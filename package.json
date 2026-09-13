@@ -3,6 +3,14 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "scripts": { "start": "node server.mjs", "test": "node --test tests/*.test.mjs" },
-  "dependencies": { "three": "0.170.0" }
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "build:surfaces": "node scripts/build-surfaces.mjs",
+    "build:voices": "node scripts/build-episode-voices.mjs"
+  },
+  "dependencies": {
+    "polygon-clipping": "0.15.7",
+    "three": "0.170.0"
+  }
 }

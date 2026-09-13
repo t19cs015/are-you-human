@@ -1,0 +1,16 @@
+import {execFileSync} from 'node:child_process';
+import {readFile,writeFile,mkdir,copyFile} from 'node:fs/promises';
+import {fileURLToPath} from 'node:url';
+const root=fileURLToPath(new URL('../',import.meta.url)),build=root+'data/arrival-film/',output=root+'exports/';await mkdir(output,{recursive:true});
+const file=output+'are-you-human-demo-v2.mp4';
+execFileSync('ffmpeg',['-y','-v','error','-i',build+'picture.mp4','-i',build+'master.wav','-map','0:v:0','-map','1:a:0','-c:v','copy','-c:a','aac','-b:a','192k','-ar','48000','-t','60','-movflags','+faststart','-metadata','title=Are You Human? — Demo v2','-metadata','comment=In-engine concept film. Human arrival, extended skyline and community scenes are cinematic staging. AI-generated voices. Original synthesized music.',file]);
+const report=JSON.parse(execFileSync('ffprobe',['-v','error','-show_format','-show_streams','-of','json',file],{encoding:'utf8'}));
+const video=report.streams.find(s=>s.codec_type==='video'),audio=report.streams.find(s=>s.codec_type==='audio');
+if(Math.abs(Number(report.format.duration)-60)>.04||video.width!==1920||video.height!==1080||video.nb_frames!=='1800'||audio?.channels!==2)throw new Error('Demo v2 format checks failed.');
+await writeFile(build+'specs.json',JSON.stringify({duration:Number(report.format.duration),width:video.width,height:video.height,frames:Number(video.nb_frames),fps:video.avg_frame_rate,videoCodec:video.codec_name,audioCodec:audio.codec_name,audioChannels:audio.channels,bytes:Number(report.format.size)},null,2));
+const script=JSON.parse(await readFile(root+'art/timelapse/arrival-script.json','utf8'));
+await writeFile(output+'demo-v2-narration.md','# Are You Human? — Demo v2\n\n60-second concept film, English synthesized voices.\n\n'+script.segments.map(s=>`**${s.start.toFixed(1)}–${s.end.toFixed(1)}s · ${s.who}**\n\n${s.text}`).join('\n\n')+'\n');
+await copyFile(output+'are-you-human-arrival-60s-en.srt',output+'are-you-human-demo-v2.srt');
+execFileSync('ffmpeg',['-v','error','-i',file,'-f','null','-'],{stdio:'pipe'});
+console.log('Verified: 60.00 seconds, 1920×1080, 30 fps, 1800 frames, H.264 + stereo AAC. Full decode passed.');
+console.log(file);

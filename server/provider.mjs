@@ -1,4 +1,4 @@
-const assessmentSchema={type:'object',properties:Object.fromEntries(['affinity','trust','fear','respect','attraction'].map(k=>[k,{type:'integer',minimum:-8,maximum:8}]).concat([['reason',{type:'string'}]])),required:['affinity','trust','fear','respect','attraction','reason'],additionalProperties:false};
+export const assessmentSchema={type:'object',properties:Object.fromEntries(['affinity','trust','fear','respect','attraction'].map(k=>[k,{type:'integer',minimum:-8,maximum:8}]).concat([['reason',{type:'string'}]])),required:['affinity','trust','fear','respect','attraction','reason'],additionalProperties:false};
 const decisionSchema={type:'object',properties:{text:{type:'string'},assessment:assessmentSchema,aboutHuman:assessmentSchema},required:['text','assessment','aboutHuman'],additionalProperties:false};
 export function createGenerator(config,fetcher=fetch){
  return async (instructions,input,fallback,options={})=>{
@@ -10,7 +10,7 @@ export function createGenerator(config,fetcher=fetch){
   const format=options.schema?{text:{format:{type:'json_schema',name:'project_turn',strict:true,schema:options.schema}}}:structured?{text:{format:{type:'json_schema',name:'resident_turn',strict:true,schema:decisionSchema}}}:{};
   if(structured)instructions+='\nJSONで返答。textは口に出す台詞。assessmentは今回の相手への自分だけの評価変化。aboutHumanは伝聞から人間への評価変化（直接会話では全て0）。各値-8〜8。挨拶・同じ話・根拠なしは0。reasonは具体的根拠。恋愛は成人同士の相互の意思が必要で、好意を伝えられただけで承諾しない。出会いを必ず良い方向にも悪い方向にも進めない。';
   try{
-   const res=await fetcher('https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:`Bearer ${config.key}`,'Content-Type':'application/json'},signal:AbortSignal.timeout(18000),body:JSON.stringify({model:config.model,instructions,input,max_output_tokens:options.schema?1400:structured?1000:400,store:false,...(config.model.startsWith('gpt-5')?{reasoning:{effort:'none'}}:{}),...format})});
+   const res=await fetcher('https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:`Bearer ${config.key}`,'Content-Type':'application/json'},signal:AbortSignal.timeout(18000),body:JSON.stringify({model:config.model,instructions,input,max_output_tokens:options.schema?1400:structured?1000:400,store:false,...(config.model.startsWith('gpt-5')?{reasoning:{effort:/^gpt-5(?:-nano|-mini)?(?:-2025|$)/.test(config.model)?'minimal':'none'}}:{}),...format})});
    if(!res.ok)throw new Error(`HTTP_${res.status}`);
    const data=await res.json();
    const text=(data.output||[]).filter(x=>x.type==='message').flatMap(x=>x.content||[]).filter(x=>x.type==='output_text').map(x=>x.text).join('').trim();

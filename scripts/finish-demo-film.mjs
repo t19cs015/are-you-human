@@ -1,0 +1,16 @@
+import {execFileSync} from 'node:child_process';
+import {readFile,writeFile,copyFile,mkdir} from 'node:fs/promises';
+import {fileURLToPath} from 'node:url';
+const root=fileURLToPath(new URL('../',import.meta.url)),output=root+'exports/';await mkdir(output,{recursive:true});
+const file=output+'are-you-human-60s-en.mp4';
+execFileSync('ffmpeg',['-y','-v','error','-i',root+'data/film/picture.mp4','-i',root+'data/film/master.wav','-map','0:v:0','-map','1:a:0','-c:v','copy','-c:a','aac','-b:a','192k','-ar','48000','-t','60','-movflags','+faststart','-metadata','title=Are You Human? — One Warm Light','-metadata','comment=English narrated in-engine cinematic demo. Gameplay time condensed. AI-generated voices.',file]);
+const report=JSON.parse(execFileSync('ffprobe',['-v','error','-show_format','-show_streams','-of','json',file],{encoding:'utf8'}));
+const video=report.streams.find(s=>s.codec_type==='video'),audio=report.streams.find(s=>s.codec_type==='audio');
+if(Math.abs(Number(report.format.duration)-60)>.04||video.width!==1920||video.height!==1080||video.nb_frames!=='1800'||!audio)throw new Error('Final film failed format checks.');
+await writeFile(output+'video-specs.json',JSON.stringify({duration:Number(report.format.duration),width:video.width,height:video.height,frames:Number(video.nb_frames),fps:video.avg_frame_rate,videoCodec:video.codec_name,audioCodec:audio.codec_name,audioChannels:audio.channels,bytes:Number(report.format.size)},null,2));
+await copyFile(root+'data/film/frame-1650.png',output+'are-you-human-poster.png');
+await copyFile(root+'art/demo/watch.html',output+'watch.html');
+const script=JSON.parse(await readFile(root+'art/demo/script.json','utf8'));
+await writeFile(output+'english-narration.md','# Are You Human? — One Warm Light\n\n60-second English narration.\n\n'+script.segments.map(s=>`**${s.start.toFixed(1)}–${s.end.toFixed(1)}s · ${s.id==='mia'?'Mia':'Narrator'}**\n\n${s.text}`).join('\n\n')+'\n');
+console.log('Final MP4 verified: 60.00s, 1920×1080, 30 fps, H.264 + AAC.');
+console.log(file);

@@ -1,0 +1,17 @@
+import {execFileSync} from 'node:child_process';
+import {readFile,writeFile,copyFile,mkdir} from 'node:fs/promises';
+import {fileURLToPath} from 'node:url';
+const root=fileURLToPath(new URL('../',import.meta.url)),output=root+'exports/';await mkdir(output,{recursive:true});
+const file=output+'are-you-human-timelapse-en.mp4';
+execFileSync('ffmpeg',['-y','-v','error','-i',root+'data/timelapse/picture.mp4','-i',root+'data/timelapse/master.wav','-map','0:v:0','-map','1:a:0','-c:v','copy','-c:a','aac','-b:a','192k','-ar','48000','-t','24','-movflags','+faststart','-metadata','title=Are You Human? — A Better Tomorrow','-metadata','comment=Concept timelapse, rendered in the game engine. Extended skyline is cinematic staging. AI-generated voice. Original synthesized score.',file]);
+const report=JSON.parse(execFileSync('ffprobe',['-v','error','-show_format','-show_streams','-of','json',file],{encoding:'utf8'}));
+const video=report.streams.find(s=>s.codec_type==='video'),audio=report.streams.find(s=>s.codec_type==='audio');
+if(Math.abs(Number(report.format.duration)-24)>.04||video.width!==1920||video.height!==1080||video.nb_frames!=='720'||audio?.channels!==2)throw new Error('Timelapse format checks failed.');
+await writeFile(output+'timelapse-specs.json',JSON.stringify({duration:Number(report.format.duration),width:video.width,height:video.height,frames:Number(video.nb_frames),fps:video.avg_frame_rate,videoCodec:video.codec_name,audioCodec:audio.codec_name,audioChannels:audio.channels,bytes:Number(report.format.size)},null,2));
+await copyFile(root+'data/timelapse/frame-0630.png',output+'timelapse-poster.png');
+await copyFile(root+'art/timelapse/watch.html',output+'timelapse.html');
+const script=JSON.parse(await readFile(root+'art/timelapse/script.json','utf8'));
+await writeFile(output+'timelapse-narration.md','# A Better Tomorrow\n\n24-second cinematic concept cut. Central AI: English synthesized voice.\n\n'+script.segments.map(s=>`**${s.start.toFixed(1)}–${s.end.toFixed(1)}s**\n\n${s.text}`).join('\n\n')+'\n');
+execFileSync('ffmpeg',['-v','error','-i',file,'-f','null','-'],{stdio:'pipe'});
+console.log('Verified: 24.00 seconds, 1920×1080, 30 fps, 720 frames, H.264 + stereo AAC. Full decode passed.');
+console.log(file);

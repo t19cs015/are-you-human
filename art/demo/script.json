@@ -1,0 +1,17 @@
+{
+  "title": "Are You Human? — One Warm Light",
+  "duration": 60,
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "segments": [
+    {"id":"mia","start":0.4,"end":7.7,"voice":"coral","text":"They say tomorrow's town doesn't need my café. But I saved you a seat.","instructions":"Speak in natural English. You are Mia, a warm, gentle adult character in a tiny cafe at night. Soft sadness, intimate and sincere. No exaggerated acting. Emphasize 'you' very gently."},
+    {"id":"conflict","start":8.2,"end":15.9,"voice":"cedar","text":"In this AI town, progress has a cost. The central upgrade takes power from Mia's café.","instructions":"Natural English, warm clear documentary narrator. Curious, thoughtful, never a sales pitch. A measured but brisk pace."},
+    {"id":"tomo","start":16.3,"end":22.9,"voice":"cedar","text":"Tomo needs that upgrade to repair his voice. Your goal: keep both futures alive.","instructions":"Natural English, warm clear documentary narrator. Emphasize both futures. Measured and brisk, no long pauses."},
+    {"id":"discover","start":23.3,"end":30.6,"voice":"cedar","text":"Look closer. The data center throws away heat. What if that warmth could save the café?","instructions":"Natural English, warm clear documentary narrator. A small moment of discovery. Curious, then hopeful. Brisk but intelligible."},
+    {"id":"ai","start":31.0,"end":39.1,"voice":"cedar","text":"Propose a solution in your own words. OpenAI models interpret it. Residents choose a partner and decide how to help.","instructions":"Natural English, warm clear documentary narrator. Confident and specific. Flowing, brisk pacing, not a commercial."},
+    {"id":"action","start":39.5,"end":46.5,"voice":"cedar","text":"They walk to their jobs and work together. Their actions change the town.","instructions":"Natural English, warm clear documentary narrator. The delight of watching little characters work together. Conversational, not overexcited."},
+    {"id":"payoff","start":47.0,"end":53.8,"voice":"cedar","text":"The update finishes. The café stays warm. Your discovery becomes their shared tomorrow.","instructions":"Natural English, warm clear documentary narrator. Quiet satisfaction, warm and human. Let the last phrase land."},
+    {"id":"title","start":54.1,"end":59.2,"voice":"cedar","text":"Are You Human? A small town where conversation becomes cooperation.","instructions":"Natural English. Warm, clear, inviting. Read the title as a gentle question. Leave a brief pause before the second sentence. Avoid promotional exaggeration."}
+  ]
+}
