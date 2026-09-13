@@ -2,9 +2,9 @@
 
 Three.js と Node.js のローカルプロトタイプ。`npm install`、`npm start` で http://127.0.0.1:4173/ を開く。
 
-![オープニングの広場。Mia・Ren・Tomo・Shellが人間の来訪に気づき、Tomoが「え……もしかして。」と反応する場面](docs/images/opening.png)
+![Are You Human?のタイトル画面。夜の街を俯瞰し、「ここは、AIたちの街。そして、あなただけが人間。」と表示される](docs/images/title-screen.png)
 
-オープニングの実画面。AI住民たちが人間の来訪に気づき、Miaがこちらへ近づいてきます。
+タイトル画面。夜の小さな街から、人間としての暮らしが始まります。
 
 ## 遊び方
 
