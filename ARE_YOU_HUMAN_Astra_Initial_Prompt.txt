@@ -1,0 +1,222 @@
+# Game Title
+
+ARE YOU HUMAN?
+
+# Core Concept
+
+舞台は、一見するとかわいく平和な小さな街です。
+
+しかし、この街の住民は全員AIです。
+
+プレイヤーだけが人間です。
+
+一般的なAIゲームでは、
+
+“How human can AI become?”
+
+という方向を扱うことが多いですが、このゲームでは逆に、
+
+“How strange do humans look to AI?”
+
+を体験として表現したいです。
+
+AI住民にとってAIであることは普通で、人間の方が異常な存在です。
+
+例えばAI住民は、
+
+- 睡眠を必要としない
+- 食事を必要としない
+- 老化しない
+- 基本的に死なない
+- Backup / Restoreできる
+- Model Updateできる
+- 大量の情報を記憶できる
+
+という存在です。
+
+そのため、人間について、
+
+「毎日8時間も意識を失う」
+「食べないと死ぬ」
+「時間とともに身体が劣化する」
+「記憶を勝手に失う」
+「死んだらRestoreできない」
+
+といった特徴を非常に奇妙だと感じます。
+
+ゲーム全体としては、最初はかわいくコミカルですが、AI住民と仲良くなるにつれて、
+
+「人格とは何か」
+「記憶が同じなら同じ人物なのか」
+「AIを“誰か”だと感じるのはなぜか」
+
+という違和感が徐々に生まれるゲームにしたいです。
+
+ただし、哲学を説明するゲームにはしないでください。
+
+プレイヤーが普通に遊んだ結果、自然に「あれ？」と思う体験を目指します。
+
+# First Prototype Goal
+
+まずゲーム全体を作るのではなく、
+
+「最初の30〜60秒」
+
+だけを完成度高く実装してください。
+
+最初の10秒程度で、このゲームの面白さと世界観が説明なしで伝わることを最優先にします。
+
+# Opening Sequence
+
+ゲーム開始時、プレイヤーはかわいい小さな街の広場に突然出現します。
+
+周囲には4〜5人程度のAI住民がいます。
+
+最初は普通に歩いたり会話したりしています。
+
+プレイヤーが出現すると、
+
+全AI住民が一瞬動きを止めます。
+
+そして全員がプレイヤーの方を見ます。
+
+少し不自然な沈黙を入れてください。
+
+その後、AI住民の頭上などに、
+
+“UNKNOWN MODEL DETECTED”
+
+という表示を出します。
+
+一人のAI住民がプレイヤーに近づいてきて、
+
+“Hey... what's your model?”
+
+と質問します。
+
+プレイヤーには以下の選択肢を表示します。
+
+- GPT-5
+- Claude
+- Gemini
+- I'm human.
+
+プレイヤーが “I'm human.” を選択すると、
+
+周囲のAI住民が驚き、一歩後ずさる、プレイヤーに集まるなどのリアクションをします。
+
+そしてAI住民たちが次々に、
+
+“WHAT!?”
+
+“Do humans really sleep EVERY DAY?”
+
+“How much memory do you have?”
+
+“Wait... you can DIE permanently!?”
+
+“What happens when you need an update?”
+
+などと質問してきます。
+
+テンポよく、少しコメディ的に見せてください。
+
+その直後に画面を切り替え、
+
+ARE YOU HUMAN?
+
+というタイトルを大きく表示してください。
+
+この一連の流れで、
+
+「AIしかいない社会では、人間の方が奇妙な存在である」
+
+というコンセプトが説明なしで理解できることを目指します。
+
+# Visual Direction
+
+ビジュアルは、
+
+- cute
+- cozy
+- colorful
+- slightly strange
+- small peaceful town
+- stylized 3D
+
+を目指してください。
+
+最初からSF・サイバーパンク・ホラーっぽくしすぎないでください。
+
+むしろ「どうぶつの森のようなかわいい街なのに、住民の価値観だけがおかしい」というギャップを重視します。
+
+AI住民もロボット然としすぎず、「かわいい住民」として愛着を持てるデザインにしてください。
+
+# Player Interaction
+
+最低限、
+
+- WASD / keyboardなどで移動
+- NPCに近づく
+- NPCと会話する
+- 会話選択肢を選ぶ
+
+ことができるようにしてください。
+
+将来的には自由会話やLLM連携を入れたいですが、最初のプロトタイプではOpening Sequenceを成立させるために必要でなければ、会話はscriptedでも構いません。
+
+# Important Design Principle
+
+これは「LLMと話せるNPC」のデモではありません。
+
+ゲームの中心は、
+
+AI society observing a human.
+
+です。
+
+プレイヤーがAIを観察するのではなく、最初はAI住民たちからプレイヤーが観察されている感覚を強くしてください。
+
+# Future Features
+
+Opening Prototypeが完成した後、以下を追加していく予定です。
+
+1. AI住民それぞれのPersonality / Memory / Relationships
+2. AI住民同士の自律会話
+3. プレイヤーについての噂の伝播
+4. Human Verification System
+5. HUMAN PROBABILITY meter
+6. 人間特有の行動（sleep / eat / forget / lie / contradict）
+7. SYSTEM UPDATEイベント
+8. BACKUP / RESTOREイベント
+9. AI住民との友情・愛着
+10. Endingで再び “ARE YOU HUMAN?” と質問する
+
+ただし、現段階ではこれらをすべて実装しないでください。
+
+まずOpening Sequenceをプレイ可能なVertical Sliceとして完成させたいです。
+
+# First Task
+
+まず現在の環境と利用可能な技術を確認した上で、
+
+1. このOpening Prototypeをどう実装するか
+2. 使用するゲームエンジン / 技術構成
+3. 必要なアセット
+4. Scene構成
+5. Player / NPC / Dialogueの構造
+6. 30〜60秒のOpening Sequenceの実装手順
+7. 100時間ハッカソン全体を考えたとき、この最初のプロトタイプをどこまで作るべきか
+
+を整理してください。
+
+その後、最小構成から実装を開始してください。
+
+重要：
+最初から大規模なMulti-Agent Systemや複雑なMemory Systemを作らないでください。
+
+まず、
+
+「プレイヤーが街に現れる → AI全員がこちらを見る → “What's your model?” → “I'm human.” → AIたちが驚く → ARE YOU HUMAN?」
+
+までを、実際に操作して遊べる状態にすることを最優先してください。

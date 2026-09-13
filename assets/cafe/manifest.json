@@ -1,0 +1,191 @@
+[
+  {
+    "file": "house-house.glb",
+    "repo": "TinyTreats-Game-Assets/Tiny-Treats-Homely-House-1.0",
+    "revision": "75ad29a12b4e26dd1c7abda1e1486d6d731d8e16",
+    "source": "addons/tiny_treats_homely_house_set/Assets/gltf/house.gltf",
+    "license": "CC0-1.0",
+    "bytes": 215860,
+    "sha256": "9db4ffa3931011935c877d1b0411260d0679e4b5facfc3f34a1a98d93666ed3a"
+  },
+  {
+    "file": "house-fence_straight.glb",
+    "repo": "TinyTreats-Game-Assets/Tiny-Treats-Homely-House-1.0",
+    "revision": "75ad29a12b4e26dd1c7abda1e1486d6d731d8e16",
+    "source": "addons/tiny_treats_homely_house_set/Assets/gltf/fence_straight.gltf",
+    "license": "CC0-1.0",
+    "bytes": 28356,
+    "sha256": "e85b57a989ce921ce3419092abd9f57d1f2ed98c339c1ef1f76f000ce8ae8359"
+  },
+  {
+    "file": "house-fence_post.glb",
+    "repo": "TinyTreats-Game-Assets/Tiny-Treats-Homely-House-1.0",
+    "revision": "75ad29a12b4e26dd1c7abda1e1486d6d731d8e16",
+    "source": "addons/tiny_treats_homely_house_set/Assets/gltf/fence_post.gltf",
+    "license": "CC0-1.0",
+    "bytes": 24196,
+    "sha256": "df097b7c713489577381b9dc96a746c8b33a6f65e0c7913a0a2733ee9b97ed93"
+  },
+  {
+    "file": "house-package.glb",
+    "repo": "TinyTreats-Game-Assets/Tiny-Treats-Homely-House-1.0",
+    "revision": "75ad29a12b4e26dd1c7abda1e1486d6d731d8e16",
+    "source": "addons/tiny_treats_homely_house_set/Assets/gltf/package.gltf",
+    "license": "CC0-1.0",
+    "bytes": 34588,
+    "sha256": "afd0563319d58b06ead89f953f8c39bc0203434bc61a4fe8d7b6707da2aab7c2"
+  },
+  {
+    "file": "house-doormat.glb",
+    "repo": "TinyTreats-Game-Assets/Tiny-Treats-Homely-House-1.0",
+    "revision": "75ad29a12b4e26dd1c7abda1e1486d6d731d8e16",
+    "source": "addons/tiny_treats_homely_house_set/Assets/gltf/doormat.gltf",
+    "license": "CC0-1.0",
+    "bytes": 30544,
+    "sha256": "051010bfc49c2a458839c75d8c8216f30680fa35d1f0c173dbca1f252ba70b9b"
+  },
+  {
+    "file": "park-bench.glb",
+    "repo": "TinyTreats-Game-Assets/Tiny-Treats-Pretty-Park-1.0",
+    "revision": "050e7ba991da7d4338d5539d35acd97134709386",
+    "source": "addons/tiny_treats_pretty_park_set/Assets/gltf/bench.gltf",
+    "license": "CC0-1.0",
+    "bytes": 40996,
+    "sha256": "8397beb6763011188b0e3e28e0089d85e75b785482f75adae5f228f3f047ce76"
+  },
+  {
+    "file": "park-street_lantern.glb",
+    "repo": "TinyTreats-Game-Assets/Tiny-Treats-Pretty-Park-1.0",
+    "revision": "050e7ba991da7d4338d5539d35acd97134709386",
+    "source": "addons/tiny_treats_pretty_park_set/Assets/gltf/street_lantern.gltf",
+    "license": "CC0-1.0",
+    "bytes": 36852,
+    "sha256": "d4e1804c8cc2097b48a9cef87cf0060d6839a986da567c1d7470ead3452bcf0e"
+  },
+  {
+    "file": "park-tree.glb",
+    "repo": "TinyTreats-Game-Assets/Tiny-Treats-Pretty-Park-1.0",
+    "revision": "050e7ba991da7d4338d5539d35acd97134709386",
+    "source": "addons/tiny_treats_pretty_park_set/Assets/gltf/tree.gltf",
+    "license": "CC0-1.0",
+    "bytes": 30220,
+    "sha256": "eb76370191aefe01e128d95d3785f6a399433758f35b97ac7aa03664f3335edd"
+  },
+  {
+    "file": "park-bush.glb",
+    "repo": "TinyTreats-Game-Assets/Tiny-Treats-Pretty-Park-1.0",
+    "revision": "050e7ba991da7d4338d5539d35acd97134709386",
+    "source": "addons/tiny_treats_pretty_park_set/Assets/gltf/bush.gltf",
+    "license": "CC0-1.0",
+    "bytes": 26860,
+    "sha256": "6721ae8b0b5ecd22e5a7dc6f2d7fc6aab61bfd7637b5992d20c16a6e9c91617e"
+  },
+  {
+    "file": "park-hedge_straight.glb",
+    "repo": "TinyTreats-Game-Assets/Tiny-Treats-Pretty-Park-1.0",
+    "revision": "050e7ba991da7d4338d5539d35acd97134709386",
+    "source": "addons/tiny_treats_pretty_park_set/Assets/gltf/hedge_straight.gltf",
+    "license": "CC0-1.0",
+    "bytes": 26952,
+    "sha256": "362e34971c7d404ee553d1dad966478fbb76e5756f10b880181305113f72cd8b"
+  },
+  {
+    "file": "park-cobble_stones_large.glb",
+    "repo": "TinyTreats-Game-Assets/Tiny-Treats-Pretty-Park-1.0",
+    "revision": "050e7ba991da7d4338d5539d35acd97134709386",
+    "source": "addons/tiny_treats_pretty_park_set/Assets/gltf/cobble_stones_large.gltf",
+    "license": "CC0-1.0",
+    "bytes": 71512,
+    "sha256": "347db5a5fe7b4526ebbc4ee4ab2bee6bf539206640e9fc141a2c883d7d8d1cf7"
+  },
+  {
+    "file": "park-flower_A.glb",
+    "repo": "TinyTreats-Game-Assets/Tiny-Treats-Pretty-Park-1.0",
+    "revision": "050e7ba991da7d4338d5539d35acd97134709386",
+    "source": "addons/tiny_treats_pretty_park_set/Assets/gltf/flower_A.gltf",
+    "license": "CC0-1.0",
+    "bytes": 30552,
+    "sha256": "054f6672e57fa38d04672ba30a375e7f91d1823445ea8f8aee9898c9ba18ce2d"
+  },
+  {
+    "file": "park-flower_B.glb",
+    "repo": "TinyTreats-Game-Assets/Tiny-Treats-Pretty-Park-1.0",
+    "revision": "050e7ba991da7d4338d5539d35acd97134709386",
+    "source": "addons/tiny_treats_pretty_park_set/Assets/gltf/flower_B.gltf",
+    "license": "CC0-1.0",
+    "bytes": 28604,
+    "sha256": "8cd76f7ab9fb6481efe62ccf072975b16dea557ea0f00ae12c822b46544add77"
+  },
+  {
+    "file": "park-grass_A.glb",
+    "repo": "TinyTreats-Game-Assets/Tiny-Treats-Pretty-Park-1.0",
+    "revision": "050e7ba991da7d4338d5539d35acd97134709386",
+    "source": "addons/tiny_treats_pretty_park_set/Assets/gltf/grass_A.gltf",
+    "license": "CC0-1.0",
+    "bytes": 31524,
+    "sha256": "253d99dffdb9c5a3752bbd6f48f64d8b8ecd3c452ff3890d11627979a45d95b7"
+  },
+  {
+    "file": "furniture-table_small.glb",
+    "repo": "KayKit-Game-Assets/KayKit-Furniture-Bits-1.0",
+    "revision": "96d5930a8dbdb363409bbc2d3341718b00e17c9c",
+    "source": "addons/kaykit_furniture_bits/Assets/gltf/table_small.gltf",
+    "license": "CC0-1.0",
+    "bytes": 26252,
+    "sha256": "9185cd08a26446df8a7ad2924c7369e80bb5d6eb746ca445f37068ee4937169b"
+  },
+  {
+    "file": "furniture-chair_A_wood.glb",
+    "repo": "KayKit-Game-Assets/KayKit-Furniture-Bits-1.0",
+    "revision": "96d5930a8dbdb363409bbc2d3341718b00e17c9c",
+    "source": "addons/kaykit_furniture_bits/Assets/gltf/chair_A_wood.gltf",
+    "license": "CC0-1.0",
+    "bytes": 33480,
+    "sha256": "d658d0946670c58f96182f46a007173f59a458191ca3ed2181f6a728991eb34e"
+  },
+  {
+    "file": "furniture-chair_stool_wood.glb",
+    "repo": "KayKit-Game-Assets/KayKit-Furniture-Bits-1.0",
+    "revision": "96d5930a8dbdb363409bbc2d3341718b00e17c9c",
+    "source": "addons/kaykit_furniture_bits/Assets/gltf/chair_stool_wood.gltf",
+    "license": "CC0-1.0",
+    "bytes": 27824,
+    "sha256": "fa0035a81955a6722e4b9df622ae60529a4939aa59f2efd61baacc9b49d1538f"
+  },
+  {
+    "file": "furniture-book_single.glb",
+    "repo": "KayKit-Game-Assets/KayKit-Furniture-Bits-1.0",
+    "revision": "96d5930a8dbdb363409bbc2d3341718b00e17c9c",
+    "source": "addons/kaykit_furniture_bits/Assets/gltf/book_single.gltf",
+    "license": "CC0-1.0",
+    "bytes": 20992,
+    "sha256": "1b25c268e2d799294257782de79cebabaf55bef26056bbfbc29ba7b621d110dc"
+  },
+  {
+    "file": "furniture-cactus_medium_A.glb",
+    "repo": "KayKit-Game-Assets/KayKit-Furniture-Bits-1.0",
+    "revision": "96d5930a8dbdb363409bbc2d3341718b00e17c9c",
+    "source": "addons/kaykit_furniture_bits/Assets/gltf/cactus_medium_A.gltf",
+    "license": "CC0-1.0",
+    "bytes": 34548,
+    "sha256": "ff8ed60b435366ffc5d479a5cbdd175b530cb726a4f69fa72459a5c4332c31ae"
+  },
+  {
+    "file": "furniture-cactus_small_A.glb",
+    "repo": "KayKit-Game-Assets/KayKit-Furniture-Bits-1.0",
+    "revision": "96d5930a8dbdb363409bbc2d3341718b00e17c9c",
+    "source": "addons/kaykit_furniture_bits/Assets/gltf/cactus_small_A.gltf",
+    "license": "CC0-1.0",
+    "bytes": 26332,
+    "sha256": "0b733661d1ae01aed6cfa3e6407c525d2cad34a53a9db4fba7106aff55117cc3"
+  },
+  {
+    "file": "city-box_A.glb",
+    "repo": "KayKit-Game-Assets/KayKit-City-Builder-Bits-1.0",
+    "revision": "63976910ca04d16f0fc531b9c614244be8128713",
+    "source": "addons/kaykit_city_builder_bits/Assets/gltf/box_A.gltf",
+    "license": "CC0-1.0",
+    "bytes": 23520,
+    "sha256": "f7bbb83ad883e673aa3f9bcd65c12bbb2af79c7a7d4fc9161ea865dd3bf70a0d"
+  }
+]
