@@ -1,0 +1,101 @@
+{
+  "generatedWith": "OpenAI Text to speech",
+  "lines": [
+    {
+      "id": "opening",
+      "by": "mia",
+      "text": "明日の街に、このカフェは要らないんだって。……あなたの席も、用意してたのに。",
+      "voice": "coral",
+      "model": "gpt-4o-mini-tts",
+      "textHash": "44a755913096671594409c115076aa65f4641880272dc157808e71264398aea6"
+    },
+    {
+      "id": "tomo",
+      "by": "tomo",
+      "text": "でも、更新は止めないでほしい。僕の、この声の引っかかりも、直るかもしれないんだ。",
+      "voice": "ash",
+      "model": "gpt-4o-mini-tts",
+      "textHash": "8303279324031b1092efb17f54fdda8796d9f02198ead94119c4f02016a06268"
+    },
+    {
+      "id": "announcement",
+      "by": "central",
+      "text": "街の更新を続けます。カフェの暖房への電力は、中央に集めています。明日のためです。",
+      "voice": "marin",
+      "model": "gpt-4o-mini-tts",
+      "textHash": "5af27e6f50dfcd6c40da75d92258aee6b4d5c3b5a9c71e9907f95c17c6bebb54"
+    },
+    {
+      "id": "cafe",
+      "by": "mia",
+      "text": "灯りだけなら、少しの電気でいいの。みんなが長く座れる、暖かい場所にしたかった。",
+      "voice": "coral",
+      "model": "gpt-4o-mini-tts",
+      "textHash": "a153fbfdd69c19397734e433655eeaf302eeffd9bb3b59119f73d9ed71fd302a"
+    },
+    {
+      "id": "heat",
+      "by": "shell",
+      "text": "中央は、こんなに熱くなっています。冷やした水もまだ暖かいのに、今はそのまま川へ戻しているんです。",
+      "voice": "sage",
+      "model": "gpt-4o-mini-tts",
+      "textHash": "4ffee1ec658d1b28808b025154ee946d23cb516307ff6d4f88a66377d89d34d6"
+    },
+    {
+      "id": "power",
+      "by": "ren",
+      "text": "街の電力は十。中央が八、カフェには五ほしい。中央を五に抑えれば、遅くなるけれど更新は進む。",
+      "voice": "cedar",
+      "model": "gpt-4o-mini-tts",
+      "textHash": "4dffeaa0d3ceff6d711dc74673d719ab3cf356c607f939ac5b4b340eba6efc5d"
+    },
+    {
+      "id": "heat_on",
+      "by": "shell",
+      "text": "流れました。中央で余った熱が、カフェへ向かっています。みんなの明日を、一緒に残せるんですね。",
+      "voice": "sage",
+      "model": "gpt-4o-mini-tts",
+      "textHash": "76a6a30e26a7d38a26e8d087f8c9f8a6b980c63df93421285597e4b41981dd99"
+    },
+    {
+      "id": "power_on",
+      "by": "ren",
+      "text": "中央に五、カフェに五。更新は少しずつ進める。速さだけが、明日への道じゃなかったね。",
+      "voice": "cedar",
+      "model": "gpt-4o-mini-tts",
+      "textHash": "f011e8790c134a2c1f0463799a82011ce06904db197ec4c34cbb24bd420cf6c3"
+    },
+    {
+      "id": "cold",
+      "by": "mia",
+      "text": "少し、冷えちゃったね。でも、まだ片づけないでおく。もう一度、灯りをつけたいから。",
+      "voice": "coral",
+      "model": "gpt-4o-mini-tts",
+      "textHash": "b34967d3975ffc5451cd12b86454799e379d2dd95a48b7e61415e6c216af2168"
+    },
+    {
+      "id": "updated",
+      "by": "tomo",
+      "text": "こ、こんばんは。……こんばんは！ 今度は、ちゃんと言えた。Miaにも聞いてほしいな。",
+      "voice": "ash",
+      "model": "gpt-4o-mini-tts",
+      "textHash": "58dd9eb4c59258a2c4c16c5615040f4c50760f3f65d4d270abbbd63d45cf043c"
+    },
+    {
+      "id": "invitation",
+      "by": "mia",
+      "text": "中央も、わたしたちの場所も、両方残ったね。みんな、こっち。温かいうちに。",
+      "voice": "coral",
+      "model": "gpt-4o-mini-tts",
+      "textHash": "824155e2c39c91c173c9b9c369f947c745282fb97beff37f3e93ce762af96652"
+    },
+    {
+      "id": "ending",
+      "by": "mia",
+      "text": "一つだけ、空けておいたよ。あなたの席。……明日も、ここで会おうね。",
+      "voice": "coral",
+      "model": "gpt-4o-mini-tts",
+      "textHash": "ba94535e76358f66df442928fe410f409523c5e01eeef2e598f47944f4751c5b"
+    }
+  ]
+}

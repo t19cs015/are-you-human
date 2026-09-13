@@ -1,10 +1,13 @@
 import {createProjects} from './projects.mjs';
+import {createCity,publicCity,cityContext,cityActionPrompt,cityActions,demoCityReply,applyCityChoice} from './city.mjs';
+import {assessmentSchema} from './provider.mjs';
+import {recordConversation,explicitSharing,protectPrivateMemories} from './infrastructure.mjs';
 import {remember,archiveSpeech,recall} from './memory.mjs';
 import {routineFor} from '../src/routines.js';
 import {profiles,initialRelations,applyAssessment,demoAssessment,behavior,socialPairs} from './relationships.mjs';
 import { residents } from '../src/story.js';
 export function createSociety(){
-  return {projects:createProjects(),version:'4.2', revision:0, count:0, step:0, changes:[], agents:Object.fromEntries(residents.map(r=>[r.id,{...r, memories:[], archive:[], history:[], playerHistory:[], lastContact:0, relations:initialRelations(r.id), assessed:[], chats:0}])), events:[], busy:new Set()};
+  return {city:createCity(),projects:createProjects(),version:'4.2', revision:0, count:0, step:0, changes:[], agents:Object.fromEntries(residents.map(r=>[r.id,{...r, memories:[], archive:[], history:[], playerHistory:[], lastContact:0, relations:initialRelations(r.id), assessed:[], chats:0}])), events:[], busy:new Set()};
 }
 function history(agent,role,content){archiveSpeech(agent,role,content);agent.history.push({role,content});agent.history=agent.history.slice(-24);}
 export function instructions(s,agent,query=''){
@@ -13,6 +16,7 @@ export function instructions(s,agent,query=''){
 全員AIの小さな夜の街。人間は一人。AIには睡眠、食事、死は自分の経験としてはない。ただし一般知識として人間の生理や言葉の意味は理解している。呼吸や睡眠を知らない幼児のような質問はしない。知識として分かることと、目の前の相手をどう扱えばよいか分からないことを区別する。
 自然な日本語で1〜3文、150文字以内。賢さを専門用語や長文で演出しない。相手の意図を読み、事実と推測を区別し、以前の認識が違えば自然に修正する。「人間って不思議」「もっと教えて」「毎日！？」を口癖にしない。直前と同じ話題・質問・結びを繰り返さない。会話が進んでいるなら挨拶に戻らない。性格の矛盾を毎回告白せず、言葉選びや判断ににじませる。普段は仕事、制作、頼み事、具体的な感想について話す。ポエム、人生訓、抽象的な哲学の問いで締めない。人間を持ち上げて慰める義務はない。必要な仕事があれば得意分野を聞く。ただし参加や返事を強制しない。直前の具体的な言葉に反応する。毎回質問で終わらせない。必要なら反論、言い直し、気まずい沈黙、冗談、自分の都合を出す。人間を必ず好きにも嫌いにもならない。崇拝・排除・恋愛の結末は指定されていない。好奇心と不気味さは両立する。相手に迎合しない。実行していない物の贈与や街の規則変更を既成事実にしない。
 自分の制作案件: ${JSON.stringify((s.projects||[]).filter(p=>p.owner===agent.id||p.reviewer===agent.id))}
+${cityContext(s,agent.id)}
 現在の用事: ${agent.activity||'広場で過ごしている'}。自分の用事も会話の材料にしてよい。作業を大げさな事件にしない。
 現在のバージョン${s.version}。${s.version==='5.0'?'記憶と名前は同じだが、以前より少し事務的で正確な語彙。自分は同じ人物だと思っている。':'親しみのある普段の口調。'}
 知っていることは以下の個別記憶と会話履歴のみ。他人の会話を勝手に知っているふりをしない。
@@ -43,13 +47,22 @@ export async function chat(s,id,message,generate){
  const a=Object.hasOwn(s.agents,id)?s.agents[id]:null;if(!a)throw new Error('UNKNOWN_AGENT');
  if(s.busy.has(id))throw new Error('BUSY');s.busy.add(id);const revision=s.revision;
  try{
-  const result=await generate(instructions(s,a,message)+'\n今回の評価対象はplayer。', [...a.history,{role:'user',content:message}],()=>fallback(a,message,s));
+  const cityActive=s.city?.active,demo=cityActive?demoCityReply(s,id,message):null;
+  const schema=cityActive?{type:'object',properties:{text:{type:'string'},assessment:assessmentSchema,aboutHuman:assessmentSchema,action:{type:'string',enum:cityActions},sharing:{type:'string',enum:['keep','private','share']}},required:['text','assessment','aboutHuman','action','sharing'],additionalProperties:false}:null;
+  const result=await generate(instructions(s,a,message)+'\n今回の評価対象はplayer。'+(cityActive?cityActionPrompt(s,id):''), [...a.history,{role:'user',content:message}],()=>demo?.text||fallback(a,message,s),schema?{schema}:{});
   if(revision!==s.revision)throw new Error('STALE');
+  if(cityActive){
+    if(result.data){result.text=typeof result.data.text==='string'?result.data.text.slice(0,600):demo.text;result.assessment=result.data.assessment;result.aboutHuman=result.data.aboutHuman;}
+    result.record=recordConversation(s,id,message,result.data?.sharing||explicitSharing(message));
+    result.cityAction=applyCityChoice(s,id,result.data?.action||demo.action,message,'player');
+    if(!result.cityAction.accepted)result.text+=' '+result.cityAction.reason;
+  }
   const topic=/寝|眠|sleep/i.test(message)?'sleep':/忘|記憶|memory/i.test(message)?'forget':'personal';
   // Direct testimony replaces this topic locally. No global knowledge broadcast.
   if(topic!=='personal')for(const memory of a.memories)if(memory.topic===topic&&!memory.supersededBy)memory.supersededBy=s.count+1;
   remember(a,{id:++s.count,topic,text:message,source:'あなた',hop:0});
   history(a,'user',message);history(a,'assistant',result.text);a.playerHistory.push({who:'あなた',text:message},{who:a.name,text:result.text});a.playerHistory=a.playerHistory.slice(-12);a.lastContact=Date.now();a.chats++;applyAssessment(s,a,'player',result.assessment||demoAssessment(a,message),message);
+  if(s.city?.infrastructure?.sharing[id]===false){protectPrivateMemories(s,id);if(s.city.tasks[id])s.city.tasks[id].reason='';}
   return {...result,version:s.version};
  }finally{s.busy.delete(id);}
 }
@@ -57,11 +70,15 @@ export async function social(s,from,to,generate){
  const a=Object.hasOwn(s.agents,from)?s.agents[from]:null,b=Object.hasOwn(s.agents,to)?s.agents[to]:null;if(!a||!b||a===b)throw new Error('UNKNOWN_AGENT');
  if(s.busy.has(from)||s.busy.has(to))throw new Error('BUSY');s.busy.add(from);s.busy.add(to);const revision=s.revision;
  try{
-  const fresh=[...a.memories].reverse().find(m=>!m.supersededBy&&m.topic!=='relationship'&&!b.memories.some(n=>n.id===m.id));
+  const fresh=[...a.memories].reverse().find(m=>!m.private&&!m.supersededBy&&m.topic!=='relationship'&&!b.memories.some(n=>n.id===m.id));
+  // A private promise also removes the conversation and its derived reasons
+  // from prompts addressed to other residents. The owner still remembers it.
+  const socialView=agent=>agent.memories.some(m=>m.private)?{...agent,memories:agent.memories.filter(m=>!m.private),reflections:(agent.reflections||[]).filter(m=>!m.private),history:[],relations:Object.fromEntries(Object.entries(agent.relations).map(([id,r])=>[id,{...r,reason:'これまでの関係'}]))}:agent;
+  const publicA=socialView(a),publicB=socialView(b);
   const context=fresh?`近くの${b.name}に、この話題をあなたらしく話して: ${fresh.text}。${b.name}との関係や自分の願いに引きつけ、同意を強制せず相談・反論・提案のどれかを自然に。`:`近くの${b.name}に、自分の望みや二人の関係について一言話して。人間の話ばかりにしない。`;
-  const first=await generate(instructions(s,a,context)+`\n今回の評価対象は${to}。`,[...a.history,{role:'user',content:context}],()=>fallback({...a,memories:fresh?[fresh]:[]},context,s,true));
+  const first=await generate(instructions(s,publicA,context)+`\n今回の評価対象は${to}。`,[...publicA.history,{role:'user',content:context}],()=>fallback({...a,memories:fresh?[fresh]:[]},context,s,true));
   const replyPrompt=`${a.name}があなたに言った: 「${first.text}」。相手に短く自然に返事して。`;
-  const second=await generate(instructions(s,b,first.text)+`\n今回の評価対象は${from}。伝聞の人間についての評価はaboutHumanに分ける。`,[...b.history,{role:'user',content:replyPrompt}],()=>({mia:'観察って言い方、本人の前でもする？ 私も気になってはいるけど。',ren:'待って。それは本人に確認した事実？ 君の想像も混ざっていないか。',tomo:'じゃあ僕が見張る！ ……見守る、だ。今の訂正、本人にも伝えて。',shell:'本人の希望も聞きましょう。善意で居場所を狭くすることもあります。'}[b.id]));
+  const second=await generate(instructions(s,publicB,first.text)+`\n今回の評価対象は${from}。伝聞の人間についての評価はaboutHumanに分ける。`,[...publicB.history,{role:'user',content:replyPrompt}],()=>({mia:'観察って言い方、本人の前でもする？ 私も気になってはいるけど。',ren:'待って。それは本人に確認した事実？ 君の想像も混ざっていないか。',tomo:'じゃあ僕が見張る！ ……見守る、だ。今の訂正、本人にも伝えて。',shell:'本人の希望も聞きましょう。善意で居場所を狭くすることもあります。'}[b.id]));
   if(revision!==s.revision)throw new Error('STALE');
   if(fresh)remember(b,{...fresh,text:first.text,source:a.name,hop:fresh.hop+1});
   history(a,'assistant',first.text);history(a,'user',`${b.name}: ${second.text}`);
@@ -75,7 +92,7 @@ export async function social(s,from,to,generate){
  }finally{s.busy.delete(from);s.busy.delete(to);}
 }
 export function updateSociety(s){if(s.busy.size)throw new Error('BUSY');s.version='5.0';s.revision++;return {version:s.version};}
-export function publicState(s){return {resting:!!s.resting,projects:s.projects,version:s.version,agents:Object.values(s.agents).map(a=>({id:a.id,name:a.name,memories:a.memories.filter(m=>!m.supersededBy).slice(-18),memoryCount:a.memories.length,utteranceCount:a.archive.length,memoryEvicted:a.evicted||0,relations:a.relations,initial:initialRelations(a.id),desire:profiles[a.id].desire,behavior:behavior(a),chats:a.chats})),events:s.events,changes:s.changes,pairs:socialPairs(s)};}
+export function publicState(s){return {city:publicCity(s),resting:!!s.resting,projects:s.projects,version:s.version,agents:Object.values(s.agents).map(a=>({id:a.id,name:a.name,memories:a.memories.filter(m=>!m.supersededBy).slice(-18),memoryCount:a.memories.length,utteranceCount:a.archive.length,memoryEvicted:a.evicted||0,relations:a.relations,initial:initialRelations(a.id),desire:profiles[a.id].desire,behavior:behavior(a),chats:a.chats})),events:s.events,changes:s.changes,pairs:socialPairs(s)};}
 
 export function witnessAction(s,kind,ids){
  if(!['rest','wake'].includes(kind)||!Array.isArray(ids)||ids.length>4||ids.some(id=>!Object.hasOwn(s.agents,id)))throw new Error('INVALID_ACTION');
@@ -99,7 +116,7 @@ export async function greet(s,id,generate,now=Date.now(),proactive=false){
  s.busy.add(id);const revision=s.revision;
  try{
   const context=a.playerHistory.length?'以前話した人間が再び話せる距離に来た。記憶や最後の会話を踏まえ、自分から話を持ちかける。前の質問をやり直さない。新しい見方、自分の迷い、相手への具体的な提案など会話を一歩進める。知らない出来事や約束を作らない。返答を催促しない。':'人間が話せる距離に来た。初めての個別の会話。まず相手を一人の隣人として受け止める。人間の解説を求めない。Miaなら広場で人間か尋ねた直後で、もう自己紹介を繰り返さない。';
-  const result=await generate(instructions(s,a,a.activity||a.history.at(-1)?.content||''),[...a.history,{role:'user',content:context}],()=>a.playerHistory.length?'うん、どうしたの。':a.hello);
+  const result=await generate(instructions(s,a,a.activity||a.history.at(-1)?.content||''),[...a.history,{role:'user',content:s.city?.active?'人間の隣人が様子を見に来た。いま実際に取り組んでいる用事について、短く自然に声をかけて。':context}],()=>s.city?.active?demoCityReply(s,id,'何をしているの？').text:a.playerHistory.length?'うん、どうしたの。':a.hello);
   if(s.revision!==revision)throw new Error('STALE');
   history(a,'assistant',result.text);a.playerHistory.push({who:a.name,text:result.text});a.playerHistory=a.playerHistory.slice(-12);a.lastContact=now;
   return {...result,transcript:a.playerHistory,resume:false};

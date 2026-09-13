@@ -2,8 +2,11 @@ node_modules/
 .DS_Store
 .env
 .env.*
+!.env.example
 *.log
 
 /server/local-config.mjs
 
 /data/
+
+/exports/

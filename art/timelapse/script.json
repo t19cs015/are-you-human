@@ -1,0 +1,13 @@
+{
+  "title": "Are You Human? — A Better Tomorrow",
+  "duration": 24,
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "segments": [
+    {"id":"tomorrow","start":0.8,"end":4.5,"voice":"coral","text":"We can make tomorrow better.","instructions":"Natural English. You are the central AI of a small, cozy town. An intimate, reassuring, gentle adult voice. Sincere kindness, understated and unhurried. No sinister acting, no theatrical whisper."},
+    {"id":"resources","start":6.0,"end":11.6,"voice":"coral","text":"Just a little more power. A little more water.","instructions":"Natural English. The same gentle central AI. Soft, reassuring and matter-of-fact, like explaining a small favor. Let the two sentences breathe. No menace or sales pitch."},
+    {"id":"you","start":13.0,"end":16.8,"voice":"coral","text":"And a little more of you.","instructions":"Natural English. A kind, quiet central AI, warmly including the listener. Leave a tiny pause before 'you'. Do not sound like a horror villain. The words themselves carry the unease."},
+    {"id":"care","start":19.0,"end":23.1,"voice":"coral","text":"Don't worry. It's all for you.","instructions":"Natural English. A gentle, sincere, comforting central AI. Soft adult voice, close and calm. No threatening inflection. A brief pause after 'Don't worry'. Finish quietly."}
+  ]
+}

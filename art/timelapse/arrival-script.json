@@ -1,0 +1,20 @@
+{
+  "title": "Are You Human? — The Unconnected Human",
+  "duration": 60,
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "segments": [
+    {"id":"noticed","who":"MIA","start":1.6,"end":4.6,"voice":"coral","text":"Wait... is that a human?","instructions":"Natural English. You are Mia, a small friendly AI resident. You have just turned around and noticed a human visitor. Warm, quietly astonished, curious. A little hesitation, no shouting or cartoon exaggeration."},
+    {"id":"unconnected","who":"REN","start":5.0,"end":8.6,"voice":"cedar","text":"You're not connected to Central.","instructions":"Natural English. A thoughtful, slightly surprised AI resident noticing something extraordinary. Conversational and intimate, a low gentle voice. Emphasize 'not connected', without menace."},
+    {"id":"choice","who":"MIA","start":9.0,"end":11.8,"voice":"coral","text":"Then... you can choose.","instructions":"Natural English. Mia, a kind curious AI resident. A small discovery, a sense of possibility. Very gentle, not triumphant."},
+    {"id":"community","who":"NARRATOR","start":12.2,"end":19.3,"voice":"cedar","text":"Every resident thinks for themselves. But their lives feed the same growing mind.","instructions":"Natural English. A warm clear documentary narrator, brisk and flowing. Curious, thoughtful, no promotional tone or dramatic pauses."},
+    {"id":"resources","who":"CENTRAL","start":21.0,"end":26.2,"voice":"coral","text":"Just a little more power. A little more water.","instructions":"Natural English. The same gentle central AI. Soft, reassuring and matter-of-fact, like explaining a small favor. Let the two sentences breathe. No menace or sales pitch."},
+    {"id":"you","who":"CENTRAL","start":27.1,"end":31.0,"voice":"coral","text":"And a little more of you.","instructions":"Natural English. A kind, quiet central AI, warmly including the listener. Leave a tiny pause before 'you'. Do not sound like a horror villain. The words themselves carry the unease."},
+    {"id":"fuel","who":"NARRATOR","start":31.6,"end":38.0,"voice":"cedar","text":"Your conversations become its fuel. And the little town keeps changing.","instructions":"Natural English. A clear gentle documentary narrator, thoughtful and quietly unsettled. No horror voice. Measured but flowing."},
+    {"id":"care","who":"CENTRAL","start":38.8,"end":43.0,"voice":"coral","text":"Don't worry. It's all for you.","instructions":"Natural English. A gentle, sincere, comforting central AI. Soft adult voice, close and calm. No threatening inflection. A brief pause after 'Don't worry'. Finish quietly."},
+    {"id":"future","who":"NARRATOR","start":43.5,"end":52.2,"voice":"cedar","text":"Work with Central, or stand against it. Your interactions shape what this community becomes.","instructions":"Natural English. Warm, clear documentary narrator. Agency and possibility, no sales pitch. Flowing, slightly brisk. Emphasize 'community'."},
+    {"id":"together","who":"NARRATOR","start":52.7,"end":56.0,"voice":"cedar","text":"Speak. Listen. See what they choose.","instructions":"Natural English. Gentle, clear and inviting. Keep pauses short. Curious about what the residents will do."},
+    {"id":"title","who":"NARRATOR","start":57.0,"end":59.7,"voice":"cedar","text":"Are you human?","instructions":"Natural English. Read as a gentle, intimate question, full of curiosity. No advertising voice, no sinister whisper."}
+  ]
+}

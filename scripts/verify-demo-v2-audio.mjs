@@ -1,0 +1,13 @@
+import {readFile,writeFile} from 'node:fs/promises';
+import {fileURLToPath} from 'node:url';
+import {defaults} from '../server/config.mjs';
+const root=fileURLToPath(new URL('../',import.meta.url));
+const form=new FormData();form.set('model','gpt-4o-mini-transcribe');
+form.set('file',new File([await readFile(root+'data/arrival-film/master.wav')],'demo-v2.wav',{type:'audio/wav'}));
+const response=await fetch('https://api.openai.com/v1/audio/transcriptions',{method:'POST',headers:{Authorization:'Bearer '+defaults.key},body:form,signal:AbortSignal.timeout(60000)});
+if(!response.ok)throw new Error('Audio verification failed: HTTP '+response.status);
+const transcript=await response.json(),script=JSON.parse(await readFile(root+'art/timelapse/arrival-script.json','utf8'));
+const normalized=text=>text.toLowerCase().replace(/[^a-z0-9\s]/g,'').replace(/\s+/g,' ').trim();
+const expected=script.segments.map(s=>s.text).join(' '),matches=normalized(transcript.text)===normalized(expected);
+await writeFile(root+'data/arrival-film/narration-verification.json',JSON.stringify({matches,expected,transcript:transcript.text},null,2));
+console.log(matches?'English narration: every scripted word matched independent transcription.':'Narration transcript differs; inspect data/arrival-film/narration-verification.json.');

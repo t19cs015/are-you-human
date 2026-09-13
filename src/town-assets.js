@@ -1,4 +1,5 @@
 import {squarePaving} from './paving.js';
+import {roomAt} from './locations.js';
 import * as T from '/node_modules/three/build/three.module.js';
 import {asset} from './cafe-assets.js';
 
@@ -149,19 +150,19 @@ export async function upgradeTown(world,studio){
   for(let i=0;i<13;i++)box(0x8d816e,cx-5.5+i*.9,.045,0,.035,.018,9.8);
  }}
  // Batch by geometry and material within each room, preserving room-level frustum culling.
- for(const roots of Object.values(pools)){
+ for(const [zone,roots] of Object.entries(pools)){
   group.updateMatrixWorld(true);const batches=new Map();
   for(const root of roots)root.traverse(o=>{if(!o.isMesh)return;const key=o.geometry.uuid+':'+o.material.uuid;if(!batches.has(key))batches.set(key,{geometry:o.geometry,material:o.material,matrices:[]});batches.get(key).matrices.push(o.matrixWorld.clone());});
-  for(const b of batches.values()){const m=new T.InstancedMesh(b.geometry,b.material,b.matrices.length);b.matrices.forEach((matrix,i)=>m.setMatrixAt(i,matrix));m.castShadow=true;m.receiveShadow=true;m.computeBoundingSphere();group.add(m);}
+  for(const b of batches.values()){const m=new T.InstancedMesh(b.geometry,b.material,b.matrices.length);b.matrices.forEach((matrix,i)=>m.setMatrixAt(i,matrix));m.castShadow=true;m.receiveShadow=true;m.computeBoundingSphere();m.userData.room=zone==='town'?null:zone;group.add(m);}
   for(const root of roots)root.removeFromParent();
  }
  // Atomic visual swap after all assets loaded. Existing gameplay objects are preserved.
  for(const objects of Object.values(world.townObjects))objects.forEach(o=>o.visible=false);
- studio?.furniture.forEach(o=>o.visible=false);
+ studio?.furniture.forEach(o=>{o.visible=false;o.userData.replaced=true;});
  // Update only the four replaced buildings' footprints; leave all other collision records intact.
  const originals=[[0,-7.2],[5.2,-6],[-10,-1],[10,-1]];
  originals.forEach(([x,z],i)=>{const c=world.colliders.find(c=>c.x===x&&c.z===z&&c.hw===2.12);if(c)Object.assign(c,townFootprints[i]);});
  for(const x of [-10,10]){const light=world.scene.children.find(o=>o.isPointLight&&o.position.x===x&&o.position.z===1);if(light)light.position.set(x+(x<0?2.4:-2.4),2,-1);}
  world.colliders.push(...colliders);world.scene.add(group);
- return {group,assetCount:names.length,update(t){for(const m of motions)m.bulb.position.y=m.y+Math.sin(t*.8+m.phase*.4)*.012;}};
+ return {group,assetCount:names.length,setRoom(room){for(const o of group.children){const zone=o.userData.room||roomAt(o.position.x,o.position.z);if(zone)o.visible=zone===room;}},update(t){for(const m of motions)m.bulb.position.y=m.y+Math.sin(t*.8+m.phase*.4)*.012;}};
 }
