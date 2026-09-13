@@ -1,7 +1,7 @@
 import {entrances,nearbyEntrance} from './locations.js';
 import {upgradeTown} from './town-assets.js';
 import {upgradeCafe} from './cafe-assets.js';
-import {upgradeMia} from './mia-visual.js';
+import {upgradeResident} from './resident-visual.js';
 import {createStudio,drawArtifact,roomCenters} from './studio.js';
 import {routines} from './routines.js';
 import * as T from '/node_modules/three/build/three.module.js';
@@ -12,7 +12,7 @@ const $=id=>document.getElementById(id);
 let world;
 try{world=createWorld($('world'));}catch(e){$('error').hidden=false;throw e;}
 const {scene,camera,renderer,npcs,face,walk,canMove}=world;
-let cafeVisual=null;const miaVisual=upgradeMia(npcs.find(n=>n.id==='mia'));
+let cafeVisual=null;const residentVisuals=new Map(npcs.map(n=>[n.id,upgradeResident(n)]));
 upgradeCafe(world).then(v=>cafeVisual=v).catch(()=>{console.warn('Cafe assets unavailable; original scene retained.');});
 const studio=createStudio(world);let townVisual=null;upgradeTown(world,studio).then(v=>townVisual=v).catch(()=>console.warn('Town assets unavailable; original town retained.'));let room=null,projectClock=8,projectPending=false;const songNodes=[];
 let mode='idle',elapsed=0,time=0,playTime=0,yaw=0,pitch=0,stage='',session='',active=null,waiting=false,muted=false,audio,master,version='4.2',connected=false,epoch=0,encounter=null,socialClock=12,pairIndex=0,rumorReturned=false,hasChat=false,updatedTalk=false,endReady=false;
@@ -47,7 +47,7 @@ function sound(freq=440,duration=.15,volume=.03,type='sine'){
 }
 function startAudio(){if(!audio){try{audio=new AudioContext();master=audio.createGain();master.gain.value=.8;master.connect(audio.destination);}catch{}}audio?.resume();}
 function say(n,text,duration=5,style=''){
- if(n.id==='mia')miaVisual.wave(time);n.el.replaceChildren();const small=document.createElement('small');small.textContent=n.name;n.el.append(small,document.createTextNode(text));n.el.className='bubble '+style;n.el.hidden=false;n.until=time+duration;
+ residentVisuals.get(n.id)?.wave(time);n.el.replaceChildren();const small=document.createElement('small');small.textContent=n.name;n.el.append(small,document.createTextNode(text));n.el.className='bubble '+style;n.el.hidden=false;n.until=time+duration;
 }
 function clearBubbles(){npcs.forEach(n=>n.el.hidden=true);}
 function line(who,text,isYou=false){const div=document.createElement('div');div.className='utterance'+(isYou?' you':'');const small=document.createElement('small');small.textContent=who;div.append(small,document.createTextNode(text));$('transcript').append(div);while($('transcript').children.length>14)$('transcript').firstElementChild.remove();$('transcript').scrollTop=$('transcript').scrollHeight;}
@@ -267,7 +267,8 @@ function frame(now){requestAnimationFrame(frame);const dt=Math.max(0,Math.min((n
  if(mode==='update'&&elapsed>5.5){$('update').hidden=true;mode='play';socialClock=12;if(master)master.gain.setTargetAtTime(muted?0:.8,audio.currentTime,.5);sound(523,.4,.03);toast('更新が完了しました。住民は、いつもの場所へ。',6);$('objective-text').textContent='Miaは、さっきの話を覚えているだろうか。';}
  const cafeSong=!room&&Math.hypot(player.x+5,player.z+3)<5?state.projects?.find(p=>p.kind==='music'&&p.published)?.revisions.find(r=>r.number===state.projects.find(p=>p.kind==='music').published)?.artifact:null;
  if(mode!=='update'&&mode!=='idle'&&time-lastNote>(cafeSong?30/cafeSong.tempo:3.5)){lastNote=time;const notes=cafeSong?cafeSong.notes.map(n=>440*2**((n-69)/12)):[196,246.94,293.66,369.99,293.66,246.94];sound(notes[Math.floor(time/(cafeSong?30/cafeSong.tempo:3.5))%notes.length],cafeSong ? .4 : 2.8,.012);}
- const mia=getNPC('mia');cafeVisual?.update(time);townVisual?.update(time);miaVisual.update(time,mode==='opening'&&elapsed>3?'surprised':waiting&&active===mia?'thinking':state.agents.find(a=>a.id==='mia')?.behavior.kind==='avoid'?'suspicious':active===mia?'happy':'neutral',!mia.el.hidden);
+ cafeVisual?.update(time);townVisual?.update(time);
+ if(mode!=='update')for(const n of npcs){const expression=mode==='opening'&&elapsed>3?'surprised':waiting&&active===n?'thinking':state.agents.find(a=>a.id===n.id)?.behavior.kind==='avoid'?'suspicious':n.glitch>0?'glitch':active===n?'happy':'neutral';residentVisuals.get(n.id).update(time,expression,!n.el.hidden,n.working&&n.workProp.visible);}
  renderLabels();renderer.render(scene,camera);
 }
 requestAnimationFrame(frame);

@@ -52,4 +52,8 @@ Three.js と Node.js のローカルプロトタイプ。`npm install`、`npm st
 
 確認ページは `/cafe-review.html?town=1`。全景・一人称・室内の視点を切り替えられます。詳細は [街全体の変更報告](docs/TOWN_VISUAL_UPGRADE.md)。カフェだけの比較ページ `/cafe-review.html` と [最初の比較報告](docs/CAFE_VISUAL_REVIEW.md) は過去の基準として残しています。
 
-取得した無料アセット29点の出典・固定コミット・ハッシュは `assets/cafe/manifest.json`、ライセンス原文は `docs/licenses/`。読み込みに失敗した区画は従来の外観を残します。AI住民のオリジナルモデルは今後Blenderで制作する予定です。
+取得した無料アセット29点の出典・固定コミット・ハッシュは `assets/cafe/manifest.json`、ライセンス原文は `docs/licenses/`。読み込みに失敗した区画は従来の外観を残します。AI住民4人にはBlenderで制作したオリジナルモデルを使用しています。
+
+## 住民の3Dモデル
+
+Mia・Ren・Tomo・Shellを、それぞれ異なる外装・アクセサリー・表情・しぐさで制作しました。`/character-review.html` で4人を並べたり、個別に回転して表情を確認できます（API不要）。編集用のBlenderファイルは `art/characters/`。詳細は [住民モデルの制作・編集ガイド](docs/RESIDENT_MODELS.md)。
