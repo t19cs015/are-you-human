@@ -155,8 +155,8 @@ function draw(t){
   if(t>23.65){ctx.fillStyle=`rgba(16,31,41,${smooth((t-23.65)/.35)*.65})`;ctx.fillRect(0,0,W,H);}
   $('timestamp').textContent='00:'+String(Math.floor(t)).padStart(2,'0')+' / 00:24';$('time').value=t;
 }
-export {world,visual,sceneAt,canvas,ctx,project,extension,central,manifest};
-const standalone=document.body.dataset.film!=='arrival';
+export {world,visual,sceneAt,canvas,ctx,project,extension,central,manifest,cafe,town,city,infra,plots,buildings};
+const standalone=!['arrival','firstperson'].includes(document.body.dataset.film);
 let current=0,playing=false,rendering=false,start=0,raf=0;
 function stop(){playing=false;cancelAnimationFrame(raf);$('voice').pause();$('play').textContent='Preview with sound';}
 function loop(now){if(!playing)return;current=Math.min(DURATION-.001,(now-start)/1000);draw(current);if(current>=DURATION-.01){stop();return;}raf=requestAnimationFrame(loop);}
