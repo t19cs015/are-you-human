@@ -1,7 +1,9 @@
 import {advanceProject,projectFeedback} from './server/projects.mjs';
-import {startCity,startEpisode,tickCity,thinkCity,controlCity,visitCityFacility,publicCity} from './server/city.mjs';
+import {startCity,startEpisode,startCommunity,tickCity,thinkCity,controlCity,visitCityFacility,publicCity} from './server/city.mjs';
 import {inspectEpisode,proposeEpisode} from './server/episode.mjs';
-import {episodeSpeech} from './server/speech.mjs';
+import {episodeSpeech,communitySpeech,residentSpeech} from './server/speech.mjs';
+import {interactCommunity,proposeCommunity} from './server/community.mjs';
+import {generateCommunityArt,readCommunityArt} from './server/community-art.mjs';
 import {createStorage} from './server/storage.mjs';
 import {memoryPage} from './server/memory.mjs';
 import http from 'node:http';
@@ -16,9 +18,9 @@ const root=fileURLToPath(new URL('.',import.meta.url));
 const types={mp3:'audio/mpeg',html:'text/html',js:'text/javascript',css:'text/css',glb:'model/gltf-binary',json:'application/json'};
 const json=(res,code,data)=>res.writeHead(code,{'Content-Type':'application/json','Cache-Control':'no-store'}).end(JSON.stringify(data));
 async function body(req,limit=16000){let raw='';for await(const part of req){raw+=part;if(raw.length>limit)throw new Error('BODY_TOO_LARGE');}return JSON.parse(raw||'{}');}
-export function createServer({fetcher=fetch,apiKey=defaults.key,model=defaults.model,realtimeModel=defaults.realtimeModel,saveDirectory=null}={}){
+export function createServer({fetcher=fetch,apiKey=defaults.key,model=defaults.model,realtimeModel=defaults.realtimeModel,imageModel=defaults.imageModel,saveDirectory=null}={}){
  const sessions=new Map(),hydrating=new Map(),storage=saveDirectory?createStorage(saveDirectory):null;
- const config=()=>({key:apiKey,model,realtimeModel,calls:0,retryAfter:0});
+ const config=()=>({key:apiKey,model,realtimeModel,imageModel,calls:0,retryAfter:0});
  const server=http.createServer(async(req,res)=>{
   try{
    const host=req.headers.host||'';
@@ -49,7 +51,7 @@ export function createServer({fetcher=fetch,apiKey=defaults.key,model=defaults.m
      if(s.world.busy.size)return json(res,409,{error:'BUSY'});
      if((data.key!==undefined&&(typeof data.key!=='string'||data.key.length>300))||typeof data.model!=='string'||!/^[\w.:-]{1,100}$/.test(data.model))return json(res,400,{error:'INVALID_CONFIG'});
      await endCentralVoice(s,null,fetcher);
-     s.config={key:data.useDefault===true?apiKey:data.key===undefined?s.config.key:data.key.trim(),model:data.model,realtimeModel,calls:0,retryAfter:0};return json(res,200,{connected:!!s.config.key,model:s.config.model});
+     s.config={key:data.useDefault===true?apiKey:data.key===undefined?s.config.key:data.key.trim(),model:data.model,realtimeModel,imageModel,calls:0,retryAfter:0};return json(res,200,{connected:!!s.config.key,model:s.config.model});
     }
     if(url.pathname==='/api/central/voice'&&req.method==='POST')return json(res,200,await openCentralVoice(s,data,fetcher));
     if(url.pathname==='/api/central/stop'&&req.method==='POST')return json(res,200,await endCentralVoice(s,data.connection,fetcher));
@@ -59,6 +61,13 @@ export function createServer({fetcher=fetch,apiKey=defaults.key,model=defaults.m
     if(url.pathname==='/api/episode/inspect'&&req.method==='POST'){const result=inspectEpisode(s.world,data.clue,data.position);return await commit({...result,city:publicCity(s.world)});}
     if(url.pathname==='/api/episode/propose'&&req.method==='POST'){const result=await proposeEpisode(s.world,data.message,generate);return await commit({...result,city:publicCity(s.world)});}
     if(url.pathname==='/api/episode/speech'&&req.method==='POST')return json(res,200,await episodeSpeech(s,data.event,fetcher));
+    if(url.pathname==='/api/community/start'&&req.method==='POST')return await commit(startCommunity(s.world));
+    if(url.pathname==='/api/community/interact'&&req.method==='POST'){const result=interactCommunity(s.world,data.object,data.position,data.revision);return await commit({...result,city:publicCity(s.world)});}
+    if(url.pathname==='/api/community/propose'&&req.method==='POST'){const result=await proposeCommunity(s.world,data.message,generate);return await commit({...result,city:publicCity(s.world)});}
+    if(url.pathname==='/api/community/image'&&req.method==='POST')return await commit(await generateCommunityArt(s,data.revision,fetcher));
+    if(url.pathname==='/api/community/art'&&req.method==='GET')return json(res,200,await readCommunityArt(s,url.searchParams.get('id')));
+    if(url.pathname==='/api/community/speech'&&req.method==='POST')return json(res,200,await communitySpeech(s,data.event,fetcher));
+    if(url.pathname==='/api/resident/speech'&&req.method==='POST')return json(res,200,await residentSpeech(s,data.id,fetcher));
     if(url.pathname==='/api/city/start'&&req.method==='POST')return await commit(startCity(s.world));
     if(url.pathname==='/api/city/tick'&&req.method==='POST')return await commit(tickCity(s.world,data.positions,data.held));
     if(url.pathname==='/api/city/control'&&req.method==='POST')return await commit(controlCity(s.world,data.action,data.position));
@@ -93,11 +102,11 @@ export function createServer({fetcher=fetch,apiKey=defaults.key,model=defaults.m
    }
    // Explicit public files only: never serve server code, keys, dotfiles or tests.
    const p=decodeURIComponent(url.pathname);
-   const allowed=/^\/assets\/episode\/[a-z_]+\.(mp3|json)$/.test(p)||/^\/assets\/characters\/(mia|ren|tomo|shell)\.glb$/.test(p)||/^\/assets\/infrastructure\/[a-z-]+\.(glb|json)$/.test(p)||p==='/character-review.html'||p==='/cafe-review.html'||/^\/assets\/cafe\/[a-zA-Z0-9_-]+\.(glb|json)$/.test(p)||['/node_modules/three/examples/jsm/loaders/GLTFLoader.js','/node_modules/three/examples/jsm/utils/BufferGeometryUtils.js'].includes(p)||p==='/'||p==='/index.html'||/^\/src\/[a-z-]+\.(js|css)$/.test(p)||p==='/node_modules/three/build/three.module.js';
+   const allowed=/^\/assets\/(episode|community)\/[a-z_]+\.(mp3|json)$/.test(p)||/^\/assets\/characters\/(mia|ren|tomo|shell)\.glb$/.test(p)||/^\/assets\/infrastructure\/[a-z-]+\.(glb|json)$/.test(p)||p==='/character-review.html'||p==='/cafe-review.html'||/^\/assets\/cafe\/[a-zA-Z0-9_-]+\.(glb|json)$/.test(p)||['/node_modules/three/examples/jsm/loaders/GLTFLoader.js','/node_modules/three/examples/jsm/utils/BufferGeometryUtils.js','/node_modules/three/examples/jsm/geometries/RoundedBoxGeometry.js'].includes(p)||p==='/'||p==='/index.html'||/^\/src\/[a-z-]+\.(js|css)$/.test(p)||p==='/node_modules/three/build/three.module.js';
    if(req.method!=='GET'||!allowed)return json(res,404,{error:'NOT_FOUND'});
    const file=p==='/'?'index.html':p.slice(1);const text=await readFile(root+file);
    res.writeHead(200,{'Content-Type':types[file.split('.').at(-1)]||'text/plain','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}).end(text);
-  }catch(e){const code=['BUSY','STALE','REALTIME_BUSY','REALTIME_CLOSED','CITY_INACTIVE','EPISODE_REQUIRES_NEW_NIGHT'].includes(e.message)?409:['KEY_REQUIRED','API_KEY_INVALID','API_LIMIT','REALTIME_UNAVAILABLE'].includes(e.message)?503:['UNKNOWN_AGENT','UNKNOWN_PROJECT','INVALID_ARTIFACT','INVALID_ACTION','INVALID_MESSAGE','INVALID_SDP','TOO_FAR','BODY_TOO_LARGE'].includes(e.message)||e instanceof SyntaxError?400:500;json(res,code,{error:code===500?(['SAVE_WRITE_FAILED','SAVE_READ_FAILED'].includes(e.message)?e.message:'SERVER_ERROR'):e.message});}
+  }catch(e){const code=['BUSY','STALE','REALTIME_BUSY','REALTIME_CLOSED','CITY_INACTIVE','EPISODE_REQUIRES_NEW_NIGHT'].includes(e.message)?409:['KEY_REQUIRED','API_KEY_INVALID','API_LIMIT','REALTIME_UNAVAILABLE','ART_UNAVAILABLE'].includes(e.message)?503:['UNKNOWN_AGENT','UNKNOWN_PROJECT','INVALID_ARTIFACT','INVALID_ACTION','INVALID_MESSAGE','INVALID_SDP','TOO_FAR','TRY_SWITCH_FIRST','INVALID_PLAN','BODY_TOO_LARGE'].includes(e.message)||e instanceof SyntaxError?400:500;json(res,code,{error:code===500?(['SAVE_WRITE_FAILED','SAVE_READ_FAILED'].includes(e.message)?e.message:'SERVER_ERROR'):e.message});}
  });
  server.on('close',()=>{for(const s of sessions.values())endCentralVoice(s,null,fetcher).catch(()=>{});});
  return server;

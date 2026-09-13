@@ -1,0 +1,45 @@
+{
+  "generatedWith": "OpenAI Text to speech",
+  "lines": [
+    {
+      "id": "arrival_mia",
+      "by": "mia",
+      "text": "……あれ？ 人間？ ねえ、みんな見て！",
+      "voice": "coral",
+      "model": "gpt-4o-mini-tts",
+      "textHash": "3b27a87ea7bafc3a9711f9e4b659794041d4a94716a285d4e39f036e69ab304c"
+    },
+    {
+      "id": "arrival_tomo",
+      "by": "tomo",
+      "text": "ほんとだ！ そのレバー、触ってみて！",
+      "voice": "ash",
+      "model": "gpt-4o-mini-tts",
+      "textHash": "37bbd47edefdc4428d401c19ee7a7e3d105191f4f3604c5e6eca6daae2cf5e36"
+    },
+    {
+      "id": "first_light",
+      "by": "mia",
+      "text": "灯りが戻った！ あなたが変えたんだね。",
+      "voice": "coral",
+      "model": "gpt-4o-mini-tts",
+      "textHash": "f150a2c59e366513bdb303bad31f27261562678ec424ef1f82ef8dd32b58a9d2"
+    },
+    {
+      "id": "first_central",
+      "by": "central",
+      "text": "電力の流れが変わりました。明日は、少し遅くなります。",
+      "voice": "marin",
+      "model": "gpt-4o-mini-tts",
+      "textHash": "ff98eaf714e7f4160162b2c899e46c748d670c34909593ae08d0afa5dcc31e82"
+    },
+    {
+      "id": "first_invite",
+      "by": "shell",
+      "text": "この灯りで、何を作りましょう。あなたの案を聞かせて。",
+      "voice": "sage",
+      "model": "gpt-4o-mini-tts",
+      "textHash": "70c8d4370ec06a376935e22f315f02cfa2a65b128f15ba28d8e93d5658ec655b"
+    }
+  ]
+}

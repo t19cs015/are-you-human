@@ -1,6 +1,7 @@
 import * as T from '/node_modules/three/build/three.module.js';
 import {GLTFLoader} from '/node_modules/three/examples/jsm/loaders/GLTFLoader.js';
 import {asset} from './cafe-assets.js';
+import {createVariedSkyline} from './skyline-variety.js';
 import {infrastructureSites,infrastructureObstacles,modernPlots} from './town-layout.js';
 
 export function createInfrastructureWorld(world){
@@ -48,7 +49,8 @@ export function createInfrastructureWorld(world){
     ctx.font='34px sans-serif';const words=[...text],lines=[];while(words.length&&lines.length<3)lines.push(words.splice(0,23).join(''));lines.forEach((l,i)=>ctx.fillText(l,512,150+i*47));
     ctx.font='19px monospace';ctx.fillStyle='#a4c6cd';ctx.fillText(g.modelEnabled?'POWER · WATER · MEMORY':'HOLDING THIS MOMENT',512,335);screenMap.needsUpdate=true;
   }
-  const models={},towers=[];let rotor=null,pumpRotor=null,upper=null;const towerGlow=[];
+  const skyline=createVariedSkyline(world.scene,modernPlots);
+  const models={};let rotor=null,pumpRotor=null,upper=null;const towerGlow=[];
   const loader=new GLTFLoader();
   const ready=(async()=>{
     const loaded=await Promise.all(['windmill','pump','tower','data-center','city-house'].map(async id=>[id,(await loader.loadAsync('/assets/infrastructure/'+id+'.glb')).scene]));
@@ -58,7 +60,7 @@ export function createInfrastructureWorld(world){
     }
     rotor=models.wind.getObjectByName('Rotor');pumpRotor=models.pump.getObjectByName('Rotor');upper=models.central.getObjectByName('UpperWorks');if(upper)upper.scale.y=.001;
     models.relay.traverse(o=>{if(o.isMesh&&o.material.emissiveIntensity>0){o.material=o.material.clone();towerGlow.push(o.material);}});
-    for(const p of modernPlots){const holder=new T.Group();holder.position.set(p.x,.12,p.z);holder.rotation.y=p.rotation;const model=templates['city-house'].clone(true);model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});holder.add(model);holder.scale.y=.001;group.add(holder);towers.push({holder,...p});}
+
     return true;
   })().catch(error=>{console.warn('Infrastructure assets unavailable.',error.message);return false;});
   const treesReady=(async()=>{
@@ -80,8 +82,8 @@ export function createInfrastructureWorld(world){
     growth=T.MathUtils.damp(growth,g.phase>=1?1:0,1.4,dt);newLamps.scale.y=Math.max(.001,growth);newLamps.visible=growth>.003;
     newLights.forEach(l=>l.intensity=growth*(g.allocation==='town'?9:4));
     if(upper)upper.scale.y=T.MathUtils.damp(upper.scale.y,g.phase>=2?1:.001,.65,dt);
-    for(const t of towers){t.holder.scale.y=T.MathUtils.damp(t.holder.scale.y,g.phase>=t.phase?t.height/8:.001,.6,dt);t.holder.visible=t.holder.scale.y>.005;}
-    const powered=g.relayOnline&&(g.energyRate>0||g.energy>1);beacon.intensity=powered?36:0;halo.visible=!!powered;halo.rotation.z=time*.2;halo.material.opacity=.28+Math.sin(time*1.6)*.12;
+    skyline.update(city?.community?.active?city.community.central:g.phase*30);
+    const powered=g.relayOnline&&(city?.community?.active?g.energyRate>0:g.energyRate>0||g.energy>1);beacon.intensity=powered?36:0;halo.visible=!!powered;halo.rotation.z=time*.2;halo.material.opacity=.28+Math.sin(time*1.6)*.12;
     towerGlow.forEach(m=>m.emissiveIntensity=powered?1.1:.03);
     for(const f of flows){const on=f===cooling?g.waterRate>0:f===power?g.windOnline&&g.windEnabled&&g.relayOnline:powered;f.beads.visible=!!on;if(!on)continue;f.phase+=dt*(f===cooling?.045:.07)*(f===toCentral&&g.allocation==='town'?.4:1);for(let i=0;i<12;i++){dummy.position.copy(f.curve.getPointAt((f.phase+i/12)%1));dummy.updateMatrix();f.beads.setMatrixAt(i,dummy.matrix);}f.beads.instanceMatrix.needsUpdate=true;}
     boat.position.y=-.08+Math.sin(time*.7)*.025;boat.rotation.z=Math.sin(time*.5)*.015;

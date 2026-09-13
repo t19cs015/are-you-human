@@ -76,7 +76,7 @@ export function createWorld(container){
   const el=document.createElement('div');el.className='bubble';el.hidden=true;document.getElementById('labels').append(el);
   return {...data,root,body,eyes,workProp,el,until:0,target:null,wait:0,activity:'立ち話',social:false,glitch:0};
  });
- function canMove(x,z,includeNPC=true,ignoreId=null){return (outdoorGround(x,z)||(Math.abs(x-40)<5.65&&Math.abs(z)<4.65)||(Math.abs(x-60)<5.65&&Math.abs(z)<4.65))&&!colliders.some(c=>Math.abs(x-c.x)<c.hw+.25&&Math.abs(z-c.z)<c.hd+.25)&&(!includeNPC||!npcs.some(n=>n.id!==ignoreId&&Math.hypot(x-n.root.position.x,z-n.root.position.z)<.6));}
+ function canMove(x,z,includeNPC=true,ignoreId=null){return (outdoorGround(x,z)||(Math.abs(x-40)<5.65&&Math.abs(z)<4.65)||(Math.abs(x-60)<5.65&&Math.abs(z)<4.65))&&!colliders.some(c=>c.active!==false&&Math.abs(x-c.x)<c.hw+.25&&Math.abs(z-c.z)<c.hd+.25)&&(!includeNPC||!npcs.some(n=>n.id!==ignoreId&&Math.hypot(x-n.root.position.x,z-n.root.position.z)<.6));}
  function face(n,p){n.root.rotation.y=Math.atan2(p.x-n.root.position.x,p.z-n.root.position.z);}
  function walk(n,target,dt,time,speed=.7){const dx=target.x-n.root.position.x,dz=target.z-n.root.position.z,d=Math.hypot(dx,dz);if(d<.12){n.body.position.y=0;return true;}
   face(n,target);const step=Math.min(d,speed*dt),x=n.root.position.x+dx/d*step,z=n.root.position.z+dz/d*step;

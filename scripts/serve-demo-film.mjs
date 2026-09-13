@@ -71,7 +71,7 @@ const server=http.createServer(async(req,res)=>{
     }
     if(req.method==='GET'&&path==='/status')return json(res,200,{frames,rendering:!!encoder,error:encodingError});
     const files={'/':'art/demo/film.html','/watch':'exports/watch.html','/are-you-human-60s-en.mp4':'exports/are-you-human-60s-en.mp4','/are-you-human-poster.png':'exports/are-you-human-poster.png','/english-narration.md':'exports/english-narration.md','/film.js':'art/demo/film.js','/script.json':'art/demo/script.json','/audio-manifest.json':'data/film/audio-manifest.json','/narration.wav':'data/film/narration.wav','/replay.json':'data/film/replay.json','/video.mp4':'exports/are-you-human-60s-en.mp4'};
-    const file=files[path]||(/^\/(src\/[a-z-]+\.(js|css)|assets\/(cafe|characters|infrastructure)\/[a-zA-Z0-9_-]+\.(glb|json)|node_modules\/three\/(build\/three.module.js|examples\/jsm\/(loaders\/GLTFLoader.js|utils\/BufferGeometryUtils.js)))$/.test(path)?path.slice(1):null);
+    const file=files[path]||(/^\/(src\/[a-z-]+\.(js|css)|assets\/(cafe|characters|infrastructure)\/[a-zA-Z0-9_-]+\.(glb|json)|node_modules\/three\/(build\/three.module.js|examples\/jsm\/(loaders\/GLTFLoader.js|utils\/BufferGeometryUtils.js|geometries\/RoundedBoxGeometry.js)))$/.test(path)?path.slice(1):null);
     if(req.method!=='GET'||!file)return json(res,404,{error:'Not found'});
     const data=await readFile(root+file),ext=file.split('.').at(-1),type={html:'text/html',js:'text/javascript',css:'text/css',json:'application/json',glb:'model/gltf-binary',mp4:'video/mp4',wav:'audio/wav',png:'image/png',md:'text/markdown; charset=utf-8'}[ext];
     res.writeHead(200,{'Content-Type':type||'application/octet-stream','Cache-Control':'no-store'}).end(data);

@@ -12,4 +12,5 @@ export const defaults={
   key:(process.env.OPENAI_API_KEY??legacyKey).trim(),
   model:process.env.OPENAI_MODEL||'gpt-5.6-luna',
   realtimeModel:process.env.OPENAI_REALTIME_MODEL||'gpt-realtime-mini',
+  imageModel:process.env.OPENAI_IMAGE_MODEL||'gpt-image-2.5-flare',
 };

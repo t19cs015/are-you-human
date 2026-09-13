@@ -3,6 +3,7 @@ import {places} from '../src/town-layout.js';
 import {infrastructure,batchCost} from './infrastructure.mjs';
 import {controlCity,publicCity} from './city.mjs';
 import {episodePublic,episodeContext,queueEpisodePlan} from './episode.mjs';
+import {communityContext} from './community.mjs';
 
 export const voiceDuration=5*60*1000;
 export function requireCentral(s,position){
@@ -17,7 +18,7 @@ export function centralSnapshot(world){
     deliveredRecords:[],changes:episode.update>=100?'Tomoの声を直す更新が完了した':'Tomoの声を直す更新を進めている'};
   // Only records actually delivered here. Never include residents' private memories
   // or the contents of parcels still on their way to the central hall.
-  return {episode:episodePublic(world),phase:g.phase,maxPhase:3,energy:Math.floor(g.energy),water:Math.floor(g.water),nextCost:batchCost(g),
+  return {community:world.city.community?.active?{route:world.city.community.route,centralProgress:Math.round(world.city.community.central),places:world.city.community.completed.map(p=>p.title)}:null,episode:episodePublic(world),phase:g.phase,maxPhase:3,energy:Math.floor(g.energy),water:Math.floor(g.water),nextCost:batchCost(g),
     modelEnabled:g.modelEnabled,wind:g.windOnline&&g.windEnabled,pump:g.pumpOnline&&g.pumpEnabled,relay:g.relayOnline,
     allocation:g.allocation,availableRecords:g.samples.length,
     residents:Object.entries(world.city.tasks).map(([id,t])=>({name:world.agents[id].name,job:t.label,waitingFor:t.waitingFor||''})),
@@ -34,7 +35,7 @@ export const centralTools=[
   {type:'function',name:'set_modernization',description:'プレイヤーが明確に頼んだとき、中央による街の更新を停止(false)または再開(true)する。会話は止まらない。',parameters:{type:'object',properties:{enabled:{type:'boolean'}},required:['enabled'],additionalProperties:false}},
 ];
 const episodeTool={type:'function',name:'propose_cafe_plan',description:'この灯りを明日にも、の場面で、人間が具体的に提案した方法を住民に相談する。完成させる操作ではない。余熱の循環か、電力の分配で更新とカフェを両立する。',parameters:{type:'object',properties:{method:{type:'string',enum:['share_heat','share_power']},idea:{type:'string'}},required:['method','idea'],additionalProperties:false}};
-function persona(s){return centralPersona+episodeContext(s.world,'central')+(s.world.city?.episode?.active?'\nこの場面に限り、具体的な方法をpropose_cafe_planで住民へ相談できる。住民の承諾と現地作業はまだ必要。相談したことだけを伝え、完成したと言わない。電力配分はepisode.supply、更新進行はepisode.updateが唯一の根拠。過去の記録収集や増築はこの場面の課題ではない。':'' );}
+function persona(s){return centralPersona+communityContext(s.world)+episodeContext(s.world,'central')+(s.world.city?.episode?.active?'\nこの場面に限り、具体的な方法をpropose_cafe_planで住民へ相談できる。住民の承諾と現地作業はまだ必要。相談したことだけを伝え、完成したと言わない。電力配分はepisode.supply、更新進行はepisode.updateが唯一の根拠。過去の記録収集や増築はこの場面の課題ではない。':'' );}
 export function runCentralTool(s,name,args,position){
   requireCentral(s,position);
   if(!args||typeof args!=='object'||Array.isArray(args))throw new Error('INVALID_ACTION');

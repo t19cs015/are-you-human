@@ -1,5 +1,6 @@
 import * as T from '/node_modules/three/build/three.module.js';
 import {places,infrastructureSites} from './town-layout.js';
+import {powerRoutes} from './community-rules.js';
 import {createCentralVoice} from './central-voice.js';
 
 export function createInfrastructureView(world,cityView,callbacks){
@@ -31,6 +32,7 @@ export function createInfrastructureView(world,cityView,callbacks){
       $('facility-description').textContent=notes[site];
       $('facility-readings').textContent=site==='central'?`中央の更新 ${Math.round(e.update)}% · 電力 ${e.supply.central} · 冷却 ${e.supply.cooled?'稼働中':'停止中'}`:site==='relay'?`供給 ${e.supply.total} → 中央 ${e.supply.central} / カフェ ${e.supply.cafe}`:site==='wind'?`発電 ${e.supply.total} · ${g.windEnabled?'運転中':'停止中'}`:`冷却水 ${e.supply.cooled?'循環中':'停止中'} · カフェへの余熱 ${e.supply.heat}`;
     }
+    if(city.community?.active){const c=city.community;if(site==='central'){$('facility-description').textContent='みんなの声と、この街の電力・水から、明日の街を描いている。あなたの案も、そこに届く。';$('facility-readings').textContent=`中央の更新 ${Math.round(c.central)}% · ${g.modelEnabled?'更新中':'停止中'} · 街の灯り ${Math.round(c.energy)}`;}if(site==='relay')$('facility-readings').textContent='配分：'+powerRoutes[c.route].name;}
     const controls=site==='wind'?(g.windOnline?[[g.windEnabled?'wind_stop':'wind_start',g.windEnabled?'風車を止める':'風車を回す']]:[]):site==='pump'?(g.pumpOnline?[[g.pumpEnabled?'pump_stop':'pump_start',g.pumpEnabled?'取水を止める':'水を送る']]:[]):site==='relay'?(g.relayOnline?[[g.allocation==='central'?'town_power':'central_power',g.allocation==='central'?'街の暮らしに電力を分ける':'中央への供給を優先する']]:[]):[[g.modelEnabled?'pause_model':'resume_model',g.modelEnabled?'中央の更新を止める':'中央の更新を再開する']];
     if(e?.active&&site==='relay')controls.length=0;
     const controlsKey=controls.map(c=>c[0]).join(',');

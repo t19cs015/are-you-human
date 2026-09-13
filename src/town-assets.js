@@ -164,5 +164,5 @@ export async function upgradeTown(world,studio){
  originals.forEach(([x,z],i)=>{const c=world.colliders.find(c=>c.x===x&&c.z===z&&c.hw===2.12);if(c)Object.assign(c,townFootprints[i]);});
  for(const x of [-10,10]){const light=world.scene.children.find(o=>o.isPointLight&&o.position.x===x&&o.position.z===1);if(light)light.position.set(x+(x<0?2.4:-2.4),2,-1);}
  world.colliders.push(...colliders);world.scene.add(group);
- return {group,assetCount:names.length,setRoom(room){for(const o of group.children){const zone=o.userData.room||roomAt(o.position.x,o.position.z);if(zone)o.visible=zone===room;}},update(t){for(const m of motions)m.bulb.position.y=m.y+Math.sin(t*.8+m.phase*.4)*.012;}};
+ return {group,assetCount:names.length,setRoom(room){for(const o of group.children){const zone=o.userData.room||roomAt(o.position.x,o.position.z);if(zone)o.visible=zone===room;}},update(t,community){const lightLevel=community?.active?(community.route==='central'?.08:community.route==='shared'?.7:1):1;bulbMat.color.set(lightLevel<.2?0x657e84:0xffd49b);for(const light of lights){light.userData.originalPower??=light.intensity;light.intensity=light.userData.originalPower*lightLevel;}for(const m of motions)m.bulb.position.y=m.y+Math.sin(t*.8+m.phase*.4)*.012;}};
 }

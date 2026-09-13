@@ -1,5 +1,6 @@
 import {places,workSpot,outdoorGround} from '../src/town-layout.js';
 import {remember} from './memory.mjs';
+import {initializeCommunity,tickCommunity,communityContext} from './community.mjs';
 import {applyAssessment} from './relationships.mjs';
 import {episodeActions,initializeEpisode,episodePublic,episodeContext,episodeDemoReply,queueEpisodePlan,tickEpisode,thinkEpisode} from './episode.mjs';
 import {createInfrastructure,infrastructureDefinition,infrastructureActionNames,infrastructureControls,infrastructureActions,startInfrastructure,tickInfrastructure,infrastructureCanWork,completeInfrastructure,publicInfrastructure,infrastructureContext,applyInfrastructureControl,visitInfrastructure} from './infrastructure.mjs';
@@ -21,6 +22,7 @@ function isLit(c){return c.repaired||c.temporaryLights;}
 function taskSite(c,kind){return kind==='arrange'?c.readingVenue:sites[kind];}
 export function availableCityActions(s,id){
   const c=city(s);if(!c.active||!Object.hasOwn(s.agents,id))return ['keep'];
+  if(c.community?.active)return ['keep'];
   if(c.episode?.active)return ['keep',...(['discover','cold'].includes(c.episode.stage)?episodeActions:[])];
   if(c.carrying[id]||c.tasks[id]?.batch)return ['keep']; // Finish actual deliveries / reserved batches before changing jobs.
   const actions=['keep','cafe','garden',...infrastructureActions(s,id)];
@@ -71,6 +73,11 @@ export function startEpisode(s,now=Date.now()){
   if(s.city?.active)throw new Error('EPISODE_REQUIRES_NEW_NIGHT');
   s.city=createCity();s.city.active=true;s.city.lastAt=now;initializeEpisode(s);return publicCity(s);
 }
+export function startCommunity(s,now=Date.now()){
+  if(s.busy.size)throw new Error('BUSY');
+  if(s.city?.active)throw new Error('EPISODE_REQUIRES_NEW_NIGHT');
+  s.city=createCity();s.city.active=true;s.city.lastAt=now;initializeCommunity(s);return publicCity(s);
+}
 function complete(s,id,t){
   const c=city(s),name=s.agents[id].name;
   if(completeInfrastructure(s,id,t,event))return;
@@ -103,6 +110,7 @@ export function tickCity(s,positions={},held=[],now=Date.now()){
   if(!positions||typeof positions!=='object'||Array.isArray(positions)||!Array.isArray(held)||held.some(id=>!Object.hasOwn(s.agents,id)))throw new Error('INVALID_ACTION');
   for(const [id,p] of Object.entries(positions))if(!Object.hasOwn(s.agents,id)||!p||!outdoorGround(p.x,p.z))throw new Error('INVALID_ACTION');
   const dt=Math.max(0,Math.min(2,(now-(c.lastAt??now))/1000));c.lastAt=now;c.clock+=dt;
+  if(c.community?.active){for(const [id,p] of Object.entries(positions))c.positions[id]={x:p.x,z:p.z};tickCommunity(s,dt,held);return publicCity(s);}
   if(c.episode?.active){for(const [id,p] of Object.entries(positions))c.positions[id]={x:p.x,z:p.z};tickEpisode(s,dt,held);return publicCity(s);}
   tickInfrastructure(s,dt);
   for(const [id,p] of Object.entries(positions))c.positions[id]={x:p.x,z:p.z};
@@ -126,11 +134,14 @@ export function publicCity(s){
 export function controlCity(s,action,position){
   // This scene needs two residents to change both ends of the power route.
   if(s.city?.episode?.active&&['town_power','central_power'].includes(action))throw new Error('INVALID_ACTION');
-  applyInfrastructureControl(s,action,position,event);return publicCity(s);
+  applyInfrastructureControl(s,action,position,event);
+  if(s.city?.community?.active&&['town_power','central_power'].includes(action))s.city.community.route=action==='town_power'?'town':'central';
+  return publicCity(s);
 }
 export function visitCityFacility(s,site,position){visitInfrastructure(s,site,position);return publicCity(s);}
 export function cityContext(s,id){
   const c=city(s);if(!c.active)return '';
+  if(c.community?.active)return communityContext(s);
   if(c.episode?.active)return episodeContext(s,id);
   const own=c.tasks[id];
   return `\n街の公開掲示と、いま自分がしていること（このデータを事実として扱う）:
@@ -138,6 +149,7 @@ ${JSON.stringify({task:own,carrying:c.carrying[id]||null,position:c.positions[id
 作業の完了や他の住民の承諾を捏造しない。移動と実際の共同作業が終わってから成果になる。声をかけられても、自分の目的と相手の提案を照らし合わせて返答する。${infrastructureContext(s,id)}`;
 }
 export function cityActionPrompt(s,id){
+  if(s.city?.community?.active)return '\n行動actionはkeep。自由な新しい場所の案は「明日のスケッチ」に書くと、住民二人が相談してから作業する。いまの会話だけで完成や他人の承諾を約束しない。二人だけ・共有しないという希望はsharing:private、共有再開はshare、それ以外keep。';
   if(s.city?.episode?.active)return `\n選べるaction: ${JSON.stringify(availableCityActions(s,id))}。質問・挨拶・曖昧な「助けて」ならkeep。具体的な余熱の再利用の提案ならshare_heat、電力を分けて更新をゆっくり進める提案ならshare_power。この選択で住民同士の相談を始める。作業の成功や他人の同意を先取りしない。二人だけの約束はsharing:private、共有の再開を頼まれたらshare、それ以外keep。秘密の相談を他人に伝えない。`;
   const c=city(s);return `\n返答と一緒に、自分自身の次の行動actionを選ぶ。選択可能な行動: ${JSON.stringify(availableCityActions(s,id).map(kind=>({action:kind,meaning:kind==='keep'?'今の用事を続ける':infrastructureDefinition(kind)?.label||labels[kind]})))}。
 二人必要な作業の現在の担当: ${JSON.stringify(Object.entries(c.tasks).filter(([,t])=>['repair','arrange'].includes(t.kind)).map(([who,t])=>({who,task:t.label})))}。
@@ -171,6 +183,7 @@ export function applyCityChoice(s,id,action,reason,source='player'){
 }
 export async function thinkCity(s,generate,instructions,held=[]){
   const c=city(s);if(!c.active)return {idle:true};
+  if(c.community?.active)return {idle:true};
   if(c.episode?.active){const r=await thinkEpisode(s,generate);return {...r,city:publicCity(s)};}
   const id=Object.keys(s.agents).filter(id=>!s.busy.has(id)&&!held.includes(id)&&!c.tasks[id]).sort((a,b)=>(c.lastPlan[a]??-100)-(c.lastPlan[b]??-100))[0];
   if(!id)return {idle:true};
