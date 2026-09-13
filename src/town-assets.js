@@ -1,3 +1,4 @@
+import {squarePaving} from './paving.js';
 import * as T from '/node_modules/three/build/three.module.js';
 import {asset} from './cafe-assets.js';
 
@@ -71,18 +72,16 @@ export async function upgradeTown(world,studio){
   put('park-bush',x,2,.65);put('furniture-cactus_small_A',sx,-2,.65);
  }
  // A warm stone surface with small variations; one draw call per palette rather than per tile.
- const tileGeometry=new T.BoxGeometry(.73,.045,.73),tiles=[[],[],[]];
+ const tiles=[];
  for(let xi=-9;xi<=9;xi++)for(let zi=-7;zi<=6;zi++){
   const x=xi*.78,z=zi*.78;
-  if(x<-2.7&&z<1.5)continue; // Cafe's original detailed cobblestone terrace.
+  if(x<-2.7&&z<1.5)continue; // Cafe owns these cells on the shared paving grid.
   if(z<-3.8&&Math.abs(x-5.2)<2.3)continue;
   if(z<-4.9&&Math.abs(x)<2.3)continue;
-  tiles[Math.abs(xi*13+zi*7)%3].push([x,.15,z]);
+  tiles.push([xi,zi]);
  }
- for(let zi=7;zi<=14;zi++)for(let xi=-2;xi<=2;xi++)tiles[(zi+xi+3)%3].push([xi*.78,.15,zi*.78]);
- for(let i=0;i<3;i++){
-  const m=new T.InstancedMesh(tileGeometry,material([0x9c9c90,0xa5a498,0x92988e][i]),tiles[i].length);const matrix=new T.Matrix4();tiles[i].forEach((p,j)=>m.setMatrixAt(j,matrix.makeTranslation(...p)));m.receiveShadow=true;group.add(m);
- }
+ for(let zi=7;zi<=14;zi++)for(let xi=-2;xi<=2;xi++)tiles.push([xi,zi]);
+ group.add(squarePaving(tiles));
  box(0x707e73,0,.075,0,14.8,.09,11.4);box(0x707e73,0,.08,8.3,4,.09,6.9);
  // Flush plaza medallion: an identifiable meeting place that never obstructs NPC paths.
  const disc=new T.Mesh(new T.CircleGeometry(1.9,64),material(0xa8ad9f));disc.rotation.x=-Math.PI/2;disc.position.set(0,.184,.7);disc.receiveShadow=true;group.add(disc);

@@ -1,3 +1,4 @@
+import {squarePaving} from './paving.js';
 import * as T from '/node_modules/three/build/three.module.js';
 import {GLTFLoader} from '/node_modules/three/examples/jsm/loaders/GLTFLoader.js';
 const loader=new GLTFLoader(),cache=new Map(),atlases=new Map();
@@ -6,7 +7,7 @@ export async function asset(name){
  return (await cache.get(name)).clone(true);
 }
 export async function upgradeCafe(world){
- const names=['house-house','house-fence_straight','house-package','park-bench','park-street_lantern','park-tree','park-bush','park-hedge_straight','park-cobble_stones_large','park-flower_A','park-flower_B','park-grass_A','furniture-table_small','furniture-chair_A_wood','furniture-book_single','furniture-cactus_medium_A','furniture-cactus_small_A','city-box_A'];
+ const names=['house-house','house-fence_straight','house-package','park-bench','park-street_lantern','park-tree','park-bush','park-hedge_straight','park-flower_A','park-flower_B','park-grass_A','furniture-table_small','furniture-chair_A_wood','furniture-book_single','furniture-cactus_medium_A','furniture-cactus_small_A','city-box_A'];
  const loaded=await Promise.all(names.map(async n=>[n,await asset(n)]));const templates=Object.fromEntries(loaded);
  const group=new T.Group();group.name='Cafe benchmark • CC0 assets';const sway=[],steam=[],lights=[];
  const palette={cream:0xf3dfb4,green:0x647f6e,wood:0x795a48,metal:0x344952};
@@ -34,10 +35,10 @@ export async function upgradeCafe(world){
  }
  put('furniture-cactus_medium_A',-3.8,-4.15,.53);put('furniture-cactus_medium_A',-6.9,-4.15,.46);
  put('house-package',-7.1,-5.15,.45);put('city-box_A',-7.45,-4.55,.42);
- // Stone clusters share geometry/material; instancing keeps the repeated path cheap.
- const stone=templates['park-cobble_stones_large'];stone.updateMatrixWorld(true);const meshes=[];stone.traverse(o=>{if(o.isMesh)meshes.push(o);});const placements=[];
- for(let x=-7.65;x<-2.5;x+=1.06)for(let z=-4;z<1.45;z+=1.03)placements.push([x,z]);
- for(const mesh of meshes){const inst=new T.InstancedMesh(mesh.geometry,mesh.material,placements.length);const matrix=new T.Matrix4();placements.forEach(([x,z],i)=>{matrix.compose(new T.Vector3(x,.22,z),new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),(i%4)*Math.PI/2),new T.Vector3(.52,.52,.52));inst.setMatrixAt(i,matrix.clone().multiply(mesh.matrixWorld));});inst.receiveShadow=true;group.add(inst);}
+ // Same grid, height, joints and palette as the rest of the plaza.
+ const paving=[];
+ for(let x=-10;x<=-4;x++)for(let z=-7;z<=1;z++)paving.push([x,z]);
+ group.add(squarePaving(paving));
  for(let i=0;i<32;i++){const x=i<16?-7.55+(i%4)*.22:-3.15+(i%3)*.14,z=i<16?-3.4+Math.floor(i/4)*.85:-5.4+Math.floor((i-16)/3)*.3;const flower=put(i%3?'park-flower_A':'park-flower_B',x,z,.32+(i%3)*.09);sway.push({object:flower,amount:.045,phase:i});}
  for(let i=0;i<12;i++)put('park-grass_A',-7.8+(i%3)*.2,-3.7+Math.floor(i/3)*1.1,.4);
  // Modifications to the existing house: fabric canopy, sign and warm windows.
