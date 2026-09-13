@@ -1,3 +1,5 @@
+import {entrances,nearbyEntrance} from './locations.js';
+import {upgradeTown} from './town-assets.js';
 import {upgradeCafe} from './cafe-assets.js';
 import {upgradeMia} from './mia-visual.js';
 import {createStudio,drawArtifact,roomCenters} from './studio.js';
@@ -12,7 +14,7 @@ try{world=createWorld($('world'));}catch(e){$('error').hidden=false;throw e;}
 const {scene,camera,renderer,npcs,face,walk,canMove}=world;
 let cafeVisual=null;const miaVisual=upgradeMia(npcs.find(n=>n.id==='mia'));
 upgradeCafe(world).then(v=>cafeVisual=v).catch(()=>{console.warn('Cafe assets unavailable; original scene retained.');});
-const studio=createStudio(world);let room=null,projectClock=8,projectPending=false;const songNodes=[];
+const studio=createStudio(world);let townVisual=null;upgradeTown(world,studio).then(v=>townVisual=v).catch(()=>console.warn('Town assets unavailable; original town retained.'));let room=null,projectClock=8,projectPending=false;const songNodes=[];
 let mode='idle',elapsed=0,time=0,playTime=0,yaw=0,pitch=0,stage='',session='',active=null,waiting=false,muted=false,audio,master,version='4.2',connected=false,epoch=0,encounter=null,socialClock=12,pairIndex=0,rumorReturned=false,hasChat=false,updatedTalk=false,endReady=false;
 let state={agents:[],events:[]},busyUpdate=false,dragging=false,lastPointer=null,toastUntil=0,lastNote=0,lastStep=0;
 let resting=false,restPending=false,initiativeClock=3,initiativePending=false;
@@ -192,8 +194,8 @@ function life(dt){
    return;
   }
   if(!n.target){n.job=routines[n.id][n.jobIndex||0];const destination=n.job.room||null;const current=n.root.position.x>50?'library':n.root.position.x>20?'lab':null;
-   if(current&&current!==destination)n.root.position.set(current==='lab'?5.2:0,.09,current==='lab'?-3.7:-4.8);
-   n.tripRoom=destination&&current!==destination?destination:null;const point=n.tripRoom?(destination==='lab'?[5.2,-3.7]:[0,-4.8]):n.job.point;n.target=new T.Vector3(point[0],.09,point[1]);n.activity=n.job.label+'ため移動';n.tripStart=time;}
+   if(current&&current!==destination)n.root.position.set(entrances[current][0],.09,entrances[current][1]);
+   n.tripRoom=destination&&current!==destination?destination:null;const point=n.tripRoom?entrances[destination]:n.job.point;n.target=new T.Vector3(point[0],.09,point[1]);n.activity=n.job.label+'ため移動';n.tripStart=time;}
   const arrived=walk(n,n.target,dt,time,.9);
   if(n.root.position.distanceTo(n.target)<.4){
    if(n.tripRoom){n.root.position.set(roomCenters[n.tripRoom],.09,2);n.tripRoom=null;n.target=new T.Vector3(n.job.point[0],.09,n.job.point[1]);n.tripStart=time;return;}
@@ -247,7 +249,7 @@ function opening(dt){
  if(elapsed>6)face(getNPC('mia'),player);
  const t=T.MathUtils.smoothstep(elapsed,2,7);camera.position.lerpVectors(new T.Vector3(12,15,20),player,t);const target=new T.Vector3(0,.7,0).lerp(new T.Vector3(0,1.5,1.8),t);camera.lookAt(target);
 }
-function renderLabels(){const rects=[];npcs.forEach(n=>{if(time>n.until)n.el.hidden=true;if(n.el.hidden)return;projected.copy(n.root.position);projected.y+=2.28;projected.project(camera);if(projected.z>1||projected.z< -1||Math.abs(projected.x)>1.2){n.el.style.visibility='hidden';return;}n.el.style.visibility='visible';
+function renderLabels(){const rects=[];npcs.forEach(n=>{if(time>n.until)n.el.hidden=true;if(n.el.hidden)return;const npcRoom=n.root.position.x>50?'library':n.root.position.x>20?'lab':null;if(npcRoom!==room){n.el.style.visibility='hidden';return;}projected.copy(n.root.position);projected.y+=2.28;projected.project(camera);if(projected.z>1||projected.z< -1||Math.abs(projected.x)>1.2){n.el.style.visibility='hidden';return;}n.el.style.visibility='visible';
  const width=n.el.offsetWidth,height=n.el.offsetHeight;const x=Math.max(width/2+8,Math.min(innerWidth-width/2-8,(projected.x*.5+.5)*innerWidth));let y=Math.max(height+90,(-projected.y*.5+.5)*innerHeight);
  for(const r of rects)if(Math.abs(x-r.x)<(width+r.w)/2+8&&y-height<r.y&&y>r.y-r.h)y=r.y-r.h-10;
  n.el.style.left=x+'px';n.el.style.top=y+'px';rects.push({x,y,w:width,h:height});});}
@@ -265,18 +267,18 @@ function frame(now){requestAnimationFrame(frame);const dt=Math.max(0,Math.min((n
  if(mode==='update'&&elapsed>5.5){$('update').hidden=true;mode='play';socialClock=12;if(master)master.gain.setTargetAtTime(muted?0:.8,audio.currentTime,.5);sound(523,.4,.03);toast('更新が完了しました。住民は、いつもの場所へ。',6);$('objective-text').textContent='Miaは、さっきの話を覚えているだろうか。';}
  const cafeSong=!room&&Math.hypot(player.x+5,player.z+3)<5?state.projects?.find(p=>p.kind==='music'&&p.published)?.revisions.find(r=>r.number===state.projects.find(p=>p.kind==='music').published)?.artifact:null;
  if(mode!=='update'&&mode!=='idle'&&time-lastNote>(cafeSong?30/cafeSong.tempo:3.5)){lastNote=time;const notes=cafeSong?cafeSong.notes.map(n=>440*2**((n-69)/12)):[196,246.94,293.66,369.99,293.66,246.94];sound(notes[Math.floor(time/(cafeSong?30/cafeSong.tempo:3.5))%notes.length],cafeSong ? .4 : 2.8,.012);}
- const mia=getNPC('mia');cafeVisual?.update(time);miaVisual.update(time,mode==='opening'&&elapsed>3?'surprised':waiting&&active===mia?'thinking':state.agents.find(a=>a.id==='mia')?.behavior.kind==='avoid'?'suspicious':active===mia?'happy':'neutral',!mia.el.hidden);
+ const mia=getNPC('mia');cafeVisual?.update(time);townVisual?.update(time);miaVisual.update(time,mode==='opening'&&elapsed>3?'surprised':waiting&&active===mia?'thinking':state.agents.find(a=>a.id==='mia')?.behavior.kind==='avoid'?'suspicious':active===mia?'happy':'neutral',!mia.el.hidden);
  renderLabels();renderer.render(scene,camera);
 }
 requestAnimationFrame(frame);
 
 function roomControls(){
- const nearLab=Math.hypot(player.x-5.2,player.z+3.7)<3,nearLibrary=Math.hypot(player.x,player.z+4.8)<3;
+ const entrance=nearbyEntrance(player.x,player.z),nearLab=entrance==='lab',nearLibrary=entrance==='library';
  $('room-button').hidden=!!active||blocked()||(!room&&!nearLab&&!nearLibrary);$('room-button').textContent=room?'街へ戻る':nearLab?'Labに入る':'Libraryに入る';
  $('work-button').hidden=!room||!!active||blocked();$('work-button').textContent=room==='library'?'資料を読む':'モニターを見る';
 }
 function stopSong(){for(const node of songNodes){try{node.stop();}catch{}}songNodes.length=0;}
-$('room-button').onclick=()=>{if(waiting)return;closeDialog();stopSong();if(room){player.set(room==='lab'?5.2:0,1.68,room==='lab'?-3.4:-4.5);room=null;yaw=Math.PI;}else{room=Math.hypot(player.x-5.2,player.z+3.7)<3?'lab':'library';player.set(roomCenters[room],1.68,3.4);yaw=0;}pitch=0;keys.clear();$('location').textContent=room?room.toUpperCase():'THE PLAZA';};
+$('room-button').onclick=()=>{if(waiting)return;closeDialog();stopSong();if(room){player.set(entrances[room][0],1.68,entrances[room][1]);room=null;yaw=Math.PI;}else{const entrance=nearbyEntrance(player.x,player.z);if(!entrance)return;room=entrance;player.set(roomCenters[room],1.68,3.4);yaw=0;}pitch=0;keys.clear();$('location').textContent=room?room.toUpperCase():'THE PLAZA';};
 $('close-workspace').onclick=()=>{stopSong();setModal('workspace',false);};
 $('work-button').onclick=async()=>{
  setModal('workspace',true);$('workspace-content').textContent='読み込み中…';

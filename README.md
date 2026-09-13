@@ -46,8 +46,10 @@ Three.js と Node.js のローカルプロトタイプ。`npm install`、`npm st
 
 詳細計画: `docs/SOCIETY_IMPLEMENTATION_PLAN.md`。元企画: `ARE_YOU_HUMAN_Astra_Initial_Prompt.txt`。
 
-## カフェのVisual Benchmark
+## 街のビジュアル
 
-カフェ周辺だけをCC0の既製アセットで更新しました。探索カメラは一人称のままです。比較ページは `/cafe-review.html`、報告は `docs/CAFE_VISUAL_REVIEW.md`。比較ページはゲームのセッションやAPIを使用せず、同じ視点でBefore/AfterとMiaの7表情を確認できます。
+カフェの方向性をLibrary・Lab・住宅・広場へ展開しました。屋根色・看板・植栽・石畳を揃え、LabとLibraryの室内にも木製家具や本棚、照明を追加しています。一人称操作、制作モニター、資料閲覧はそのまま使えます。
 
-アセットの出典・固定コミット・ハッシュは `assets/cafe/manifest.json`、ライセンス原文は `docs/licenses/`。読み込みに失敗した場合は従来のカフェを残します。街全体へのアセット展開は行っていません。
+確認ページは `/cafe-review.html?town=1`。全景・一人称・室内の視点を切り替えられます。詳細は [街全体の変更報告](docs/TOWN_VISUAL_UPGRADE.md)。カフェだけの比較ページ `/cafe-review.html` と [最初の比較報告](docs/CAFE_VISUAL_REVIEW.md) は過去の基準として残しています。
+
+取得した無料アセット29点の出典・固定コミット・ハッシュは `assets/cafe/manifest.json`、ライセンス原文は `docs/licenses/`。読み込みに失敗した区画は従来の外観を残します。AI住民のオリジナルモデルは今後Blenderで制作する予定です。

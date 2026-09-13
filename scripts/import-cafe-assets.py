@@ -4,7 +4,7 @@ import urllib.request,urllib.parse,json,struct,hashlib
 PACKS={
  'house':('TinyTreats-Game-Assets/Tiny-Treats-Homely-House-1.0',['house','fence_straight','fence_post','package','doormat']),
  'park':('TinyTreats-Game-Assets/Tiny-Treats-Pretty-Park-1.0',['bench','street_lantern','tree','bush','hedge_straight','cobble_stones_large','flower_A','flower_B','grass_A']),
- 'furniture':('KayKit-Game-Assets/KayKit-Furniture-Bits-1.0',['table_small','chair_A_wood','chair_stool_wood','book_single','cactus_medium_A','cactus_small_A']),
+ 'furniture':('KayKit-Game-Assets/KayKit-Furniture-Bits-1.0',['table_small','chair_A_wood','chair_stool_wood','book_single','cactus_medium_A','cactus_small_A','book_set','shelf_B_large_decorated','table_medium_long','chair_C','lamp_standing','rug_rectangle_A','armchair_pillows','cabinet_medium_decorated']),
  'city':('KayKit-Game-Assets/KayKit-City-Builder-Bits-1.0',['box_A'])}
 root=Path(__file__).resolve().parents[1];manifest=[]
 def get(url):return urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'AreYouHuman-CC0-Importer'})).read()
@@ -13,6 +13,9 @@ for pack,(repo,names) in PACKS.items():
  license=get(base+'LICENSE.txt');assert b'CC0' in license and b'commercial' in license
  (root/'docs/licenses'/f'{pack}-LICENSE.txt').write_bytes(license)
  for name in names:
+  prior=next((m for m in existing if m['file']==f'{pack}-{name}.glb' and m['revision']==commit),None)
+  if prior and (root/'assets/cafe'/prior['file']).exists() and hashlib.sha256((root/'assets/cafe'/prior['file']).read_bytes()).hexdigest()==prior['sha256']:
+   manifest.append(prior);continue
   paths=[x['path'] for x in tree['tree'] if x['path'].endswith('/'+name+'.gltf')];assert len(paths)==1
   path=paths[0];gltf=json.loads(get(base+path));binary=bytearray()
   def append(data):

@@ -7,7 +7,7 @@ export function createWorld(container){
  renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.35;container.append(renderer.domElement);
  scene.add(new T.HemisphereLight(0x9dbceb,0x45574d,1.45));
  const moon=new T.DirectionalLight(0xadc8ff,1.25);moon.position.set(-9,16,-3);moon.castShadow=true;moon.shadow.mapSize.set(2048,2048);Object.assign(moon.shadow.camera,{left:-18,right:18,top:18,bottom:-18});moon.shadow.normalBias=.03;scene.add(moon);
- const materials=new Map(),colliders=[],cafeObjects=[];
+ const materials=new Map(),colliders=[],cafeObjects=[],townObjects={buildings:[],lamps:[],benches:[],trees:[],flowers:[],paving:[]};
  function mat(color,glow=0){const key=color+':'+glow;if(!materials.has(key))materials.set(key,new T.MeshStandardMaterial({color,roughness:.88,emissive:glow?color:0,emissiveIntensity:glow}));return materials.get(key);}
  function mesh(geometry,color,parent=scene,x=0,y=0,z=0,glow=0){const m=new T.Mesh(geometry,mat(color,glow));m.position.set(x,y,z);m.castShadow=!glow;m.receiveShadow=true;parent.add(m);return m;}
  function box(p,c,x,y,z,w,h,d,glow=0){return mesh(new T.BoxGeometry(w,h,d),c,p,x,y,z,glow);}
@@ -19,9 +19,11 @@ export function createWorld(container){
  }
  function warmLight(x,y,z,intensity=10,range=8){const l=new T.PointLight(0xffad57,intensity,range,2);l.position.set(x,y,z);scene.add(l);return l;}
  cyl(scene,0x354a45,0,-.4,0,15,.8);cyl(scene,0x667362,0,.015,0,14.8,.1);
+ const pavingStart=scene.children.length;
  box(scene,0x8f8b79,0,.075,0,13,.12,11);box(scene,0x8f8b79,0,.08,8,3.2,.1,7);
  // Shallow seams give the plaza texture without a new asset pipeline.
  for(let x=-6;x<=6;x+=1.25)for(let z=-4.5;z<5;z+=1.15){box(scene,((Math.round(x*4)+Math.round(z*10))%3)?0x999480:0x888877,x,.145,z,1.18,.035,1.07);}
+ townObjects.paving.push(...scene.children.slice(pavingStart));
  function house(x,z,title,c,roof){
   const g=new T.Group();g.position.set(x,0,z);scene.add(g);
   box(g,c,0,1.7,0,3.8,3.4,3);const r=mesh(new T.ConeGeometry(3.1,1.5,4),roof,g,0,4.12,0);r.rotation.y=Math.PI/4;r.scale.z=.9;
@@ -31,22 +33,24 @@ export function createWorld(container){
   box(g,0xb2a08a,0,.22,1.9,1.5,.3,.7);warmLight(x,2,z+2,11,7);
   colliders.push({x,z,hw:2.12,hd:1.85});return g;
  }
- cafeObjects.push(house(-5.2,-6,'CAFE',0xab8070,0x78586b));house(0,-7.2,'LIBRARY',0x82949d,0x4a6570);house(5.2,-6,'LAB',0x84918a,0x616b89);
- house(-10,-1,'HOME',0x8c847c,0x6c657c);house(10,-1,'HOME',0x9a8e79,0x765e70);
+ cafeObjects.push(house(-5.2,-6,'CAFE',0xab8070,0x78586b));townObjects.buildings.push(house(0,-7.2,'LIBRARY',0x82949d,0x4a6570),house(5.2,-6,'LAB',0x84918a,0x616b89));
+ townObjects.buildings.push(house(-10,-1,'HOME',0x8c847c,0x6c657c),house(10,-1,'HOME',0x9a8e79,0x765e70));
  function lamp(x,z){cyl(scene,0x354351,x,1.55,z,.065,3.1);box(scene,0x3c4a54,x,3,z,.4,.08,.4);ball(scene,0xffbb67,x,2.77,z,.17,.25,.17,1.2);const cap=mesh(new T.ConeGeometry(.32,.3,4),0x334653,scene,x,3.18,z);cap.rotation.y=Math.PI/4;warmLight(x,2.7,z,14,8);colliders.push({x,z,hw:.18,hd:.18});}
- [[-3.1,-3.6],[3.1,-3.6],[-6,4],[6,4],[0,10]].forEach(p=>{const start=scene.children.length;lamp(...p);if(p[0]===-3.1)cafeObjects.push(...scene.children.slice(start));});
+ [[-3.1,-3.6],[3.1,-3.6],[-6,4],[6,4],[0,10]].forEach(p=>{const start=scene.children.length;lamp(...p);if(p[0]===-3.1)cafeObjects.push(...scene.children.slice(start));else townObjects.lamps.push(...scene.children.slice(start));});
  function bench(x,z){const g=new T.Group();g.position.set(x,0,z);scene.add(g);box(g,0x9f7962,0,.56,0,1.9,.13,.65);box(g,0xa9876b,0,1,-.3,1.9,.62,.1);for(const a of [-.72,.72])box(g,0x344858,a,.28,0,.12,.55,.6);colliders.push({x,z,hw:1.1,hd:.5});return g;}
- cafeObjects.push(bench(-5,2.5));bench(5,2.5);
+ cafeObjects.push(bench(-5,2.5));townObjects.benches.push(bench(5,2.5));
  // Cafe terrace: occupied places, rather than empty decorative buildings.
  const terraceStart=scene.children.length;
  cyl(scene,0xaa8063,-5,-.02,-2.7,.09,.1);cyl(scene,0xb18c69,-5,.78,-2.7,.68,.1);cyl(scene,0x5b6261,-5,.4,-2.7,.075,.7);
  colliders.push({x:-5,z:-2.7,hw:.78,hd:.78});cyl(scene,0xe5d2ad,-5,.92,-2.7,.08,.18);
  cafeObjects.push(...scene.children.slice(terraceStart));
  textSign('LITTLE ELSEWHERE',0,1.05,10.8,2.6,.48);box(scene,0x5b635b,0,.5,10.7,.12,1,.12);
- function tree(x,z,s){const g=new T.Group();g.position.set(x,0,z);g.scale.setScalar(s);scene.add(g);cyl(g,0x74614f,0,1,0,.19,2);ball(g,0x42665d,0,2.6,0,1.15,1.5,1.05);ball(g,0x547264,-.45,3.1,.2,.75,.9,.75);colliders.push({x,z,hw:.4*s,hd:.4*s});}
+ function tree(x,z,s){const g=new T.Group();townObjects.trees.push(g);g.position.set(x,0,z);g.scale.setScalar(s);scene.add(g);cyl(g,0x74614f,0,1,0,.19,2);ball(g,0x42665d,0,2.6,0,1.15,1.5,1.05);ball(g,0x547264,-.45,3.1,.2,.75,.9,.75);colliders.push({x,z,hw:.4*s,hd:.4*s});}
  for(let i=0;i<24;i++){const a=i/24*Math.PI*2;tree(Math.cos(a)*13,Math.sin(a)*13,.85+(i%3)*.18);}
  for(const [x,z] of [[-7,4],[7,4],[-8,-4],[8,-4]])tree(x,z,.85);
+ const flowersStart=scene.children.length;
  for(let i=0;i<65;i++){const a=i*2.4,r=7.5+(i%4)*.8,x=Math.cos(a)*r,z=Math.sin(a)*r;if(z<-4)continue;ball(scene,i%2?0xb295aa:0xd2b375,x,.23,z,.1,.18,.1);}
+ townObjects.flowers.push(...scene.children.slice(flowersStart));
  // Quiet sky: moon, stars and layered silhouettes.
  const moonDisc=ball(scene,0xffdfb2,-15,19,-35,2.1,2.1,2.1,1.1);moonDisc.material=new T.MeshBasicMaterial({color:0xf1d3a2,fog:false,toneMapped:false});
  const starPositions=[];for(let i=0;i<170;i++){const a=i*2.399;const y=12+(i%23);starPositions.push(Math.cos(a)*45,y,Math.sin(a)*45);}
@@ -83,5 +87,5 @@ export function createWorld(container){
  }
  function resize(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);}
  addEventListener('resize',resize);
- return {scene,camera,renderer,npcs,canMove,face,walk,moon,colliders,cafeObjects};
+ return {scene,camera,renderer,npcs,canMove,face,walk,moon,colliders,cafeObjects,townObjects};
 }

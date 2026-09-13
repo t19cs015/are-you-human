@@ -11,16 +11,18 @@ export function drawArtifact(canvas,project){
 }
 function wrap(ctx,text,x,y,max,line){let row='';for(const c of String(text)){if(ctx.measureText(row+c).width>max){ctx.fillText(row,x,y);y+=line;row='';}row+=c;}ctx.fillText(row,x,y);}
 export function createStudio(world){
- const {scene}=world,displays=[];
+ const {scene}=world,displays=[],furniture=[];
  function box(color,x,y,z,w,h,d){const m=new T.Mesh(new T.BoxGeometry(w,h,d),new T.MeshStandardMaterial({color,roughness:.8}));m.position.set(x,y,z);scene.add(m);return m;}
  function screen(x,y,z,id){const canvas=document.createElement('canvas');canvas.width=640;canvas.height=420;const texture=new T.CanvasTexture(canvas);texture.colorSpace=T.SRGBColorSpace;const m=new T.Mesh(new T.PlaneGeometry(2.1,1.38),new T.MeshBasicMaterial({map:texture}));m.position.set(x,y,z);scene.add(m);displays.push({canvas,texture,id,key:''});return canvas;}
  for(const [room,x] of Object.entries(roomCenters)){
   box(0x69757c,x,-.05,0,12,.15,10);box(0x34495c,x,2.1,-5,12,4.2,.2);box(0x34495c,x-6,2.1,0,.2,4.2,10);box(0x34495c,x+6,2.1,0,.2,4.2,10);box(0x24354a,x,4.25,0,12,.2,10);
   const light=new T.PointLight(0xffd4a0,70,18);light.position.set(x,3,0);scene.add(light);
+  const deskStart=scene.children.length;
   for(const dx of [-2.8,2.8]){box(0x9a7e68,x+dx,.88,-1.9,2.7,.15,1.3);box(0x314452,x+dx,.44,-1.9,.16,.9,.9);box(0x516c78,x+dx,.5,-.45,.8,.14,.8);world.colliders.push({x:x+dx,z:-1.9,hw:1.35,hd:.65});}
+  furniture.push(...scene.children.slice(deskStart));
   if(room==='lab'){screen(x-2.8,1.95,-2.25,'poster');screen(x+2.8,1.95,-2.25,'music');}
-  else {for(let shelf=-1;shelf<=1;shelf++){box(0x856d5c,x+shelf*3.3,1.3,-4.4,2.6,2.6,.6);for(let row=0;row<3;row++)for(let col=0;col<8;col++)box([0x9caeaf,0xba916a,0x617d94][col%3],x+shelf*3.3-1+col*.28,.6+row*.7,-4,.2,.5,.3);}const c=screen(x,2.3,-3.95,'library');const ctx=c.getContext('2d');ctx.fillStyle='#183449';ctx.fillRect(0,0,640,420);ctx.fillStyle='#f0d5a0';ctx.font='30px sans-serif';ctx.fillText('LIBRARY / 技術資料',25,55);ctx.font='22px sans-serif';['文字の可読性とコントラスト','音楽のテンポと音量の比較','歩行制御の実験ノート'].forEach((t,i)=>ctx.fillText(t,25,135+i*72));}
+  else {const shelvesStart=scene.children.length;for(let shelf=-1;shelf<=1;shelf++){box(0x856d5c,x+shelf*3.3,1.3,-4.4,2.6,2.6,.6);for(let row=0;row<3;row++)for(let col=0;col<8;col++)box([0x9caeaf,0xba916a,0x617d94][col%3],x+shelf*3.3-1+col*.28,.6+row*.7,-4,.2,.5,.3);}furniture.push(...scene.children.slice(shelvesStart));const c=screen(x,2.3,-3.95,'library');const ctx=c.getContext('2d');ctx.fillStyle='#183449';ctx.fillRect(0,0,640,420);ctx.fillStyle='#f0d5a0';ctx.font='30px sans-serif';ctx.fillText('LIBRARY / 技術資料',25,55);ctx.font='22px sans-serif';['文字の可読性とコントラスト','音楽のテンポと音量の比較','歩行制御の実験ノート'].forEach((t,i)=>ctx.fillText(t,25,135+i*72));}
  }
  box(0x755f50,-2.2,1.1,4.6,.15,2.2,.2);screen(-2.2,2.2,4.7,'published');
- return {update(state){for(const d of displays){if(d.id==='library')continue;const p=d.id==='published'?state.projects?.find(p=>p.kind==='poster'&&p.published):state.projects?.find(p=>p.id===d.id);const key=JSON.stringify([p?.revision,p?.phase]);if(key===d.key)continue;d.key=key;drawArtifact(d.canvas,p);d.texture.needsUpdate=true;}}};
+ return {furniture,update(state){for(const d of displays){if(d.id==='library')continue;const p=d.id==='published'?state.projects?.find(p=>p.kind==='poster'&&p.published):state.projects?.find(p=>p.id===d.id);const key=JSON.stringify([p?.revision,p?.phase]);if(key===d.key)continue;d.key=key;drawArtifact(d.canvas,p);d.texture.needsUpdate=true;}}};
 }
