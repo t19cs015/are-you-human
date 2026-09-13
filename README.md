@@ -2,16 +2,9 @@
 
 Three.js と Node.js のローカルプロトタイプ。`npm install`、`npm start` で http://127.0.0.1:4173/ を開く。
 
-![夜のカフェとMia。青い夜空に暖かな建物の灯り、石畳とテラスが並ぶ現在のゲーム画面](docs/images/cafe-after.png)
+![オープニングの広場。Mia・Ren・Tomo・Shellが人間の来訪に気づき、Tomoが「え……もしかして。」と反応する場面](docs/images/opening.png)
 
-現在のカフェ周辺。一人称の高さで撮影した比較ページの実画面です（撮影時はUIを非表示）。街全体への展開と、BlenderによるAI住民のオリジナルモデル制作は今後の予定です。
-
-<details>
-<summary>カフェ改善前の画面を見る（同じ視点）</summary>
-
-![改善前のカフェとMia。同じカメラ位置で撮影](docs/images/cafe-before.png)
-
-</details>
+オープニングの実画面。AI住民たちが人間の来訪に気づき、Miaがこちらへ近づいてきます。
 
 ## 遊び方
 
