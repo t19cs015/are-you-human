@@ -6,6 +6,7 @@ test('HTTP boundary: isolated sessions, safe files, origin, validation and mock 
  try{
   assert.equal((await request('/server.mjs')).status,404);assert.equal((await request('/.env')).status,404);assert.equal((await request('/server/local-config.mjs')).status,404);assert.equal((await request('/assets/cafe/../../server/local-config.mjs')).status,404);
   const model=await fetch(base+'/assets/cafe/house-house.glb');assert.equal(model.status,200);assert.equal(model.headers.get('content-type'),'model/gltf-binary');const bytes=new Uint8Array(await model.arrayBuffer());assert.equal(String.fromCharCode(...bytes.slice(0,4)),'glTF');
+  const mia=await fetch(base+'/assets/characters/mia.glb');assert.equal(mia.status,200);assert.equal(mia.headers.get('content-type'),'model/gltf-binary');assert.equal((await request('/art/characters/mia.blend')).status,404);
   const loader=await fetch(base+'/node_modules/three/examples/jsm/loaders/GLTFLoader.js');assert.equal(loader.status,200);
   assert.equal((await request('/api/session',{},null,{Origin:'http://evil.example'})).status,403);
   const {data:{id}}=await request('/api/session',{});const {data:{id:second}}=await request('/api/session',{});

@@ -5,7 +5,7 @@ world.camera.position.set(-.8,1.68,3.5);world.camera.lookAt(-5.25,2.3,-5.2);worl
 const mia=world.npcs.find(n=>n.id==='mia');mia.root.position.set(-3.9,.18,-.25);world.face(mia,world.camera.position);world.npcs.filter(n=>n!==mia).forEach(n=>n.root.visible=false);
 const town=new URLSearchParams(location.search).has('town');let townArea;
 let area,visual,t=0,last=performance.now(),frames=[];
-try{if(!before){area=await upgradeCafe(world);visual=upgradeMia(mia);if(town){const studio=createStudio(world);studio.update({projects:[]});townArea=await upgradeTown(world,studio);}}document.getElementById('status').textContent=before?'Before · 元のカフェ':'After · CC0アセット / カフェ1区画';}catch(e){document.getElementById('status').textContent='アセットを読み込めませんでした';throw e;}
+try{if(!before){area=await upgradeCafe(world);visual=upgradeMia(mia);await visual.ready;if(town){const studio=createStudio(world);studio.update({projects:[]});townArea=await upgradeTown(world,studio);}}document.getElementById('status').textContent=before?'Before · 元のカフェ':'After · CC0アセット / カフェ1区画';}catch(e){document.getElementById('status').textContent='アセットを読み込めませんでした';throw e;}
 if(town){
  document.querySelector('h1').textContent='Little Elsewhere';
  document.getElementById('status').textContent='街全体 · CC0アセット / 一人称と室内';

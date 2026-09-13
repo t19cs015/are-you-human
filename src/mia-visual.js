@@ -1,3 +1,4 @@
+import {GLTFLoader} from '/node_modules/three/examples/jsm/loaders/GLTFLoader.js';
 import * as T from '/node_modules/three/build/three.module.js';
 export const expressions=['neutral','happy','surprised','confused','suspicious','thinking','glitch'];
 export function upgradeMia(n){
@@ -12,7 +13,19 @@ export function upgradeMia(n){
  n.eyes.forEach(e=>e.visible=false);
  const canvas=document.createElement('canvas');canvas.width=384;canvas.height=224;const ctx=canvas.getContext('2d'),texture=new T.CanvasTexture(canvas);texture.colorSpace=T.SRGBColorSpace;
  const screen=new T.Mesh(new T.PlaneGeometry(.68,.4),new T.MeshBasicMaterial({map:texture,transparent:true,toneMapped:false}));screen.position.set(0,1.435,.454);n.body.add(screen);
- let last='',lastPos=n.root.position.clone(),waveUntil=0;
+ let last='',lastPos=n.root.position.clone(),waveUntil=0,head=null,imported=null;
+ const fallback=[...n.body.children].filter(o=>o!==n.workProp);
+ const ready=new GLTFLoader().loadAsync('/assets/characters/mia.glb').then(g=>{
+  const find=name=>{let found;g.scene.traverse(o=>{if(o.name.replace(/[._]/g,'')===name)found=o;});return found;};
+  const face=find('FaceScreen'),newArms=[find('ArmL'),find('ArmR')],newFeet=[find('FootL'),find('FootR')];
+  if(!face||newArms.some(o=>!o)||newFeet.some(o=>!o))throw new Error('Mia model is missing animation pivots');
+  g.scene.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
+  texture.flipY=false;texture.needsUpdate=true;
+  face.material=new T.MeshBasicMaterial({map:texture,toneMapped:false});
+  head=find('Head');imported=g.scene;imported.name='Mia original Blender model';
+  n.body.add(imported);fallback.forEach(o=>o.visible=false);arms.splice(0,arms.length,...newArms);feet.splice(0,feet.length,...newFeet);
+  return true;
+ }).catch(error=>{console.warn('Original Mia unavailable; keeping existing model.',error.message);return false;});
  function paint(expression,blink){
   ctx.clearRect(0,0,384,224);ctx.fillStyle='#112a35';ctx.beginPath();ctx.roundRect(0,0,384,224,55);ctx.fill();ctx.fillStyle='#b8f4e9';ctx.strokeStyle='#b8f4e9';ctx.lineWidth=10;ctx.lineCap='round';
   for(const x of [120,264]){
@@ -26,10 +39,11 @@ export function upgradeMia(n){
   if(expression==='glitch'){ctx.fillStyle='#f1ad9c';ctx.fillRect(38,91,110,10);ctx.fillStyle='#8fffe5';ctx.fillRect(225,144,90,7);}
   ctx.globalAlpha=.12;ctx.fillStyle='#ffffff';ctx.beginPath();ctx.roundRect(28,15,300,22,12);ctx.fill();ctx.globalAlpha=1;texture.needsUpdate=true;
  }
- return {wave(time){waveUntil=time+2.1;},update(time,expression='neutral',talking=false){
+ return {ready,get model(){return imported;},wave(time){waveUntil=time+2.1;},update(time,expression='neutral',talking=false){
   if(!expressions.includes(expression))expression='neutral';const blink=time%4.4<.13,key=expression+blink;if(key!==last){paint(expression,blink);last=key;}
   const moving=lastPos.distanceToSquared(n.root.position)>.000001;lastPos.copy(n.root.position);
-  arms.forEach((a,i)=>{a.rotation.x=moving?Math.sin(time*8+i*Math.PI)*.38:talking?Math.sin(time*3+i)*.12:Math.sin(time*1.4+i)*.025;a.rotation.z=time<waveUntil&&i===1?2.45+Math.sin(time*9)*.2:(i===0?.08:-.08);});
+  arms.forEach((a,i)=>{a.rotation.x=moving?Math.sin(time*8+i*Math.PI)*.38:talking?Math.sin(time*3+i)*.12:Math.sin(time*1.4+i)*.025;a.rotation.z=time<waveUntil&&i===1?2.05+Math.sin(time*9)*.13:(i===0?.08:-.08);});
   feet.forEach((f,i)=>f.rotation.x=moving?Math.sin(time*8+i*Math.PI)*.25:0);
+  if(head){head.rotation.z=expression==='confused'?.12:expression==='thinking'?-.07:0;head.rotation.x=talking?Math.sin(time*2.5)*.018:0;}
  }};
 }

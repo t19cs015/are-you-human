@@ -73,7 +73,7 @@ export function createServer({fetcher=fetch,apiKey=defaultApiKey,saveDirectory=n
    }
    // Explicit public files only: never serve server code, keys, dotfiles or tests.
    const p=decodeURIComponent(url.pathname);
-   const allowed=p==='/cafe-review.html'||/^\/assets\/cafe\/[a-zA-Z0-9_-]+\.(glb|json)$/.test(p)||['/node_modules/three/examples/jsm/loaders/GLTFLoader.js','/node_modules/three/examples/jsm/utils/BufferGeometryUtils.js'].includes(p)||p==='/'||p==='/index.html'||/^\/src\/[a-z-]+\.(js|css)$/.test(p)||p==='/node_modules/three/build/three.module.js';
+   const allowed=p==='/assets/characters/mia.glb'||p==='/cafe-review.html'||/^\/assets\/cafe\/[a-zA-Z0-9_-]+\.(glb|json)$/.test(p)||['/node_modules/three/examples/jsm/loaders/GLTFLoader.js','/node_modules/three/examples/jsm/utils/BufferGeometryUtils.js'].includes(p)||p==='/'||p==='/index.html'||/^\/src\/[a-z-]+\.(js|css)$/.test(p)||p==='/node_modules/three/build/three.module.js';
    if(req.method!=='GET'||!allowed)return json(res,404,{error:'NOT_FOUND'});
    const file=p==='/'?'index.html':p.slice(1);const text=await readFile(root+file);
    res.writeHead(200,{'Content-Type':types[file.split('.').at(-1)]||'text/plain','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}).end(text);
