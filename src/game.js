@@ -25,6 +25,8 @@ import {createHumanView} from './human-view.js';
 import {residentIsSynced,humanCallRadius} from './human-rules.js';
 import {powerRoutes} from './community-rules.js';
 import {navigationAudit} from './navigation-audit.js';
+import {createTownRenderer} from './town-renderer.js';
+import {createGraphicsReview} from './graphics-review.js';
 import {openingStage,routePoints} from './story.js';
 const $=id=>document.getElementById(id);
 let world;
@@ -41,6 +43,8 @@ let mouseSensitivity=1,reducedMotion=false,communityArrival=false;
 try{mouseSensitivity=Math.max(.4,Math.min(2,Number(localStorage.getItem('ayh-sensitivity'))||1));reducedMotion=localStorage.getItem('ayh-reduced-motion')==='true';}catch{}
 let residentAudio=null,residentSpeechRevision=0;
 const studio=createStudio(world);let townVisual=null;const townReady=upgradeTown(world,studio).then(v=>townVisual=v).catch(()=>console.warn('Town assets unavailable; original town retained.'));let room=null,projectClock=8,projectPending=false;const songNodes=[];
+const townRenderer=createTownRenderer(world);
+const graphicsReady=Promise.all([cafeReady,townReady,cityWorld.ready,infrastructureWorld.ready,...[...residentVisuals.values()].map(v=>v.ready)]).then(()=>townRenderer.prepare());
 let mode='idle',elapsed=0,time=0,playTime=0,yaw=0,pitch=0,stage='',session='',active=null,waiting=false,muted=false,voiceActive=false,audio,master,version='4.2',connected=false,epoch=0,encounter=null,socialClock=12,pairIndex=0,rumorReturned=false,hasChat=false,updatedTalk=false,endReady=false;
 let state={agents:[],events:[]},busyUpdate=false,dragging=false,lastPointer=null,toastUntil=0,lastNote=0,lastStep=0;
 let resting=false,restPending=false,initiativeClock=3,initiativePending=false;
@@ -66,6 +70,7 @@ const episodeView=createEpisodeView({api,changed:syncCity,notice:toast,error:e=>
 const communityView=createCommunityView({api,changed:syncCity,refresh:refreshState,position:()=>({x:player.x,z:player.z}),focus:()=>surface.focus({preventScroll:true}),prepare(){closeDialog();releaseLook();cityView.hide();infrastructureView.close();},home(){infrastructureView.close();closeDialog();releaseLook();cityView.hide();leaveBorrowed();room=null;player.set(0,1.68,6.6);yaw=pitch=0;},central(){visitFacility('central');cityView.hide();infrastructureView.open('central');},lookProject(p){cityView.hide();const q=places[p.site];yaw=Math.atan2(player.x-q.x,player.z-q.z);pitch=-.07;},say(id,text,kind){const n=getNPC(id);if(n&&n!==active){residentVisuals.get(id)?.wave(time);if(kind==='human-relay')say(n,text,2.3);}},art:url=>communityWorld.setArt(url),pulse:(id,site)=>communityWorld.pulse(time,site),notice:toast,error:e=>toast(apiError(e)),chime(kind){const shift=kind==='place'?([1,1.125,1.25,1.5][Math.floor(time*3)%4]):1;const notes=(kind==='switch'?[392,523,659]:kind==='wind'?[523,659,784,1047]:[523,659,784,988]).map(n=>n*shift);notes.forEach((f,i)=>setTimeout(()=>sound(f,.5,.026,'sine'),i*85));}});
 const humanView=createHumanView({focus:()=>surface.focus({preventScroll:true}),prepare(){closeDialog();communityView.close();infrastructureView.close();releaseLook();},map:()=>cityView.toggle(),sketch:()=>communityView.openBoard(),central(){visitFacility('central');cityView.hide();infrastructureView.open('central');},memory:()=>visitMemory(),home:()=>returnToPlaza(),settings:()=>$('settings-button').click(),sound:()=>$('sound').click(),journal:()=>$('journal-button').click(),restart:()=>$('restart').click()});
 let centralWasNear=false,humanPending=false;
+const graphicsReview=new URLSearchParams(location.search).has('visual')?createGraphicsReview({graphics:townRenderer,renderer,visit(view){closeDialog();humanView.close();communityView.close();infrastructureView.close();releaseLook();cityView.hide();room=null;player.set(...view.position);const [x,y,z]=view.look;yaw=Math.atan2(player.x-x,player.z-z);pitch=Math.atan2(y-player.y,Math.hypot(player.x-x,player.z-z));keys.clear();locomotion.reset();}}):null;
 function returnToPlaza(){infrastructureView.close();closeDialog();releaseLook();cityView.hide();leaveBorrowed();room=null;player.set(0,1.68,6.6);yaw=pitch=0;}
 function visitMemory(){infrastructureView.close();closeDialog();releaseLook();cityView.hide();leaveBorrowed();room=null;player.set(0,1.68,48.3);yaw=Math.PI;pitch=.04;}
 async function humanAction(action,id){
@@ -133,7 +138,7 @@ function openingChoice(){
 async function enterTown(reset,episodeStart=false,restore=false,communityStart=false){
  $('begin').disabled=true;$('resume').disabled=true;$('play-episode').disabled=true;$('play-community').disabled=true;
  try{
-  await ready;await Promise.all([cityWorld.ready,infrastructureWorld.ready,cafeReady,townReady,...[...residentVisuals.values()].map(v=>v.ready)]);if(communityView.busy||waiting||projectPending||initiativePending||encounter?.pending||cityPending||cityThinkPending){toast('いまの会話が終わったら、もう一度。');return;}
+  await ready;await graphicsReady;if(communityView.busy||waiting||projectPending||initiativePending||encounter?.pending||cityPending||cityThinkPending){toast('いまの会話が終わったら、もう一度。');return;}
   if(new URLSearchParams(location.search).has('review')&&!document.getElementById('navigation-audit'))navigationAudit(world);
   releaseLook();leaveBorrowed();closeDialog();await infrastructureView.stopVoice();episodeView.stop();communityView.stop();communityWorld.reset();mode='idle';epoch++;
   if(episodeStart||communityStart){
@@ -394,7 +399,7 @@ function renderLabels(){const rects=[];npcs.forEach(n=>{if(state.city?.community
  for(const r of rects)if(Math.abs(x-r.x)<(width+r.w)/2+8&&y-height<r.y&&y>r.y-r.h)y=r.y-r.h-10;
  n.el.style.left=x+'px';n.el.style.top=y+'px';rects.push({x,y,w:width,h:height});});}
 let last=performance.now();
-function frame(now){requestAnimationFrame(frame);const dt=Math.max(0,Math.min((now-last)/1000,.05));last=now;if(document.hidden)return;time+=dt;elapsed+=dt;
+function frame(now){requestAnimationFrame(frame);const frameMs=now-last,dt=Math.max(0,Math.min(frameMs/1000,.05));last=now;if(document.hidden)return;time+=dt;elapsed+=dt;
  if(time>toastUntil)$('toast').hidden=true;
  $('movement').hidden=mode!=='play'||blocked()||resting;$('rest-button').hidden=mode!=='play';
  if(mode==='idle'){cityView.cameraFrame(dt,keys,true);life(dt);}
@@ -419,7 +424,7 @@ function frame(now){requestAnimationFrame(frame);const dt=Math.max(0,Math.min((n
  cafeVisual?.update(time,state.city?.episode);episodeWorld.update(time,state.city);townVisual?.update(time,state.city?.community);cityWorld.update(time,state.city);infrastructureWorld.update(time,state.city);studio.setRoom(cityView.overview?null:room);townVisual?.setRoom(cityView.overview?null:room);
  if(mode!=='update')for(const n of npcs){const expression=(mode==='opening'&&elapsed>3||communityArrival&&playTime<7)?'surprised':waiting&&active===n?'thinking':state.agents.find(a=>a.id===n.id)?.behavior.kind==='avoid'?'suspicious':n.glitch>0?'glitch':active===n?'happy':'neutral';residentVisuals.get(n.id).update(time,expression,!n.el.hidden,n.working&&n.workProp.visible,residentIsSynced(state.city,n.id));}
  const nearFacility=infrastructureView.nearest();$('facility-button').hidden=mode!=='play'||cityView.overview||blocked()||!!active||!nearFacility;if(nearFacility)$('facility-button').textContent=places[nearFacility].name+' · F';
- renderLabels();cityView.renderMarkers();infrastructureView.frame(cityView.overview,mode==='play');renderer.render(scene,camera);
+ renderLabels();cityView.renderMarkers();infrastructureView.frame(cityView.overview,mode==='play');townRenderer.render(time,state.city);graphicsReview?.frame(now,mode==='play',frameMs);
 }
 requestAnimationFrame(frame);
 
@@ -528,5 +533,6 @@ async function playResidentSpeech(n){
 }
 $('resident-replay').onclick=()=>{if(active)playResidentSpeech(active);};
 $('mouse-sensitivity').value=mouseSensitivity;$('reduce-motion').checked=reducedMotion;
+$('graphics-quality').value=townRenderer.quality;$('graphics-quality').onchange=e=>townRenderer.setQuality(e.target.value);
 $('mouse-sensitivity').oninput=e=>{mouseSensitivity=Number(e.target.value);try{localStorage.setItem('ayh-sensitivity',String(mouseSensitivity));}catch{}};
 $('reduce-motion').onchange=e=>{reducedMotion=e.target.checked;try{localStorage.setItem('ayh-reduced-motion',String(reducedMotion));}catch{}};

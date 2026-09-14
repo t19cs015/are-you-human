@@ -18,9 +18,6 @@ export function createCityWorld(world){
     for(let a=-5;a<=5;a++)for(let b=-5;b<=4;b++){dummy.position.set(cx+a*.78,.13,24+b*.78);dummy.updateMatrix();tiles.setMatrixAt(i++,dummy.matrix);}
     tiles.receiveShadow=true;group.add(tiles);
   }
-  // A slow, ink-blue river beyond the garden; its bank is the walking boundary.
-  const ripples=[];
-  for(let i=0;i<24;i++){const r=box(0x82999d,-35+(i*11)%70,-.275,37+(i%7),.8+(i%4)*.4,.008,.035);r.material=new T.MeshBasicMaterial({color:0x93afbb,transparent:true,opacity:.15});ripples.push(r);}
   // Flush paths leave the central village and all its original props intact.
   for(const x of [-1.9,1.9])for(let z=12;z<21;z+=1.1)box(0x756854,x,.09,z,.12,.12,.95);
   world.colliders.push(...townObstacles);
@@ -85,7 +82,6 @@ export function createCityWorld(world){
   return {group,ready:furnitureReady,update(time,city){
     const lit=!city?.active||city.repaired;riverGlow.color.setHex(lit?0xffd699:0x536470);riverLight.intensity=lit?35:city?.temporaryLights?12:0;
     temporary.visible=!!city?.temporaryLights;piles.forEach((p,i)=>p.visible=(city?.booksDelivered||0)>i);openSign.visible=!!city?.readingReady;
-    for(let i=0;i<ripples.length;i++){ripples[i].position.x+=Math.sin(time*.3+i)*.0008;ripples[i].material.opacity=.1+Math.sin(time*.6+i)*.04;}
     for(const [id,c] of carries){c.holder.visible=!!city?.carrying[id];c.parcel.material=mat(city?.carrying[id]==='records'?0x91c2c5:city?.carrying[id]==='books'?0x839eac:city?.carrying[id]==='lanterns'?0xe9c690:0xb9bf9e);}
   }};
 }

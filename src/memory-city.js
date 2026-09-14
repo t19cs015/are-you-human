@@ -7,7 +7,6 @@ import {createFaceTexture} from './resident-visual.js';
 export function createMemoryCity(world){
   const group=new T.Group();group.name='記憶の都市 · a city that computes';world.scene.add(group);world.colliders.push(...memoryObstacles);
   const skyline=createVariedSkyline(group,memoryPlots);skyline.update(100);
-  skyline.group.traverse(o=>{if(o.isMesh&&o.material.emissiveIntensity<.1){o.material.emissive.copy(o.material.color);o.material.emissiveIntensity=.1;}});
   const unit=new RoundedBoxGeometry(1,1,1,2,.06),sphere=new T.SphereGeometry(1,12,8),materials=new Map(),dummy=new T.Object3D();
   const mat=(color,glow=0)=>{const key=color+':'+glow;if(!materials.has(key))materials.set(key,new T.MeshStandardMaterial({color,roughness:.58,metalness:.12,emissive:color,emissiveIntensity:Math.max(.06,glow)}));return materials.get(key);};
   function box(color,x,y,z,w,h,d,parent=group,glow=0){const m=new T.Mesh(unit,mat(color,glow));m.position.set(x,y,z);m.scale.set(w,h,d);m.receiveShadow=true;parent.add(m);return m;}
@@ -22,6 +21,7 @@ export function createMemoryCity(world){
   }
   for(const x of [-4.7,4.7])for(const z of [52,63,74,85]){
     box(0x6b8887,x,1.4,z,.13,2.7,.13);orb(0xf0d3a2,x,2.8,z,.15);
+    const light=new T.PointLight(0xffd4a1,10,8,2);light.position.set(x,2.8,z);group.add(light);
     world.colliders.push({x,z,hw:.1,hd:.1});
   }
   // Small planted pockets sit between the avenues and the building footprints.
@@ -33,12 +33,13 @@ export function createMemoryCity(world){
   }
   // The open bank can be seen from the bridge, with four familiar face patterns.
   const bank=new T.Group();bank.position.set(0,0,51);group.add(bank);
-  const faces=[];
+  const faces=[],facing=new T.Vector3();
+  for(const side of [-1,1]){box(0x7e9d95,side*2.4,.3,0,.85,.34,.7,bank);orb(0xb6e0d0,side*2.4,.51,0,.09,bank);}
   ['mia','ren','tomo','shell'].forEach((id,i)=>{
-    const side=i<2?-1:1,y=1.35+i%2*1.2;box(0x7e9d95,side*2.4,y-1,0,.35,.22,.6,bank);
-    const {texture}=createFaceTexture(id),face=new T.Sprite(new T.SpriteMaterial({map:texture,transparent:true,opacity:.85,depthWrite:false}));
-    face.position.set(side*2.4,y,0);face.scale.set(1.1,.66,1);bank.add(face);faces.push({face,y,i});
-    ring(side*2.4,y,0,.57,[0,0,0],0xb6e0d0,bank);
+    const side=i<2?-1:1,y=1.3+i%2*1.25,display=new T.Group();display.position.set(side*2.4,y,0);bank.add(display);
+    const {texture}=createFaceTexture(id),face=new T.Mesh(new T.PlaneGeometry(.86,.52),new T.MeshBasicMaterial({map:texture,alphaTest:.15,side:T.DoubleSide}));
+    face.position.z=.02;display.add(face);faces.push({face,display,y,i});
+    const rim=new T.Mesh(new T.TorusGeometry(.55,.022,6,48),mat(0xb6e0d0,.5));display.add(rim);
   });
   const empty=ring(0,1.6,0,.65,[0,0,0],0xf0c995,bank);empty.material=empty.material.clone();empty.material.transparent=true;
   // Ceramic racks with slowly turning cooling fans; the street is its circuit board.
@@ -77,6 +78,6 @@ export function createMemoryCity(world){
     for(const l of lanes){for(let i=0;i<l.count;i++){dummy.position.copy(l.curve.getPointAt((flowClock*l.speed+i/l.count)%1));dummy.scale.set(.10,.10,.24);dummy.lookAt(dummy.position.clone().add(l.curve.getTangentAt((flowClock*l.speed+i/l.count)%1)));dummy.updateMatrix();l.capsules.setMatrixAt(i,dummy.matrix);}l.capsules.instanceMatrix.needsUpdate=true;}
     couriers.forEach((c,i)=>{const phase=flowClock*.028+i*Math.PI/5;c.position.set(33*Math.cos(phase),.13,63+(i%2)*12+.85*Math.sin(phase));c.rotation.y=Math.atan2(-33*Math.sin(phase),.85*Math.cos(phase));});
     const glow=city?.clock-(city?.community?.human?.lastArchive??-100)<5;
-    faces.forEach(({face,y,i})=>{face.position.y=y+Math.sin(time*1.2+i)*.09;face.material.opacity=glow?.95:.65;});empty.material.opacity=glow?.65+Math.sin(time*3)*.2:.22;
+    faces.forEach(({face,display,y,i})=>{display.position.y=y+Math.sin(time*1.2+i)*.055;display.getWorldPosition(facing);facing.x=world.camera.position.x;facing.z=world.camera.position.z;display.lookAt(facing);face.material.color.setScalar(glow?1.25:1);});empty.material.opacity=glow?.65+Math.sin(time*3)*.2:.22;
   }};
 }

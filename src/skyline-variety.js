@@ -6,20 +6,31 @@ import {RoundedBoxGeometry} from '/node_modules/three/examples/jsm/geometries/Ro
 export function createVariedSkyline(scene,originalPlots){
   const plots=originalPlots.map((p,i)=>({...p,family:i%6}));
   const group=new T.Group();group.name='明日の街 · six building families';scene.add(group);
-  const geometries={box:new RoundedBoxGeometry(1,1,1,2,.065),cylinder:new T.CylinderGeometry(1,1,1,20),cone:new T.ConeGeometry(1,1,20),sphere:new T.SphereGeometry(1,16,10)};
+  const geometries={box:new RoundedBoxGeometry(1,1,1,2,.065),pane:new T.BoxGeometry(1,1,1),cylinder:new T.CylinderGeometry(1,1,1,20),cone:new T.ConeGeometry(1,1,20),sphere:new T.SphereGeometry(1,16,10)};
   const palettes=[{wall:0xd6cbbb,trim:0x83a093,glass:0x648c99},{wall:0x8faba8,trim:0xccc6ac,glass:0x426d83},{wall:0xbda2a1,trim:0x526d7a,glass:0x739398},{wall:0xaec4bc,trim:0x607f88,glass:0x507481},{wall:0xd6c9aa,trim:0x9f7f83,glass:0x729fa8},{wall:0xc4cbb5,trim:0x98a88b,glass:0x70939b}];
   const pools=new Map(),materials=new Map(),local=new T.Object3D();
   function piece(id,shape,color,x,y,z,w,h,d,rotation=0,glow=0){
     const key=shape+':'+color+':'+glow;
-    if(!materials.has(color+':'+glow))materials.set(color+':'+glow,new T.MeshStandardMaterial({color,roughness:.64,emissive:glow?color:0,emissiveIntensity:glow}));
+    if(!materials.has(color+':'+glow))materials.set(color+':'+glow,new T.MeshStandardMaterial({color,roughness:glow?.35:.72,emissive:glow?color:0,emissiveIntensity:glow}));
     if(!pools.has(key))pools.set(key,{geometry:geometries[shape],material:materials.get(color+':'+glow),parts:[]});
     local.position.set(x,y,z);local.rotation.set(0,rotation,0);local.scale.set(w,h,d);local.updateMatrix();pools.get(key).parts.push({id,matrix:local.matrix.clone()});
   }
   function block(id,color,x,y,z,w,h,d,glow=0){piece(id,'box',color,x,y,z,w,h,d,0,glow);}
-  function windows(id,x,y,z,w,d,columns=3,height=.7,color=0xf0d7a2){
+  function windowStyle(id,y,col,side){const n=Math.abs(id*17+Math.round(y*10)+col*7+side*11)%11;return n<3?{color:0x355663,glow:0}:n<6?{color:0x9cc6c5,glow:.4}:{color:0xefc989,glow:.55};}
+  function windows(id,x,y,z,w,d,columns=3,height=.7){
     for(const side of [-1,1]){
-      for(let col=0;col<columns;col++)block(id,color,x+(col-(columns-1)/2)*w/(columns+.8),y,z+side*(d/2+.025),w/(columns+2.1),height,.044,.42);
-      for(let col=0;col<2;col++)block(id,color,x+side*(w/2+.025),y,z+(col-.5)*d/2.1,.044,height,d/3.7,.42);
+      for(let col=0;col<columns;col++){
+        const px=x+(col-(columns-1)/2)*w/(columns+.8),ww=w/(columns+2.1),s=windowStyle(id,y,col,side);
+        piece(id,'pane',0x536970,px,y,z+side*(d/2+.025),ww+.09,height+.1,.07);
+        piece(id,'pane',s.color,px,y,z+side*(d/2+.07),ww,height,.024,0,s.glow);
+        piece(id,'pane',0x627876,px,y,z+side*(d/2+.09),.028,height,.028);
+      }
+      for(let col=0;col<2;col++){
+        const pz=z+(col-.5)*d/2.1,ww=d/3.7,s=windowStyle(id,y,col+columns,side);
+        piece(id,'pane',0x536970,x+side*(w/2+.025),y,pz,.07,height+.1,ww+.09);
+        piece(id,'pane',s.color,x+side*(w/2+.07),y,pz,.024,height,ww,0,s.glow);
+        piece(id,'pane',0x627876,x+side*(w/2+.09),y,pz,.028,height,.028);
+      }
     }
   }
   function garden(id,y,w,d){
@@ -39,20 +50,22 @@ export function createVariedSkyline(scene,originalPlots){
     }else if(p.family===1){ // A round municipal tower with a copper cone cap.
       piece(i,'cylinder',a.wall,0,h/2+.3,0,1.56,h,1.56);
       for(let y=1.2;y<h;y+=1.55){piece(i,'cylinder',a.trim,0,y-.58,0,1.64,.12,1.64);
-        for(let f=0;f<10;f++){const angle=f*Math.PI/5;piece(i,'box',0xc9e0d5,Math.sin(angle)*1.57,y,Math.cos(angle)*1.57,.47,.85,.055,angle,.42);}}
+        for(let f=0;f<10;f++){const angle=f*Math.PI/5,s=windowStyle(i,y,f,1);
+          piece(i,'pane',0x536970,Math.sin(angle)*1.57,y,Math.cos(angle)*1.57,.56,.94,.075,angle);
+          piece(i,'pane',s.color,Math.sin(angle)*1.62,y,Math.cos(angle)*1.62,.47,.85,.024,angle,s.glow);}}
       piece(i,'cylinder',a.trim,0,h+.37,0,1.71,.2,1.71);piece(i,'cone',0xaa8c85,0,h+1,0,1.7,1.12,1.7);
       piece(i,'sphere',0xd8c99c,0,h+1.68,0,.14,.22,.14,0,.3);
     }else if(p.family===2){ // Unequal twin towers with a small connecting bridge.
       for(const side of [-1,1]){const height=h*(side<0?1:.77),x=side*.92;
         block(i,a.wall,x,height/2+.35,0,1.55,height,2.8);
-        for(let y=1.15;y<height;y+=1.35){windows(i,x,y,0,1.55,2.8,1,.74,0xd3e3d4);block(i,a.trim,x,y+.55,0,1.67,.11,2.93);}
+        for(let y=1.15;y<height;y+=1.35){windows(i,x,y,0,1.55,2.8,1,.74);block(i,a.trim,x,y+.55,0,1.67,.11,2.93);}
         block(i,a.trim,x,height+.38,0,1.8,.32,3.08);
       }
       block(i,0x9ab7af,0,h*.59,0,3.5,.78,1.12);block(i,0xd9e2d5,0,h*.59,.58,3.2,.38,.04,.38);
     }else if(p.family===3){ // Glazed office, vertical fins, broad low podium.
       block(i,a.wall,0,1.35,0,3.9,2.4,3.5);windows(i,0,1.4,0,3.9,3.5,4,1.1);
       block(i,a.glass,0,(h+2.6)/2,0,3.08,h-2.6,2.7);
-      for(let y=3.25;y<h;y+=1.3)windows(i,0,y,0,3.08,2.7,4,.72,0xc0d9d6);
+      for(let y=3.25;y<h;y+=1.3)windows(i,0,y,0,3.08,2.7,4,.72);
       for(const x of [-1.55,-.52,.52,1.55])for(const side of [-1,1])block(i,a.wall,x,(h+2.5)/2,side*1.42,.13,h-2.3,.19);
       block(i,a.trim,0,h+.17,0,3.5,.34,3.1);block(i,a.trim,.6,h+.65,.5,.75,.9,.8);
     }else if(p.family===4){ // Art-deco stepped cap, warm narrow windows.
@@ -71,11 +84,13 @@ export function createVariedSkyline(scene,originalPlots){
     }
   }
   const batches=[];
-  for(const pool of pools.values()){const mesh=new T.InstancedMesh(pool.geometry,pool.material,pool.parts.length);mesh.castShadow=true;mesh.receiveShadow=true;mesh.frustumCulled=false;group.add(mesh);batches.push({...pool,mesh});}
+  for(const pool of pools.values()){const mesh=new T.InstancedMesh(pool.geometry,pool.material,pool.parts.length);mesh.castShadow=pool.geometry!==geometries.pane;mesh.receiveShadow=true;group.add(mesh);batches.push({...pool,mesh});}
   const roots=plots.map(()=>new T.Matrix4()),root=new T.Object3D(),m=new T.Matrix4();
   const smooth=t=>{t=Math.max(0,Math.min(1,t));return t*t*(3-2*t);};
+  const finishedAt=Math.max(...plots.map(p=>p.at))+2.7;let previousTime=null;
   return {group,plots,update(time){
+    time=Math.min(time,finishedAt);if(time===previousTime)return;previousTime=time;
     plots.forEach((p,i)=>{root.position.set(p.x,.13,p.z);root.rotation.set(0,p.rotation,0);root.scale.set(1,Math.max(.00001,smooth((time-p.at)/2.7)),1);root.updateMatrix();roots[i].copy(root.matrix);});
-    for(const b of batches){b.parts.forEach((part,i)=>{m.multiplyMatrices(roots[part.id],part.matrix);b.mesh.setMatrixAt(i,m);});b.mesh.instanceMatrix.needsUpdate=true;}
+    for(const b of batches){b.parts.forEach((part,i)=>{m.multiplyMatrices(roots[part.id],part.matrix);b.mesh.setMatrixAt(i,m);});b.mesh.instanceMatrix.needsUpdate=true;b.mesh.computeBoundingSphere();}
   }};
 }

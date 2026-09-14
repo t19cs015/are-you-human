@@ -3,6 +3,7 @@ import {GLTFLoader} from '/node_modules/three/examples/jsm/loaders/GLTFLoader.js
 import {asset} from './cafe-assets.js';
 import {createVariedSkyline} from './skyline-variety.js';
 import {infrastructureSites,infrastructureObstacles,modernPlots} from './town-layout.js';
+import {createRiverMaterial} from './river-material.js';
 
 export function createInfrastructureWorld(world){
   const group=new T.Group();group.name='明日のための街';world.scene.add(group);
@@ -22,7 +23,7 @@ export function createInfrastructureWorld(world){
   }
   const foundation=new T.Group();group.add(foundation);
   for(const p of modernPlots){box(0x807f6f,p.x,.12,p.z,3.8,.1,3.8,foundation);for(const x of [-1.8,1.8])for(const z of [-1.8,1.8])box(0xbaaa80,p.x+x,.33,p.z+z,.09,.55,.09,foundation);}
-  const waterGeometry=new T.PlaneGeometry(108,12),water=new T.Mesh(waterGeometry,new T.MeshStandardMaterial({color:0x355b70,metalness:.22,roughness:.32}));water.rotation.x=-Math.PI/2;water.position.set(-7,-.29,41);group.add(water);
+  const river=createRiverMaterial(),water=new T.Mesh(new T.PlaneGeometry(192,12,384,32),river.material);water.name='River water';water.rotation.x=-Math.PI/2;water.position.set(-7,-.29,41);water.receiveShadow=true;group.add(water);
   const boat=new T.Group();boat.position.set(-30,-.08,39);group.add(boat);box(0x8b7764,0,0,0,1.5,.26,.75,boat);box(0xc2bca0,0,.2,0,1,.15,.6,boat);
 
   const flows=[];
@@ -77,6 +78,7 @@ export function createInfrastructureWorld(world){
   })().catch(()=>{});
   let lastTime=0,motor=0,growth=0;
   return {group,ready:Promise.all([ready,treesReady]),update(time,city){
+    river.update(time);
     const g=city?.infrastructure||{phase:0,modelEnabled:true},dt=Math.min(.05,Math.max(0,time-lastTime));lastTime=time;
     motor=T.MathUtils.damp(motor,g.windOnline&&g.windEnabled?.8:0,2,dt);if(rotor)rotor.rotation.z-=dt*motor;if(pumpRotor&&g.waterRate>0)pumpRotor.rotation.z+=dt*.9;
     growth=T.MathUtils.damp(growth,g.phase>=1?1:0,1.4,dt);newLamps.scale.y=Math.max(.001,growth);newLamps.visible=growth>.003;

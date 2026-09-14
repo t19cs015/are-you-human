@@ -1,11 +1,12 @@
 import * as T from '/node_modules/three/build/three.module.js';
+import {RoundedBoxGeometry} from '/node_modules/three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import {communityObjects,powerRoutes,projectKinds} from './community-rules.js';
 import {places} from './town-layout.js';
 
 export function createCommunityWorld(world){
   const group=new T.Group();group.name='あなたから変わる街';group.visible=false;world.scene.add(group);
   const obstacles=Object.entries(communityObjects).map(([id,p])=>({x:p.x,z:p.z,hw:id==='board'?1:id==='wind'?.85:.55,hd:id==='board'?.13:id==='wind'?.4:.55,active:false}));world.colliders.push(...obstacles);
-  const mats=new Map(),shapes={box:new T.BoxGeometry(1,1,1),sphere:new T.SphereGeometry(1,12,8),cylinder:new T.CylinderGeometry(1,1,1,16)};
+  const mats=new Map(),shapes={box:new RoundedBoxGeometry(1,1,1,1,.035),sphere:new T.SphereGeometry(1,24,16),cylinder:new T.CylinderGeometry(1,1,1,48)};
   function mat(color,glow=false){const key=color+':'+glow;if(!mats.has(key))mats.set(key,new T.MeshStandardMaterial({color,roughness:.7,emissive:glow?color:0,emissiveIntensity:glow?.8:0}));return mats.get(key);}
   function part(parent,shape,color,x,y,z,w,h,d,glow=false){const m=new T.Mesh(shapes[shape],mat(color,glow));m.position.set(x,y,z);m.scale.set(w,h,d);m.castShadow=!glow;m.receiveShadow=true;parent.add(m);return m;}
   function at(object){const g=new T.Group();g.position.set(object.x,.13,object.z);group.add(g);return g;}
@@ -17,7 +18,10 @@ export function createCommunityWorld(world){
   const beacon=at(communityObjects.switch);
   part(beacon,'cylinder',0x89a69a,0,.38,0,.57,.7,.57);part(beacon,'cylinder',0xd8cbae,0,.79,0,.66,.12,.66);
   const lever=new T.Group();lever.position.y=.85;beacon.add(lever);part(lever,'cylinder',0x677f77,0,.26,0,.045,.52,.045);part(lever,'sphere',0xf0c092,0,.53,0,.16,.16,.16,true);
-  const orb=part(beacon,'sphere',0xa7dbe4,0,1.58,0,.105,.105,.105,true);sign(beacon,'灯りの分配器',1,.24,.46).position.z=.565;
+  const orb=part(beacon,'sphere',0xa7dbe4,0,1.58,0,.105,.105,.105,true);
+  part(beacon,'box',0xc4b99a,0,.46,.595,1.04,.28,.04);sign(beacon,'灯りの分配器',1,.24,.46).position.z=.622;
+  for(const y of [.08,.71]){const trim=new T.Mesh(new T.TorusGeometry(.57,.015,6,48),mat(0xc7b489));trim.rotation.x=Math.PI/2;trim.position.y=y;beacon.add(trim);}
+  for(let i=0;i<6;i++){const a=i*Math.PI/3;part(beacon,'sphere',0x7b8e82,Math.sin(a)*.56,.859,Math.cos(a)*.56,.023,.012,.023);}
   const lamp=new T.PointLight(0xffc286,0,11,2);lamp.position.set(0,2.2,3.4);group.add(lamp);
   const organ=at(communityObjects.wind),rotors=[];
   part(organ,'box',0x9eaa8b,0,.28,0,1.7,.52,.7);sign(organ,'風のオルガン',2.1,.45,2.4);
@@ -36,7 +40,9 @@ export function createCommunityWorld(world){
   ctx.fillStyle='#537465';ctx.font='52px sans-serif';ctx.textAlign='center';ctx.fillText('ここに、どんな場所を？',384,310);ctx.font='35px sans-serif';ctx.fillText('あなたの案を聞かせて。',384,410);
   const placeholder=new T.CanvasTexture(canvas);placeholder.colorSpace=T.SRGBColorSpace;
   const picture=new T.Mesh(new T.PlaneGeometry(1.83,1.5),new T.MeshBasicMaterial({map:placeholder,side:T.DoubleSide}));picture.position.set(0,1.65,.082);board.add(picture);
-  const dust=new T.InstancedMesh(shapes.sphere,new T.MeshBasicMaterial({color:0xf3d9a9,transparent:true,opacity:.8}),45),dummy=new T.Object3D();dust.frustumCulled=false;group.add(dust);
+  const glowCanvas=document.createElement('canvas');glowCanvas.width=glowCanvas.height=32;const glowCtx=glowCanvas.getContext('2d');
+  const glow=glowCtx.createRadialGradient(16,16,0,16,16,15);glow.addColorStop(0,'#ffffffff');glow.addColorStop(.25,'#ffffffb0');glow.addColorStop(1,'#ffffff00');glowCtx.fillStyle=glow;glowCtx.fillRect(0,0,32,32);
+  const dust=new T.InstancedMesh(new T.PlaneGeometry(1,1),new T.MeshBasicMaterial({map:new T.CanvasTexture(glowCanvas),color:0xf3d9a9,transparent:true,opacity:.85,depthWrite:false,blending:T.AdditiveBlending}),45),dummy=new T.Object3D();dust.frustumCulled=false;group.add(dust);
   const flows=[];
   for(const [points,route,color] of [[[[0,.17,3.4],[-1.8,.17,2],[-2.5,.17,.5],[-4,.17,-2]],'town',0xf5c590],[[[0,.17,3.4],[1.8,.17,8],[0,.17,18],[0,.17,27.5]],'central',0xa4dce5]]){
     const curve=new T.CatmullRomCurve3(points.map(p=>new T.Vector3(...p))),pipe=new T.Mesh(new T.TubeGeometry(curve,48,.04,6,false),mat(0x8a9c92));group.add(pipe);
@@ -73,8 +79,10 @@ export function createCommunityWorld(world){
     rotors.forEach((r,i)=>r.rotation.z+=dt*(boosting?12:1)*(i%2?-1:1));
     const ps=[...c.completed,...(c.project?.stage==='building'?[c.project]:[])];const latest=new Map(ps.map(p=>[p.site,p]));
     for(const p of latest.values()){let model=projects.get(p.site);if(model?.revision!==p.revision){if(model)disposeProject(model);model=makeProject(p);projects.set(p.site,model);}const scale=p.stage==='complete'?1:.06+.94*p.progress/12;model.content.scale.y=T.MathUtils.damp(model.content.scale.y,scale,5,dt);for(let i=0;i<model.decor.length;i++){const m=model.decor[i];m.rotation.y=time*.4+i;const pop=time-pulseAt<1.5?Math.sin((time-pulseAt)*8+i)*.1:Math.sin(time*2+i)*.018;m.userData.baseY??=m.position.y;m.position.y=m.userData.baseY+pop;}}
+    dummy.quaternion.identity();
     for(const f of flows){f.beads.visible=boosting||powerRoutes[c.route][f.route]>0;for(let i=0;i<14;i++){dummy.position.copy(f.curve.getPointAt((time*(boosting?.16:.07)+i/14)%1));dummy.scale.setScalar(.09);dummy.updateMatrix();f.beads.setMatrixAt(i,dummy.matrix);}f.beads.instanceMatrix.needsUpdate=true;}
     const center=time-pulseAt<1.5&&pulseSite?places[pulseSite]:c.project?places[c.project.site]:communityObjects.switch;
-    for(let i=0;i<45;i++){const a=i*2.4+time*.22,r=1.1+(i%7)*.28;dummy.position.set(center.x+Math.cos(a)*r,.35+((time*.3+i*.13)%2.7),center.z+Math.sin(a)*r);dummy.scale.setScalar((time-pulseAt<1.5?.065:.025)*lit);dummy.updateMatrix();dust.setMatrixAt(i,dummy.matrix);}dust.instanceMatrix.needsUpdate=true;
+    dummy.quaternion.copy(world.camera.quaternion);
+    for(let i=0;i<45;i++){const a=i*2.4+time*.22,r=1.1+(i%7)*.28;dummy.position.set(center.x+Math.cos(a)*r,.35+((time*.3+i*.13)%2.7),center.z+Math.sin(a)*r);const size=(time-pulseAt<1.5?.075:.038)*lit;dummy.scale.setScalar(Math.min(size,world.camera.position.distanceTo(dummy.position)*.009));dummy.updateMatrix();dust.setMatrixAt(i,dummy.matrix);}dust.instanceMatrix.needsUpdate=true;
   }};
 }

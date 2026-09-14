@@ -53,9 +53,9 @@ export function createWorld(container){
  for(let i=0;i<65;i++){const a=i*2.4,r=7.5+(i%4)*.8,x=Math.cos(a)*r,z=Math.sin(a)*r;if(z<-4)continue;ball(scene,i%2?0xb295aa:0xd2b375,x,.23,z,.1,.18,.1);}
  townObjects.flowers.push(...scene.children.slice(flowersStart));
  // Quiet sky: moon, stars and layered silhouettes.
- const moonDisc=ball(scene,0xffdfb2,-15,19,-35,2.1,2.1,2.1,1.1);moonDisc.material=new T.MeshBasicMaterial({color:0xf1d3a2,fog:false,toneMapped:false});
+ const moonDisc=ball(scene,0xffdfb2,-15,19,-35,2.1,2.1,2.1,1.1);moonDisc.name='Original moon';moonDisc.material=new T.MeshBasicMaterial({color:0xf1d3a2,fog:false,toneMapped:false});
  const starPositions=[];for(let i=0;i<170;i++){const a=i*2.399;const y=12+(i%23);starPositions.push(Math.cos(a)*45,y,Math.sin(a)*45);}
- const stars=new T.BufferGeometry();stars.setAttribute('position',new T.Float32BufferAttribute(starPositions,3));scene.add(new T.Points(stars,new T.PointsMaterial({color:0xe8dbba,size:.075,fog:false})));
+ const stars=new T.BufferGeometry();stars.setAttribute('position',new T.Float32BufferAttribute(starPositions,3));const skyStars=new T.Points(stars,new T.PointsMaterial({color:0xe8dbba,size:.075,fog:false}));skyStars.name='Original stars';scene.add(skyStars);
  const npcs=residents.map((data,i)=>{
   const root=new T.Group(),body=new T.Group();root.add(body);scene.add(root);root.position.set(data.x,.09,data.z);
   ball(body,data.color,0,.72,0,.39,.48,.3);box(body,data.accent,0,.78,.3,.25,.18,.045);
