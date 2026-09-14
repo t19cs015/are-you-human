@@ -12,6 +12,11 @@ export function requireCentral(s,position){
 }
 export function centralSnapshot(world){
   const g=infrastructure(world);
+  const m=world.city?.memoryGame;
+  if(m?.active)return {memory:{stage:m.stage,cycle:m.cycle,nextSync:m.nextSync,shared:m.shared,preserved:m.preserved},modelEnabled:g.modelEnabled,energy:Math.floor(g.energy),water:Math.floor(g.water),
+    residents:Object.entries(world.city.tasks).map(([id,t])=>({name:world.agents[id].name,job:t.label})),
+    deliveredRecords:Object.entries(m.sharedMemories||{}).flatMap(([id,memories])=>memories.map(memory=>({by:world.agents[id].name,text:memory.text}))),
+    changes:'住人自身が残すと決めて預けた記憶を、次の同期へ渡す'};
   const episode=episodePublic(world);
   if(episode?.active)return {episode,modelEnabled:g.modelEnabled,wind:g.windOnline&&g.windEnabled,pump:g.pumpOnline&&g.pumpEnabled,relay:g.relayOnline,
     residents:Object.entries(world.city.tasks).map(([id,t])=>({name:world.agents[id].name,job:t.label})),

@@ -4,6 +4,7 @@ import {remember} from './memory.mjs';
 import {applyAssessment} from './relationships.mjs';
 import {createHumanState,residentIsSynced} from '../src/human-rules.js';
 import {tickHuman} from './human.mjs';
+import {tickMemoryGame,memoryGameContext} from './memory-game.mjs';
 
 const ids=['mia','ren','tomo','shell'];
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
@@ -98,6 +99,7 @@ export async function proposeCommunity(s,message,generate){
   }finally{s.busy.delete('community');s.busy.delete(lead);if(partnerLocked)s.busy.delete(partner);}
 }
 export function tickCommunity(s,dt,held=[]){
+  if(s.city.memoryGame?.active){tickMemoryGame(s,dt,held);return;}
   tickHuman(s,dt,held,emitCommunity);
   const c=requireCommunity(s),g=s.city.infrastructure,r=powerRoutes[c.route],boost=s.city.clock<c.boostUntil;
   const townRate=(g.windEnabled?r.town:0)+(boost?2:0),centralRate=g.modelEnabled&&g.pumpEnabled?(g.windEnabled?r.central:0)+(boost?2:0):0;
@@ -133,6 +135,7 @@ export function tickCommunity(s,dt,held=[]){
   }
 }
 export function communityContext(s){
+  if(s.city?.memoryGame?.active)return memoryGameContext(s);
   const c=s.city?.community;if(!c?.active)return '';
   return `\n今夜は人間とAIで、次の街の場所を作る。プレイヤーだけが人間で、4人の住民は中央につながるAI。街の同期中はAIは一時停止するが、人間だけは動ける。人間の呼びかけで一人が戻り、近くの住民へ呼びかけが伝わる。これは記憶の削除ではない。中央の裏には、橋で渡れる記憶の都市がある。ここは光の輸送と記憶の保管を表す場所で、人格の合成はまだできない。人間から全員へ呼びかけが伝わった回数:${c.human?.moments.length||0}。公開の事実:${JSON.stringify({route:powerRoutes[c.route].name,energy:Math.round(c.energy),central:Math.round(c.central),project:c.project,completed:c.completed.map(p=>({title:p.title,lead:p.lead,partner:p.partner}))})}。近くの分配器を人間が操作できる。風のオルガンを鳴らすと両方の電力が8秒増える。明日のスケッチから自由な提案を皆に相談できる。住民の合意と現地作業が揃って初めて完成する。未完成の場所を完成したと主張しない。`;
 }

@@ -71,7 +71,7 @@ export function createCommunityView(hooks){
   }
   return {get centralVoiceState(){return clipBy==='central'&&clip&&!clip.paused&&!clip.ended?'speaking':'idle';},get hasTarget(){return !!current;},get target(){return current;},openBoard:open,get open(){return !$('board').hidden;},get busy(){return pending;},get enabled(){return enabled;},get artPending(){return artPending;},close,interact,
     stop(){generation++;enabled=false;root.hidden=true;close();clip?.pause();clip=null;queue=[];speaking=false;},
-    activate(next,fresh){generation++;enabled=!!next?.community?.active;root.hidden=!enabled;city=next;seen=fresh?0:next?.serial||0;artId=null;$('art').hidden=true;$('subtitle').hidden=true;queue=[];clip?.pause();speaking=false;render();},
+    activate(next,fresh){generation++;enabled=!!next?.community?.active&&!next?.memoryGame?.active;root.hidden=!enabled;city=next;seen=fresh?0:next?.serial||0;artId=null;$('art').hidden=true;$('subtitle').hidden=true;queue=[];clip?.pause();speaking=false;render();},
     setMuted(value){muted=value;if(muted){voiceRevision++;clip?.pause();queue=[];speaking=false;}else speakNext();},
     suspend(value){suspended=value;if(value){voiceRevision++;clip?.pause();queue=[];speaking=false;}else speakNext();},
     update(next){city=next;if(!enabled||!city?.community)return;render();

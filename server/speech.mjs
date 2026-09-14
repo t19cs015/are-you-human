@@ -1,10 +1,10 @@
-import {access} from 'node:fs/promises';
+import {access,readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {episodeVoices,episodeVoiceInstructions,episodeLines} from '../src/episode-script.js';
 import {communityLines} from '../src/community-rules.js';
 
 export async function generateSpeech(key,by,text,fetcher=fetch){
-  const r=await fetcher('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{Authorization:'Bearer '+key,'Content-Type':'application/json'},signal:AbortSignal.timeout(20000),body:JSON.stringify({model:'gpt-4o-mini-tts',voice:episodeVoices[by]||'marin',instructions:episodeVoiceInstructions[by],input:text,response_format:'mp3',speed:1.03})});
+  const r=await fetcher('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{Authorization:'Bearer '+key,'Content-Type':'application/json'},signal:AbortSignal.timeout(20000),body:JSON.stringify({model:'gpt-4o-mini-tts',voice:episodeVoices[by]||'marin',instructions:episodeVoiceInstructions[by]||(by==='player'?'A gentle adult voice inside a small friendly robot. Natural conversational Japanese, intimate and unhurried. No exaggerated robotic effect.':undefined),input:text,response_format:'mp3',speed:1.03})});
   if(!r.ok)throw new Error('SPEECH_UNAVAILABLE');
   const bytes=Buffer.from(await r.arrayBuffer());if(bytes.length>2000000||bytes.length<50)throw new Error('SPEECH_UNAVAILABLE');return bytes;
 }
@@ -32,6 +32,16 @@ async function cachedSpeech(s,by,text,fetcher){
     if(s.speech.cache.size>32)s.speech.cache.delete(s.speech.cache.keys().next().value);
   }
   return s.speech.cache.get(hash);
+}
+let memoryClips;
+export async function memoryGameSpeech(s,id,fetcher=fetch){
+  if(!Number.isInteger(id)||!s.world.city?.memoryGame?.active)throw new Error('INVALID_ACTION');
+  const event=s.world.city.memoryGame.events.find(e=>e.id===id);
+  if(!event)throw new Error('INVALID_ACTION');
+  if(!memoryClips){try{memoryClips=JSON.parse(await readFile(new URL('../assets/memory/voices.json',import.meta.url),'utf8'));}catch{memoryClips={};}}
+  const hash=createHash('sha256').update(event.by+'\n'+event.text).digest('hex'),clip=memoryClips[hash];
+  if(clip&&/^[a-z_]+\.mp3$/.test(clip))return {mode:'generated',url:'/assets/memory/'+clip};
+  return cachedSpeech(s,event.by,event.text,fetcher);
 }
 export async function episodeSpeech(s,id,fetcher=fetch){
   if(!s.world.city?.episode?.active||!Number.isInteger(id))throw new Error('INVALID_ACTION');

@@ -16,6 +16,7 @@ function terms(text){
  return result;
 }
 export function recall(agent,query='',{limit=16,budget=6000}={}){
+ if(Array.isArray(agent.currentContext))return agent.currentContext.slice(-limit).map(({id,topic,text,source,hop,at})=>({id,topic,text,source,hop,at}));
  const q=terms(query),all=[...(agent.memories||[]),...(agent.reflections||[])].filter(m=>!m.supersededBy),n=all.length;
  const ranked=all.map((m,i)=>{
   const words=terms(m.text);let overlap=0;for(const t of q)if(words.has(t))overlap++;

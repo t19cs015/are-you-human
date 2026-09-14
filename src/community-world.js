@@ -72,7 +72,7 @@ export function createCommunityWorld(world){
     if(currentArt?.image?.src===url)return;
     new T.TextureLoader().load(url,map=>{map.colorSpace=T.SRGBColorSpace;currentArt?.dispose();currentArt=map;picture.material.map=map;picture.material.needsUpdate=true;});
   },reset(){for(const p of projects.values())disposeProject(p);projects.clear();picture.material.map=placeholder;currentArt?.dispose();currentArt=null;},update(time,city){
-    const c=city?.community;group.visible=!!c?.active;obstacles.forEach(o=>o.active=!!c?.active);if(!c?.active)return;
+    const c=city?.community,active=!!c?.active&&!city?.memoryGame?.active;group.visible=active;obstacles.forEach(o=>o.active=active);if(!active)return;
     const dt=Math.min(.06,Math.max(0,time-lastTime));lastTime=time;const boosting=city.clock<c.boostUntil;
     lit=T.MathUtils.damp(lit,powerRoutes[c.route].town?1:.12,5,dt);lamp.intensity=lit*22;
     orb.material.emissive.set(powerRoutes[c.route].color);orb.position.y=1.58+Math.sin(time*2)*.06;lever.rotation.z=T.MathUtils.damp(lever.rotation.z,{central:-.65,town:.65,shared:0}[c.route],12,dt);

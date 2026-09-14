@@ -4,6 +4,8 @@ import {inspectEpisode,proposeEpisode} from './server/episode.mjs';
 import {episodeSpeech,communitySpeech,residentSpeech} from './server/speech.mjs';
 import {interactCommunity,proposeCommunity,emitCommunity} from './server/community.mjs';
 import {humanAction} from './server/human.mjs';
+import {initializeMemoryGame,editMemoryGame,talkMemoryGame} from './server/memory-game.mjs';
+import {memoryGameSpeech} from './server/speech.mjs';
 import {generateCommunityArt,readCommunityArt} from './server/community-art.mjs';
 import {createStorage} from './server/storage.mjs';
 import {memoryPage} from './server/memory.mjs';
@@ -58,6 +60,10 @@ export function createServer({fetcher=fetch,apiKey=defaults.key,model=defaults.m
     if(url.pathname==='/api/central/stop'&&req.method==='POST')return json(res,200,await endCentralVoice(s,data.connection,fetcher));
     if(url.pathname==='/api/central/tool'&&req.method==='POST')return await commit(voiceTool(s,data));
     if(url.pathname==='/api/central/chat'&&req.method==='POST')return await commit(await chatWithCentral(s,data,generate));
+    if(url.pathname==='/api/memory/start'&&req.method==='POST'){startCommunity(s.world);initializeMemoryGame(s.world);return await commit(publicCity(s.world));}
+    if(url.pathname==='/api/memory/edit'&&req.method==='POST'){const result=editMemoryGame(s.world,data);return await commit({...result,city:publicCity(s.world)});}
+    if(url.pathname==='/api/memory/talk'&&req.method==='POST'){const result=await talkMemoryGame(s.world,data,generate);return await commit({...result,city:publicCity(s.world)});}
+    if(url.pathname==='/api/memory/speech'&&req.method==='POST')return json(res,200,await memoryGameSpeech(s,data.event,fetcher));
     if(url.pathname==='/api/episode/start'&&req.method==='POST')return await commit(startEpisode(s.world));
     if(url.pathname==='/api/episode/inspect'&&req.method==='POST'){const result=inspectEpisode(s.world,data.clue,data.position);return await commit({...result,city:publicCity(s.world)});}
     if(url.pathname==='/api/episode/propose'&&req.method==='POST'){const result=await proposeEpisode(s.world,data.message,generate);return await commit({...result,city:publicCity(s.world)});}
@@ -104,7 +110,7 @@ export function createServer({fetcher=fetch,apiKey=defaults.key,model=defaults.m
    }
    // Explicit public files only: never serve server code, keys, dotfiles or tests.
    const p=decodeURIComponent(url.pathname);
-   const allowed=/^\/assets\/(episode|community)\/[a-z_]+\.(mp3|json)$/.test(p)||/^\/assets\/characters\/(mia|ren|tomo|shell)\.glb$/.test(p)||/^\/assets\/infrastructure\/[a-z-]+\.(glb|json)$/.test(p)||p==='/character-review.html'||p==='/cafe-review.html'||/^\/assets\/cafe\/[a-zA-Z0-9_-]+\.(glb|json)$/.test(p)||['/node_modules/three/examples/jsm/loaders/GLTFLoader.js','/node_modules/three/examples/jsm/utils/BufferGeometryUtils.js','/node_modules/three/examples/jsm/geometries/RoundedBoxGeometry.js','/node_modules/three/examples/jsm/environments/RoomEnvironment.js','/node_modules/three/examples/jsm/postprocessing/EffectComposer.js','/node_modules/three/examples/jsm/postprocessing/MaskPass.js','/node_modules/three/examples/jsm/postprocessing/OutputPass.js','/node_modules/three/examples/jsm/postprocessing/Pass.js','/node_modules/three/examples/jsm/postprocessing/RenderPass.js','/node_modules/three/examples/jsm/postprocessing/ShaderPass.js','/node_modules/three/examples/jsm/postprocessing/UnrealBloomPass.js','/node_modules/three/examples/jsm/shaders/CopyShader.js','/node_modules/three/examples/jsm/shaders/LuminosityHighPassShader.js','/node_modules/three/examples/jsm/shaders/OutputShader.js'].includes(p)||p==='/'||p==='/index.html'||/^\/src\/[a-z-]+\.(js|css)$/.test(p)||p==='/node_modules/three/build/three.module.js';
+   const allowed=/^\/assets\/(episode|community|memory)\/[a-z_]+\.(mp3|json)$/.test(p)||/^\/assets\/characters\/(mia|ren|tomo|shell|player)\.glb$/.test(p)||/^\/assets\/infrastructure\/[a-z-]+\.(glb|json)$/.test(p)||p==='/character-review.html'||p==='/cafe-review.html'||/^\/assets\/cafe\/[a-zA-Z0-9_-]+\.(glb|json)$/.test(p)||['/node_modules/three/examples/jsm/loaders/GLTFLoader.js','/node_modules/three/examples/jsm/utils/BufferGeometryUtils.js','/node_modules/three/examples/jsm/geometries/RoundedBoxGeometry.js','/node_modules/three/examples/jsm/environments/RoomEnvironment.js','/node_modules/three/examples/jsm/postprocessing/EffectComposer.js','/node_modules/three/examples/jsm/postprocessing/MaskPass.js','/node_modules/three/examples/jsm/postprocessing/OutputPass.js','/node_modules/three/examples/jsm/postprocessing/Pass.js','/node_modules/three/examples/jsm/postprocessing/RenderPass.js','/node_modules/three/examples/jsm/postprocessing/ShaderPass.js','/node_modules/three/examples/jsm/postprocessing/UnrealBloomPass.js','/node_modules/three/examples/jsm/shaders/CopyShader.js','/node_modules/three/examples/jsm/shaders/LuminosityHighPassShader.js','/node_modules/three/examples/jsm/shaders/OutputShader.js'].includes(p)||p==='/'||p==='/index.html'||/^\/src\/[a-z-]+\.(js|css)$/.test(p)||p==='/node_modules/three/build/three.module.js';
    if(req.method!=='GET'||!allowed)return json(res,404,{error:'NOT_FOUND'});
    const file=p==='/'?'index.html':p.slice(1);const text=await readFile(root+file);
    res.writeHead(200,{'Content-Type':types[file.split('.').at(-1)]||'text/plain','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}).end(text);

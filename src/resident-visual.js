@@ -1,7 +1,7 @@
 import {GLTFLoader} from '/node_modules/three/examples/jsm/loaders/GLTFLoader.js';
 import * as T from '/node_modules/three/build/three.module.js';
 export const expressions=['neutral','happy','surprised','confused','suspicious','thinking','glitch','sync'];
-const profiles={mia:{ink:'#b8f4e9',phase:0,gesture:2.05},ren:{ink:'#c2e1f3',phase:1.1,gesture:.55},tomo:{ink:'#9eeeff',phase:2.2,gesture:2.15},shell:{ink:'#d5edb2',phase:3.3,gesture:1.15}};
+const profiles={player:{ink:'#d8ebc7',phase:.6,gesture:1.7},mia:{ink:'#b8f4e9',phase:0,gesture:2.05},ren:{ink:'#c2e1f3',phase:1.1,gesture:.55},tomo:{ink:'#9eeeff',phase:2.2,gesture:2.15},shell:{ink:'#d5edb2',phase:3.3,gesture:1.15}};
 export function createFaceTexture(id){
  const profile=profiles[id];if(!profile)throw new Error('Unknown resident');
  const canvas=document.createElement('canvas');canvas.width=384;canvas.height=224;const ctx=canvas.getContext('2d'),texture=new T.CanvasTexture(canvas);texture.colorSpace=T.SRGBColorSpace;
