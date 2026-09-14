@@ -10,6 +10,8 @@ export function createTownSurfaces(scene){
   });}
   const land=new T.Mesh(new T.ExtrudeGeometry(shapes(surfaces.land),{depth:.7,bevelEnabled:false,steps:1}),groundMaterial(0x697d65));
   land.rotation.x=-Math.PI/2;land.position.y=-.66;land.receiveShadow=true;group.add(land);
+  const bank=new T.Mesh(new T.ExtrudeGeometry(shapes(surfaces.bank),{depth:.85,bevelEnabled:false,steps:1}),groundMaterial(0x83968c));
+  bank.rotation.x=-Math.PI/2;bank.position.y=-1.06;bank.receiveShadow=true;bank.name='Soft banks around the restored ground';group.add(bank);
   const road=new T.Mesh(new T.ShapeGeometry(shapes(surfaces.roads)),groundMaterial(0xa6a08c));
   road.rotation.x=-Math.PI/2;road.position.y=.115;road.receiveShadow=true;road.name='Single road surface';group.add(road);
   return group;

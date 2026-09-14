@@ -4,11 +4,13 @@ import {createSociety} from '../server/society.mjs';
 import {startCommunity,tickCity} from '../server/city.mjs';
 import {initializeMemoryGame,editMemoryGame,talkMemoryGame,interactMemoryTown} from '../server/memory-game.mjs';
 import {centralSnapshot} from '../server/central.mjs';
+import {memoryGameSpeech} from '../server/speech.mjs';
 import {recall} from '../server/memory.mjs';
 import {createGenerator} from '../server/provider.mjs';
 import {createServer} from '../server.mjs';
 import {discoveryById,discoveryMemories,discoveryTarget,discoveryVisitSpot} from '../src/discovery-rules.js';
 import {outdoorGround,canalRows,canalBridges} from '../src/town-layout.js';
+import {riverJourneySeconds,riverSample,lanternJourney} from '../src/boundary-layout.js';
 
 const offline=createGenerator({key:''});
 function game(){
@@ -29,8 +31,8 @@ const has=(g,id,text)=>recall(g.s.agents[id]).some(m=>m.text.includes(text));
 
 test('touching a place earns one editable private memory, with no duplicate rewards',()=>{
   const g=game(),before=g.m.blocks.length;
-  for(const id of Object.keys(discoveryMemories)){assert.ok(g.touch(id).found);g.tick(1);assert.equal(g.touch(id).found,false);}
-  assert.equal(g.m.blocks.length,before+7);
+  for(const id of Object.keys(discoveryMemories)){if(id==='shore')g.tick(riverJourneySeconds);assert.ok(g.touch(id).found);g.tick(1);assert.equal(g.touch(id).found,false);}
+  assert.equal(g.m.blocks.length,before+9);
   g.edit({action:'rewrite',id:'place_wind',text:'PRIVATE_WIND 私は風の音に名前をつけたい。'});
   g.edit({action:'equip',equipped:['place_wind']});
   assert.ok(!JSON.stringify(centralSnapshot(g.s)).includes('PRIVATE_WIND'));
@@ -101,6 +103,33 @@ test('offline collected memories can also invite a resident, while an invented d
 test('old saves acquire exploration state without resetting the player or the first chapter',()=>{
   const g=game();g.edit({action:'rewrite',id:'arrival',text:'前のバージョンから持っている記憶。'});const blocks=structuredClone(g.m.blocks),stage=g.m.stage;
   assert.equal(g.m.exploration,undefined);g.touch('door_a');assert.deepEqual(g.m.blocks,blocks);assert.equal(g.m.stage,stage);assert.equal(g.m.exploration.visited.door_a,1);
+});
+
+test('a lantern follows a finite river into the mist, and the reply must be witnessed',()=>{
+  const g=game();assert.equal(g.touch('shore').found,false);assert.equal(g.m.exploration.shoreRead,undefined);
+  g.touch('boat');g.tick(riverJourneySeconds-1);assert.equal(g.m.exploration.shoreReplyAt,undefined);
+  g.tick(1);assert.ok(Number.isFinite(g.m.exploration.shoreReplyAt));assert.ok(!g.m.blocks.some(b=>b.id==='place_shore'));
+  assert.equal(centralSnapshot(g.s).memory.frontier.replyObserved,false);
+  assert.ok(g.touch('shore').found);assert.equal(centralSnapshot(g.s).memory.frontier.replyObserved,true);
+  g.tick(1);assert.equal(g.touch('shore').found,false);assert.equal(g.m.blocks.filter(b=>b.id==='place_shore').length,1);
+  assert.ok(Object.keys(g.s.agents).every(id=>!has(g,id,'灯りがふたつ')));
+  const start=lanternJourney(0),end=lanternJourney(riverJourneySeconds);assert.ok(Math.hypot(start.x+20.4,start.z-39.8)<2);
+  assert.ok(end.x>53&&end.x<60&&end.z>48);assert.equal(end.progress,1);assert.equal(end.opacity,0);
+  for(let t=0;t<=riverJourneySeconds;t+=.5){const p=lanternJourney(t);assert.ok(Number.isFinite(p.x)&&Number.isFinite(p.z));assert.ok(Math.abs(p.x)<63&&p.z<60);let distance=Infinity,width=0;for(let i=0;i<=500;i++){const r=riverSample(i/500),d=Math.hypot(p.x-r.x,p.z-r.z);if(d<distance){distance=d;width=r.width;}}assert.ok(distance<width-.5,'the lantern stays between the riverbanks');}
+});
+
+test('the far window changes only after delivery, and local lights wait for a real reader',async()=>{
+  const g=await reunited();g.touch('wind');g.touch('pump');g.touch('core');
+  assert.equal(g.m.exploration.borderShared,undefined);g.tick(18);assert.equal(g.m.exploration.borderShared,true);
+  g.touch('garden');g.tick(1);assert.equal(g.m.exploration.localReadAt,undefined);
+  g.s.city.positions.shell={...g.s.city.tasks.shell.target};g.tick(1);assert.ok(Number.isFinite(g.m.exploration.localReadAt));
+});
+
+test('saved dialogue keeps its original voice when the new story revises a line',async()=>{
+  const g=game();g.m.events.push({id:999,by:'central',text:'この空きは、不要と判断した時間です。待つこと、遠回り、名前のない遊び。……あなたは、残したいのですか。'});g.touch('archive');
+  const session={world:g.s,config:{key:''}},fetcher=()=>assert.fail('authored clips must not call the speech API');
+  const old=await memoryGameSpeech(session,999,fetcher),current=await memoryGameSpeech(session,g.m.events.find(e=>e.place==='archive').id,fetcher);
+  assert.equal(old.url,'/assets/memory/explore_archive.mp3');assert.match(current.url,/explore_archive_[a-f0-9]+\.mp3$/);assert.notEqual(current.url,old.url);
 });
 
 test('canals cannot be walked across except at the bridges; interaction focus respects walls and facing',()=>{

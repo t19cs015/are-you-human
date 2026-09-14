@@ -40,7 +40,7 @@ export async function memoryGameSpeech(s,id,fetcher=fetch){
   if(!event)throw new Error('INVALID_ACTION');
   if(!memoryClips){try{memoryClips=JSON.parse(await readFile(new URL('../assets/memory/voices.json',import.meta.url),'utf8'));}catch{memoryClips={};}}
   const hash=createHash('sha256').update(event.by+'\n'+event.text).digest('hex'),clip=memoryClips[hash];
-  if(clip&&/^[a-z_]+\.mp3$/.test(clip))return {mode:'generated',url:'/assets/memory/'+clip};
+  if(clip&&/^[a-z0-9_]+\.mp3$/.test(clip))return {mode:'generated',url:'/assets/memory/'+clip};
   return cachedSpeech(s,event.by,event.text,fetcher);
 }
 export async function episodeSpeech(s,id,fetcher=fetch){

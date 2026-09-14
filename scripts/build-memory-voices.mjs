@@ -21,7 +21,7 @@ const lines=[
 let manifest={};try{manifest=JSON.parse(await readFile(new URL('voices.json',directory),'utf8'));}catch{}
 if(!defaults.key)throw new Error('The server default API key is not configured.');
 for(let i=0;i<lines.length;i+=2){
- const results=await Promise.allSettled(lines.slice(i,i+2).map(async([name,by,text])=>{const hash=createHash('sha256').update(by+'\n'+text).digest('hex'),file=name+'.mp3';if(manifest[hash]){try{await readFile(new URL(file,directory));return;}catch{}}const bytes=await generateSpeech(defaults.key,by,text);await writeFile(new URL(file,directory),bytes);manifest[hash]=file;console.log(file+' · '+bytes.length+' bytes');}));
+ const results=await Promise.allSettled(lines.slice(i,i+2).map(async([name,by,text])=>{const hash=createHash('sha256').update(by+'\n'+text).digest('hex');if(manifest[hash]){try{await readFile(new URL(manifest[hash],directory));return;}catch{}}const base=name+'.mp3',file=Object.values(manifest).includes(base)?name+'_'+hash.slice(0,8)+'.mp3':base;const bytes=await generateSpeech(defaults.key,by,text);await writeFile(new URL(file,directory),bytes);manifest[hash]=file;console.log(file+' · '+bytes.length+' bytes');}));
  await writeFile(new URL('voices.json',directory),JSON.stringify(manifest,null,2)+'\n');
  for(const result of results)if(result.status==='rejected')console.error('Voice generation unavailable:',result.reason.message);
 }

@@ -4,6 +4,7 @@ import {asset} from './cafe-assets.js';
 import {createVariedSkyline} from './skyline-variety.js';
 import {infrastructureSites,infrastructureObstacles,modernPlots} from './town-layout.js';
 import {createRiverMaterial} from './river-material.js';
+import {riverSample} from './boundary-layout.js';
 
 export function createInfrastructureWorld(world){
   const group=new T.Group();group.name='明日のための街';world.scene.add(group);
@@ -23,7 +24,11 @@ export function createInfrastructureWorld(world){
   }
   const foundation=new T.Group();group.add(foundation);
   for(const p of modernPlots){box(0x807f6f,p.x,.12,p.z,3.8,.1,3.8,foundation);for(const x of [-1.8,1.8])for(const z of [-1.8,1.8])box(0xbaaa80,p.x+x,.33,p.z+z,.09,.55,.09,foundation);}
-  const river=createRiverMaterial(),water=new T.Mesh(new T.PlaneGeometry(192,12,384,32),river.material);water.name='River water';water.rotation.x=-Math.PI/2;water.position.set(-7,-.29,41);water.receiveShadow=true;group.add(water);
+  const river=createRiverMaterial({fadeEnds:true}),vertices=[],uvs=[],indices=[];
+  for(let i=0;i<=192;i++){const p=riverSample(i/192);for(let j=0;j<=8;j++){const across=(j/8*2-1)*p.width;vertices.push(p.x-p.dz*across,-p.z-p.dx*across,0);uvs.push(i/192,j/8);}}
+  for(let i=0;i<192;i++)for(let j=0;j<8;j++){const a=i*9+j,b=a+9;indices.push(a,a+1,b,b,a+1,b+1);}
+  const riverGeometry=new T.BufferGeometry();riverGeometry.setAttribute('position',new T.Float32BufferAttribute(vertices,3));riverGeometry.setAttribute('uv',new T.Float32BufferAttribute(uvs,2));riverGeometry.setIndex(indices);riverGeometry.computeVertexNormals();
+  const water=new T.Mesh(riverGeometry,river.material);water.name='River between the two mist gates';water.rotation.x=-Math.PI/2;water.position.y=-.29;water.receiveShadow=true;group.add(water);
   const boat=new T.Group();boat.position.set(-30,-.08,39);group.add(boat);box(0x8b7764,0,0,0,1.5,.26,.75,boat);box(0xc2bca0,0,.2,0,1,.15,.6,boat);
 
   const flows=[];

@@ -19,6 +19,7 @@ import {createLocomotion} from './locomotion.js';
 import {createCommunityWorld} from './community-world.js';
 import {createCommunityView} from './community-view.js';
 import {createTownDiscoveries} from './town-discoveries.js';
+import {createTownBoundary} from './town-boundary.js';
 import {discoveryTarget,discoveryById} from './discovery-rules.js';
 import {createMemoryCity} from './memory-city.js';
 import {createCentralPresence} from './central-presence.js';
@@ -45,6 +46,7 @@ const episodeWorld=createEpisodeWorld(world);
 const communityWorld=createCommunityWorld(world),locomotion=createLocomotion();
 const memoryCity=createMemoryCity(world),centralPresence=createCentralPresence(world),humanWorld=createHumanWorld(world);
 const townDiscoveries=createTownDiscoveries(world);
+const townBoundary=createTownBoundary(world);
 const memoryWorld=createMemoryWorld(world),playerVisual=createPlayerVisual(world);
 let mouseSensitivity=1,reducedMotion=false,communityArrival=false;
 try{mouseSensitivity=Math.max(.4,Math.min(2,Number(localStorage.getItem('ayh-sensitivity'))||1));reducedMotion=localStorage.getItem('ayh-reduced-motion')==='true';}catch{}
@@ -90,6 +92,8 @@ let discoveryPending=false,telescopeUntil=0;
 async function touchTown(id){
  if(discoveryPending||memoryView.busy)return;const p=discoveryById[id];if(!p)return;discoveryPending=true;
  townDiscoveries.touch(id,time);p.notes.forEach((n,i)=>setTimeout(()=>sound(n,.65,.035),i*95));
+ townBoundary.touch(id,time);
+ if(id==='river_bell'&&state.city.memoryGame.exploration?.shoreRead)p.notes.forEach((n,i)=>setTimeout(()=>sound(n,.7,.012),650+i*160));
  if(id==='telescope'){telescopeUntil=time+5;pitch=.42;}
  try{const r=await api('memory/interact',{id,position:{x:player.x,z:player.z},revision:state.city.memoryGame.revision});syncCity(r.city);if(r.found)toast('新しい記憶が、手元に残った。 Q',2.5);else if(r.note)toast(r.note,3);}
  catch(e){if(e.message==='STALE'){await refreshState();toast('街が少し変わった。もう一度、触れてみよう。');}else toast(apiError(e));}finally{discoveryPending=false;}
@@ -448,6 +452,7 @@ function frame(now){requestAnimationFrame(frame);const frameMs=now-last,dt=Math.
  humanView.frame(state.city,mode==='play',available,available?humanTarget():null,playTime,cityView.overview);
  memoryView.frame(now,mode==='play'&&!cityView.overview&&!humanView.open&&!memoryView.open&&!voiceActive&&$('facility-panel').hidden&&$('settings').hidden&&$('journal').hidden);
  townDiscoveries.focus(available&&!room&&memoryView.enabled?discoveryTarget(player,yaw,world.navigation):null);townDiscoveries.update(time,state.city);
+ townBoundary.update(time,state.city);
  if(cityView.overview){telescopeUntil=0;camera.fov=T.MathUtils.damp(camera.fov,64,5,dt);camera.updateProjectionMatrix();}
  memoryWorld.update(time,state.city);
  playerVisual.update(time,{enabled:mode==='play'&&memoryView.enabled,player,yaw,firstPerson:!cityView.overview&&!borrowed,editing:memoryView.open,selected:memoryView.open?memoryView.selected:state.city?.memoryGame?.blocks.find(b=>b.id===state.city.memoryGame.equipped[0]),moving:keys.has('w')||keys.has('s')||keys.has('a')||keys.has('d'),reducedMotion});

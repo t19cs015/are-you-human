@@ -3,6 +3,7 @@ import {RoundedBoxGeometry} from '/node_modules/three/examples/jsm/geometries/Ro
 import {discoveries,discoveryById} from './discovery-rules.js';
 import {memoryPlots,townHomes,canalRows,canalBridges} from './town-layout.js';
 import {createRiverMaterial} from './river-material.js';
+import {lanternJourney} from './boundary-layout.js';
 
 // Shared ceramic, copper and timber pieces; static details are instanced by material.
 export function createTownDiscoveries(world){
@@ -100,7 +101,7 @@ export function createTownDiscoveries(world){
  box(0xa6b8a7,0,.63,77.45,1.65,1,.7);box(0x365c63,0,1.2,77.45,1.3,.11,.55);const coreSlot=box(0xa5dbd0,0,1.3,77.45,.62,.045,.22,group,.6);obstacle(0,77.45,.82,.35);
  for(const side of [-1,1]){const g=new T.Group();g.position.set(side*2.6,2.3,78.6);group.add(g);for(let i=0;i<5;i++){const r=ring(0xa2cabc,0,i*.5,0,.3,g);r.rotation.x=Math.PI/2;}turning.push({id:'core',g,speed:.08});}
  // Lantern skiffs run through the canals; a player's launch crosses the main river.
- for(let i=0;i<7;i++){const b=new T.Group();box(0xa69477,0,0,0,.7,.15,.35,b);box(0xe9d1a7,0,.25,0,.2,.4,.2,b,.3);sphere(0xffddaa,0,.28,.13,.055,b,.8);group.add(b);boats.push({b,i});}
+ for(let i=0;i<7;i++){const b=new T.Group();box(0xa69477,0,0,0,.7,.15,.35,b);box(0xe9d1a7,0,.25,0,.2,.4,.2,b,.3);sphere(0xffddaa,0,.28,.13,.055,b,.8);group.add(b);const fadeMaterials=[];if(i===0)b.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.material.transparent=true;o.material.depthWrite=false;fadeMaterials.push(o.material);}});boats.push({b,i,fadeMaterials});}
  // One discreet focus light for all interactions, rather than a forest of labels.
  const focus=new T.Mesh(new T.RingGeometry(.11,.145,24),new T.MeshBasicMaterial({color:0xf3d39b,transparent:true,opacity:.8,depthWrite:false,side:T.DoubleSide}));focus.renderOrder=3;group.add(focus);focus.visible=false;
  const sparks=new T.InstancedMesh(geos.sphere,new T.MeshBasicMaterial({color:0xe8d7a9,transparent:true,opacity:.7}),20);sparks.frustumCulled=false;group.add(sparks);sparks.visible=false;const dummy=new T.Object3D();
@@ -113,14 +114,14 @@ export function createTownDiscoveries(world){
  return {group,touch,focus(p){target=p;},update(time,city){
   const dt=Math.min(.05,time-last);last=time;river.update(time);const e=city?.memoryGame?.exploration,pulse=time<until;
   clockTime+=dt;focus.visible=!!target&&!!city?.memoryGame?.active;
-  if(focus.visible){focus.position.set(target.x,target.y,target.z);focus.lookAt(world.camera.position);focus.scale.setScalar(1+Math.sin(time*3)*.1);}
+  if(focus.visible){const p=target.marker||target;focus.position.set(p.x,p.y,p.z);focus.lookAt(world.camera.position);focus.scale.setScalar(1+Math.sin(time*3)*.1);}
   for(const {id,g,speed} of turning){const boost=pulse&&activeTouch===id;g.rotation.z+=dt*(boost&&id!=='telescope'?8:speed)*(id==='pump'?(e?.waterOpen?1:.18):1);if(id==='clock')g.rotation.z+=(e?.clockOffset||0)*dt*.2;}
   for(const {id,b,i} of bells){const playing=pulse&&activeTouch===id||id==='music'&&e?.joined.some(j=>j.endsWith(':music'));b.rotation.z=Math.sin(time*(playing?15:2.5)+i)*(playing?.32:.055);}
   jets.forEach(({jet,i})=>{const h=.35+(pulse&&activeTouch==='fountain'?1.45:.25)*(1+Math.sin(time*4+i)*.5);jet.scale.y=h;jet.position.y=.55+h/2;});
-  for(const {id,pane,lamp} of windows){const on=pulse&&activeTouch===id;if(pane)pane.material.opacity=on?.68:0;if(lamp)lamp.material.emissiveIntensity=on?1.8:.2;}
+  for(const {id,pane,lamp} of windows){const on=pulse&&activeTouch===id;if(pane)pane.material.opacity=on?.68:e?.borderShared?.19:0;if(lamp)lamp.material.emissiveIntensity=on?1.8:.2;}
   ripples.forEach((r,i)=>{const f=(time*.45+i*.13)%1;r.scale.setScalar(.15+f*1.1);r.material.opacity=(1-f)*.3;});
   stems.forEach((g,i)=>{g.scale.y=T.MathUtils.damp(g.scale.y,e?.localMemory?1.3:.42,2,dt);g.rotation.z=Math.sin(time*1.3+i)*.05;});coreSlot.material.emissiveIntensity=e?.centralMemory?1.2:.3;
-  boats.forEach(({b,i})=>{if(i===0){const f=e?.boatAt===undefined?0:Math.min(1,(city.clock-e.boatAt)/24);b.position.set(-20.4+f*45,-.08,39.8+Math.sin(f*Math.PI)*2.8);b.rotation.y=Math.PI/2;}else{const row=canalRows[i%2];b.position.set(((time*.55+i*12)%76)-38,-.08,row+Math.sin(i)*.35);b.rotation.y=Math.PI/2;}b.position.y+=Math.sin(time*1.8+i)*.035;});
+  boats.forEach(({b,i,fadeMaterials})=>{if(i===0){const p=lanternJourney(e?.boatAt===undefined?0:city.clock-e.boatAt);b.position.set(p.x,-.08,p.z);b.rotation.y=p.angle;b.visible=p.progress<1;fadeMaterials.forEach(m=>m.opacity=p.opacity);}else{const row=canalRows[i%2];b.position.set(((time*.55+i*12)%76)-38,-.08,row+Math.sin(i)*.35);b.rotation.y=Math.PI/2;}b.position.y+=Math.sin(time*1.8+i)*.035;});
   sparks.visible=pulse;if(pulse){const p=discoveryById[activeTouch],age=3-(until-time);for(let i=0;i<20;i++){const f=(age*.7+i/20)%1;dummy.position.set(p.x+Math.cos(i*2.4)*f*.65,p.y+f*.9,p.z+Math.sin(i*2.4)*f*.65);dummy.scale.setScalar(.025*(1-f));dummy.updateMatrix();sparks.setMatrixAt(i,dummy.matrix);}sparks.instanceMatrix.needsUpdate=true;}
  }};
 }
