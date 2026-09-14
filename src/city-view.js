@@ -22,7 +22,7 @@ export function createCityView(world,callbacks){
   function hide(){overview=false;overviewChanged();}
   function toggle(){if(!active)return;callbacks.beforeView();overview=!overview;overviewChanged();}
   function district(id){
-    const d=districts.find(d=>d.id===id);if(!d)return;callbacks.beforeView();show();following=false;selected=null;focus.set(d.x,0,d.z);distance=31;$('city-detail').hidden=true;
+    const d=districts.find(d=>d.id===id);if(!d)return;callbacks.beforeView();show();following=false;selected=null;focus.set(d.x,0,d.z);distance=id==='memory'?57:31;$('city-detail').hidden=true;
   }
   for(const d of districts){const b=document.createElement('button');b.textContent=d.name;b.onclick=()=>district(d.id);$('districts').append(b);}
   for(const n of npcs){
@@ -31,7 +31,8 @@ export function createCityView(world,callbacks){
     const marker=document.createElement('button');marker.className='city-marker';marker.textContent=n.name;marker.style.setProperty('--resident-color','#'+n.accent.toString(16));marker.setAttribute('aria-label',n.name+'を追いかける');marker.onclick=e=>{e.stopPropagation();select(n.id);};$('city-markers').append(marker);markers.set(n.id,marker);
   }
   $('city-button').onclick=toggle;
-  $('city-all').onclick=()=>{callbacks.beforeView();show();selected=null;following=false;focus.set(-6,0,22);distance=73;$('city-detail').hidden=true;};
+  function frameTown(){focus.set(-6,0,city?.community?.active?37:22);distance=city?.community?.active?93:73;}
+  $('city-all').onclick=()=>{callbacks.beforeView();show();selected=null;following=false;frameTown();$('city-detail').hidden=true;};
   $('city-close-detail').onclick=()=>{selected=null;following=false;$('city-detail').hidden=true;};
   $('city-visit').onclick=()=>{if(!selected)return;callbacks.visit(selected);hide();};
   $('city-borrow').onclick=()=>{if(!selected)return;callbacks.borrow(selected);hide();};
@@ -64,7 +65,7 @@ export function createCityView(world,callbacks){
   surface.addEventListener('pointermove',e=>{
     if(!overview||!drag||e.pointerId!==drag.id)return;
     const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)>5)drag.moved=true;
-    if(drag.moved){following=false;const amount=distance/innerHeight*1.15;focus.x-=Math.cos(orbit)*dx*amount+Math.sin(orbit)*dy*amount;focus.z+=Math.sin(orbit)*dx*amount-Math.cos(orbit)*dy*amount;focus.x=T.MathUtils.clamp(focus.x,-43,27);focus.z=T.MathUtils.clamp(focus.z,-7,42);}
+    if(drag.moved){following=false;const amount=distance/innerHeight*1.15;focus.x-=Math.cos(orbit)*dx*amount+Math.sin(orbit)*dy*amount;focus.z+=Math.sin(orbit)*dx*amount-Math.cos(orbit)*dy*amount;focus.x=T.MathUtils.clamp(focus.x,-43,40);focus.z=T.MathUtils.clamp(focus.z,-7,87);}
     drag.x=e.clientX;drag.y=e.clientY;
   });
   surface.addEventListener('pointerup',e=>{if(drag?.id!==e.pointerId)return;clickedAfterDrag=drag.moved;drag=null;if(surface.hasPointerCapture(e.pointerId))surface.releasePointerCapture(e.pointerId);});
@@ -78,7 +79,7 @@ export function createCityView(world,callbacks){
   function cameraFrame(dt,keys,preview=false){
     if(!overview&&!preview)return;
     if(following&&selected){const n=npcs.find(n=>n.id===selected);focus.lerp(new T.Vector3(n.root.position.x,0,n.root.position.z),1-Math.exp(-dt*4));}
-    if(!preview){const dx=Number(keys.has('d')||keys.has('arrowright'))-Number(keys.has('a')||keys.has('arrowleft')),dz=Number(keys.has('s')||keys.has('arrowdown'))-Number(keys.has('w')||keys.has('arrowup'));if(dx||dz){following=false;focus.x=T.MathUtils.clamp(focus.x+dx*dt*distance*.3,-43,27);focus.z=T.MathUtils.clamp(focus.z+dz*dt*distance*.3,-7,42);}}
+    if(!preview){const dx=Number(keys.has('d')||keys.has('arrowright'))-Number(keys.has('a')||keys.has('arrowleft')),dz=Number(keys.has('s')||keys.has('arrowdown'))-Number(keys.has('w')||keys.has('arrowup'));if(dx||dz){following=false;focus.x=T.MathUtils.clamp(focus.x+dx*dt*distance*.3,-43,40);focus.z=T.MathUtils.clamp(focus.z+dz*dt*distance*.3,-7,87);}}
     const spread=innerWidth/innerHeight<1.15?1.4:1;wanted.set(focus.x+Math.sin(orbit)*distance*.65*spread,distance*.85*spread,focus.z+Math.cos(orbit)*distance*.65*spread);
     const blend=reduced.matches?1:1-Math.exp(-dt*4.5);camera.position.lerp(wanted,blend);lookCamera.position.copy(camera.position);lookCamera.lookAt(focus.x,0,focus.z);camera.quaternion.slerp(lookCamera.quaternion,blend);world.scene.fog.density=T.MathUtils.lerp(world.scene.fog.density,.006,blend);
   }
@@ -87,5 +88,5 @@ export function createCityView(world,callbacks){
     camera.updateMatrixWorld();
     for(const n of npcs){const marker=markers.get(n.id);projected.copy(n.root.position);projected.y=2.65;projected.project(camera);marker.hidden=projected.z< -1||projected.z>1||Math.abs(projected.x)>1||Math.abs(projected.y)>1;marker.style.left=(projected.x*.5+.5)*innerWidth+'px';marker.style.top=(-projected.y*.5+.5)*innerHeight+'px';marker.classList.toggle('selected',selected===n.id);}
   }
-  return {get overview(){return overview;},get selected(){return selected;},show,hide,toggle,select,district,update,setBorrowed,cameraFrame,renderMarkers,showPlace(site){const p=places[site];if(!p)return;show();selected=null;following=false;focus.set(p.x,0,p.z);distance=site==='relay'?34:28;$('city-detail').hidden=true;},reset(){selected=null;following=false;focus.set(-6,0,22);distance=73;eventKey='';setBorrowed(null);show();}};
+  return {get overview(){return overview;},get selected(){return selected;},show,hide,toggle,select,district,update,setBorrowed,cameraFrame,renderMarkers,showPlace(site){const p=places[site];if(!p)return;show();selected=null;following=false;focus.set(p.x,0,p.z);distance=site==='relay'?34:28;$('city-detail').hidden=true;},reset(){selected=null;following=false;frameTown();eventKey='';setBorrowed(null);show();}};
 }

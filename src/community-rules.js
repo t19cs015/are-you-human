@@ -19,6 +19,10 @@ export const communityIdeas=[
   '星を見ながら、人間とAIが話せる場所にしよう。',
 ];
 export const communityLines={
+  sync_start:{by:'central',text:'街の記憶を、そろえます。'},
+  human_together:{by:'mia',text:'同じタイミングじゃなくても、一緒に動けるんだね。'},
+  central_greeting:{by:'central',text:'こんばんは。来てくれたんですね。'},
+  archive_greeting:{by:'central',text:'みんなの続きは、ここにあります。あなたの続きは……あなたと歩いていくのですね。'},
   arrival_mia:{by:'mia',text:'……あれ？ 人間？ ねえ、みんな見て！'},
   arrival_tomo:{by:'tomo',text:'ほんとだ！ そのレバー、触ってみて！'},
   first_light:{by:'mia',text:'灯りが戻った！ あなたが変えたんだね。'},

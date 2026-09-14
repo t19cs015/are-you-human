@@ -2,6 +2,8 @@ import {squarePaving} from './paving.js';
 import {roomAt} from './locations.js';
 import * as T from '/node_modules/three/build/three.module.js';
 import {asset} from './cafe-assets.js';
+import {townHedges,onPlazaApproach} from './street-layout.js';
+import {addPropFootprint} from './street-props.js';
 
 // Exterior footprints remain compatible with the original routes and entry buttons.
 export const townFootprints=[
@@ -20,8 +22,9 @@ export async function upgradeTown(world,studio){
  function box(color,x,y,z,w,h,d,parent=group){const m=new T.Mesh(unitBox,material(color));m.position.set(x,y,z);m.scale.set(w,h,d);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;}
  function put(name,x,z,s=1,y=.18,rotation=0,zone='town',size){
   const model=templates[name].clone(true),holder=new T.Group();holder.add(model);
+  if(name==='house-fence_straight')model.position.x-=.5;
   if(size){const bounds=new T.Box3().setFromObject(model),v=bounds.getSize(new T.Vector3());model.scale.set(size[0]/v.x,size[1]/v.y,size[2]/v.z);model.position.set(-(bounds.min.x+bounds.max.x)/2*model.scale.x,-bounds.min.y*model.scale.y,-(bounds.min.z+bounds.max.z)/2*model.scale.z);}
-  holder.position.set(x,y,z);holder.scale.setScalar(s);holder.rotation.y=rotation;group.add(holder);pools[zone].push(holder);return holder;
+  holder.position.set(x,y,z);holder.scale.setScalar(s);holder.rotation.y=rotation;group.add(holder);pools[zone].push(holder);if(['park-bush','park-hedge_straight','house-fence_straight'].includes(name))addPropFootprint(colliders,holder);return holder;
  }
  function roof(model,color){
   model.traverse(o=>{if(!o.isMesh||o.name!=='house')return;const mat=o.material.clone(),tint=new T.Color(color);
@@ -89,14 +92,15 @@ export async function upgradeTown(world,studio){
  const ring=new T.Mesh(new T.RingGeometry(1.73,1.79,64),material(0x777f73));ring.rotation.x=-Math.PI/2;ring.position.set(0,.187,.7);group.add(ring);
  for(let i=0;i<8;i++){const m=box(0xc5ba93,Math.sin(i*Math.PI/4)*1.38,.19,.7+Math.cos(i*Math.PI/4)*1.38,.1,.014,.24);m.rotation.y=i*Math.PI/4;}
  put('park-bench',5,2.5,.95,.18,-Math.PI/10);
- for(const [x,z] of [[3.1,-3.6],[-6,4],[6,4],[0,10]])lantern(x,z);
+ for(const [x,z] of [[3.1,-3.6],[-6,4],[6,4],[2.6,10]])lantern(x,z);
  // Planting repeats existing CC0 models. Static instances share geometry, maps and materials.
  for(let i=0;i<24;i++){
   const a=i/24*Math.PI*2,x=Math.cos(a)*13,z=Math.sin(a)*13;
+  if(onPlazaApproach(x,z))continue;
   put('park-tree',x,z,.95+(i%3)*.13,.13,a);
  }
  for(const [x,z] of [[-7,4],[7,4],[-8,-4],[8,-4]])put('park-tree',x,z,.88,.15,x);
- for(const [x,z,rot] of [[-6.7,1.6,0],[6.9,-1.2,0],[7.5,2.1,0],[-3.1,6.5,Math.PI/2],[3.1,6.5,Math.PI/2]])put('park-hedge_straight',x,z,.72,.18,rot);
+ for(const [x,z,rot] of townHedges)put('park-hedge_straight',x,z,.72,.18,rot);
  for(let i=0;i<90;i++){
   const side=i%2?1:-1,z=4.6+Math.floor(i/2)*.13,x=side*(2.3+(i%5)*.22);
   if(Math.hypot(x,z)>11.4)continue;

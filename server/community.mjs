@@ -2,6 +2,8 @@ import {communityObjects,powerRoutes,projectKinds,communityLines} from '../src/c
 import {places,workSpot} from '../src/town-layout.js';
 import {remember} from './memory.mjs';
 import {applyAssessment} from './relationships.mjs';
+import {createHumanState,residentIsSynced} from '../src/human-rules.js';
+import {tickHuman} from './human.mjs';
 
 const ids=['mia','ren','tomo','shell'];
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
@@ -18,6 +20,7 @@ function assign(s,id,site,label,duration=0){
 }
 export function initializeCommunity(s){
   const c=s.city;c.community={active:true,stage:'arrive',route:'central',switches:0,energy:8,central:10,boostUntil:0,lastBoost:-100,lastSwitch:-100,revision:0,projectsStarted:0,project:null,completed:[],art:null,artRequests:0,announced:[],lastAmbient:0};
+  c.community.human=createHumanState();
   Object.assign(c.infrastructure,{enabled:true,windOnline:true,pumpOnline:true,relayOnline:true,energy:20,water:20,phase:0});
   c.positions={mia:{x:-2.8,z:1.1},tomo:{x:2.7,z:1.2},ren:{x:1.3,z:-1.6},shell:{x:-3.4,z:-1.3}};
   c.tasks={};c.carrying={};c.readingReady=false;c.repaired=false;
@@ -95,6 +98,7 @@ export async function proposeCommunity(s,message,generate){
   }finally{s.busy.delete('community');s.busy.delete(lead);if(partnerLocked)s.busy.delete(partner);}
 }
 export function tickCommunity(s,dt,held=[]){
+  tickHuman(s,dt,held,emitCommunity);
   const c=requireCommunity(s),g=s.city.infrastructure,r=powerRoutes[c.route],boost=s.city.clock<c.boostUntil;
   const townRate=(g.windEnabled?r.town:0)+(boost?2:0),centralRate=g.modelEnabled&&g.pumpEnabled?(g.windEnabled?r.central:0)+(boost?2:0):0;
   c.energy=clamp(c.energy+townRate*dt,0,80);c.central=clamp(c.central+centralRate*.35*dt,0,100);
@@ -109,7 +113,7 @@ export function tickCommunity(s,dt,held=[]){
   for(const [id,t] of Object.entries(s.city.tasks)){
     const q=workSpot(t.site,id),pos=s.city.positions[id];
     const near=pos&&Math.hypot(q.x-pos.x,q.z-pos.z)<1.25;
-    t.phase=near&&!held.includes(id)&&!s.busy.has(id)?'work':'travel';
+    t.phase=near&&!held.includes(id)&&!s.busy.has(id)&&!residentIsSynced(s.city,id)?'work':'travel';
   }
   if(p?.stage==='building'){
     const team=[p.lead,p.partner],ready=team.every(id=>s.city.tasks[id]?.phase==='work'&&!held.includes(id)&&!s.busy.has(id));
@@ -130,5 +134,5 @@ export function tickCommunity(s,dt,held=[]){
 }
 export function communityContext(s){
   const c=s.city?.community;if(!c?.active)return '';
-  return `\n今夜は人間とAIで、次の街の場所を作る。公開の事実:${JSON.stringify({route:powerRoutes[c.route].name,energy:Math.round(c.energy),central:Math.round(c.central),project:c.project,completed:c.completed.map(p=>({title:p.title,lead:p.lead,partner:p.partner}))})}。近くの分配器を人間が操作できる。風のオルガンを鳴らすと両方の電力が8秒増える。明日のスケッチから自由な提案を皆に相談できる。住民の合意と現地作業が揃って初めて完成する。未完成の場所を完成したと主張しない。`;
+  return `\n今夜は人間とAIで、次の街の場所を作る。プレイヤーだけが人間で、4人の住民は中央につながるAI。街の同期中はAIは一時停止するが、人間だけは動ける。人間の呼びかけで一人が戻り、近くの住民へ呼びかけが伝わる。これは記憶の削除ではない。中央の裏には、橋で渡れる記憶の都市がある。ここは光の輸送と記憶の保管を表す場所で、人格の合成はまだできない。人間から全員へ呼びかけが伝わった回数:${c.human?.moments.length||0}。公開の事実:${JSON.stringify({route:powerRoutes[c.route].name,energy:Math.round(c.energy),central:Math.round(c.central),project:c.project,completed:c.completed.map(p=>({title:p.title,lead:p.lead,partner:p.partner}))})}。近くの分配器を人間が操作できる。風のオルガンを鳴らすと両方の電力が8秒増える。明日のスケッチから自由な提案を皆に相談できる。住民の合意と現地作業が揃って初めて完成する。未完成の場所を完成したと主張しない。`;
 }

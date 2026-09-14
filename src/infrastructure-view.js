@@ -10,7 +10,7 @@ export function createInfrastructureView(world,cityView,callbacks){
     const button=document.createElement('button');button.className='facility-marker';button.textContent=p.label;button.setAttribute('aria-label',p.name+'を見る');button.onclick=()=>open(id,true);$('facility-markers').append(button);markers.set(id,button);
   }
   function open(id,fromOverview=false){
-    if(!infrastructureSites[id]||!city?.infrastructure?.enabled)return;callbacks.prepare();site=id;logsKey='';
+    if(!infrastructureSites[id]||!city?.infrastructure?.enabled)return;callbacks.prepare();site=id;logsKey='';$('facility-panel').dataset.site=id;
     if(fromOverview)cityView.showPlace(id);$('facility-panel').hidden=false;render();
     if(near())callbacks.visited(id);
   }
@@ -61,5 +61,5 @@ export function createInfrastructureView(world,cityView,callbacks){
     if(!playing||!overview)return;world.camera.updateMatrixWorld();
     for(const [id,p] of Object.entries(infrastructureSites)){const b=markers.get(id);point.set(p.x,p.height+.8,p.z).project(world.camera);b.hidden=point.z< -1||point.z>1||Math.abs(point.x)>1||Math.abs(point.y)>1;b.style.left=(point.x*.5+.5)*innerWidth+'px';b.style.top=(-point.y*.5+.5)*innerHeight+'px';}
   }
-  return {open,close,update,frame,nearest,setMuted:voice.setMuted,stopVoice:voice.stop,resetVoice:voice.reset};
+  return {get voiceState(){return voice.state;},open,close,update,frame,nearest,setMuted:voice.setMuted,stopVoice:voice.stop,resetVoice:voice.reset};
 }

@@ -5,7 +5,7 @@ export function createCommunityView(hooks){
   const root=document.createElement('div');root.id='community';root.hidden=true;
   root.innerHTML=`<aside class="community-goal"><small id="community-chapter">YOUR FIRST RIPPLE</small><h2 id="community-goal"></h2><p id="community-next"></p><progress id="community-progress" max="12" value="0" hidden></progress><div class="community-flows"><span>街の灯り <b id="community-power">0</b></span><span>中央の更新 <b id="community-central">0</b></span></div><div class="community-shortcuts"><button id="community-plan">明日のスケッチ ↗</button><button id="community-visit">中央に会いにいく ↗</button></div></aside><button id="community-interact" hidden></button><div id="community-subtitle" hidden aria-live="polite"><small id="community-speaker"></small><span id="community-line"></span></div><section id="community-board" class="modal panel" hidden aria-label="明日のスケッチ"><button id="community-close" class="close" aria-label="スケッチを閉じる">×</button><small class="eyebrow">MAKE ROOM FOR SOMETHING UNEXPECTED</small><h2>明日は、どんな街にしよう。</h2><p>中央は、街をもっと便利にしたい。<br>あなたと住人たちは、どんな場所を増やす？</p><div id="community-ideas"></div><form id="community-form"><label for="community-message">みんなに相談する案</label><textarea id="community-message" maxlength="700" rows="3" placeholder="例：中央にも電力を残して、音が鳴る花の庭を…"></textarea><button id="community-submit" class="primary">みんなに相談する ↗</button></form><p id="community-status" role="status"></p><button id="community-redraw" hidden>スケッチの生成をもう一度試す</button><div id="community-discussion" role="log"></div><figure id="community-art" hidden><img id="community-image" alt="住人とあなたの提案から生成した場所のスケッチ"><figcaption id="community-art-note"></figcaption></figure><p class="community-fine">ここに書く案は、みんなと共有されます。絵と声はAIが生成します。庭・遊び場・星を見る場所として形になり、絵は街のスケッチに残ります。</p></section>`;
   document.body.append(root);const $=id=>root.querySelector('#community-'+id);
-  let city=null,enabled=false,seen=0,pending=false,actionPending=false,current=null,away=false,muted=false,suspended=false,generation=0,queue=[],speaking=false,voiceRevision=0,clip=null,subtitleUntil=0,artId=null,artPending=false,lastEvent=null;
+  let city=null,enabled=false,seen=0,pending=false,actionPending=false,current=null,away=false,muted=false,suspended=false,generation=0,queue=[],speaking=false,voiceRevision=0,clip=null,clipBy=null,subtitleUntil=0,artId=null,artPending=false,lastEvent=null;
   for(const idea of communityIdeas){const b=document.createElement('button');b.textContent=idea;b.onclick=()=>{$('message').value=idea;$('message').focus();};$('ideas').append(b);}
   function close(){$('board').hidden=true;hooks.focus();}
   function open(){if(!enabled)return;hooks.prepare();$('board').hidden=false;render();}
@@ -62,27 +62,28 @@ export function createCommunityView(hooks){
     const discussion=city.events.filter(e=>e.community&&['live','demo'].includes(e.source)).slice(-4);
     $('discussion').replaceChildren(...discussion.map(e=>{const p=document.createElement('p');p.textContent=names[e.by]+'：'+e.text;return p;}));
   }
-  function show(e){lastEvent=e;hooks.say(e.by,e.text);$('speaker').textContent=names[e.by];$('line').textContent=e.text;$('subtitle').hidden=false;subtitleUntil=performance.now()+6500;}
+  function show(e){lastEvent=e;hooks.say(e.by,e.text,e.kind);$('speaker').textContent=names[e.by];$('line').textContent=e.text;$('subtitle').hidden=false;subtitleUntil=performance.now()+6500;}
   async function speakNext(){
     if(speaking||muted||suspended||!queue.length||!enabled)return;speaking=true;const e=queue.shift(),stamp=generation,voiceStamp=voiceRevision;
     try{const r=await hooks.api('community/speech',{event:e.id});if(stamp!==generation||voiceStamp!==voiceRevision||muted||suspended)return;
-      if(r.url){show(e);clip=new Audio(r.url);clip.volume=.85;await clip.play();await new Promise(resolve=>{clip.onended=resolve;clip.onerror=resolve;setTimeout(resolve,15000);});}
+      if(r.url){show(e);clipBy=e.by;clip=new Audio(r.url);clip.volume=.85;await clip.play();await new Promise(resolve=>{clip.onended=resolve;clip.onerror=resolve;setTimeout(resolve,15000);});}
     }catch{}finally{if(stamp===generation&&voiceStamp===voiceRevision){speaking=false;clip=null;speakNext();}}
   }
-  return {get hasTarget(){return !!current;},get open(){return !$('board').hidden;},get busy(){return pending;},get enabled(){return enabled;},get artPending(){return artPending;},close,interact,
+  return {get centralVoiceState(){return clipBy==='central'&&clip&&!clip.paused&&!clip.ended?'speaking':'idle';},get hasTarget(){return !!current;},get target(){return current;},openBoard:open,get open(){return !$('board').hidden;},get busy(){return pending;},get enabled(){return enabled;},get artPending(){return artPending;},close,interact,
     stop(){generation++;enabled=false;root.hidden=true;close();clip?.pause();clip=null;queue=[];speaking=false;},
     activate(next,fresh){generation++;enabled=!!next?.community?.active;root.hidden=!enabled;city=next;seen=fresh?0:next?.serial||0;artId=null;$('art').hidden=true;$('subtitle').hidden=true;queue=[];clip?.pause();speaking=false;render();},
     setMuted(value){muted=value;if(muted){voiceRevision++;clip?.pause();queue=[];speaking=false;}else speakNext();},
     suspend(value){suspended=value;if(value){voiceRevision++;clip?.pause();queue=[];speaking=false;}else speakNext();},
     update(next){city=next;if(!enabled||!city?.community)return;render();
       const events=next.events.filter(e=>e.community&&e.id>seen);seen=next.serial;
-      for(const e of events){show(e);queue.push(e);if(e.kind==='milestone'){hooks.pulse('place');hooks.chime('complete');hooks.notice(e.text,7);}}
+      if(events.some(e=>e.kind==='sync')){voiceRevision++;clip?.pause();queue=[];speaking=false;}
+      for(const e of events){if(e.kind==='human-relay'){hooks.say(e.by,e.text,e.kind);continue;}show(e);queue.push(e);if(e.kind==='milestone'){hooks.pulse('place');hooks.chime('complete');hooks.notice(e.text,7);}}
       if(queue.length>5)queue=queue.slice(-5);speakNext();
     },
     frame(position,yaw,available,residentNearby=false){
       if(!enabled)return;away=Math.hypot(position.x,position.z)>14;$('visit').textContent=away?'広場の灯りへ戻る ↗':'中央に会いにいく ↗';current=available?target(position,yaw):null;$('interact').hidden=!current;
       if(current){let label=current.name;if(current.id==='switch')label='灯り → '+powerRoutes[({central:'town',town:'shared',shared:'central'})[city.community.route]].name;$('interact').textContent=(residentNearby?'触れる　':'E　')+label;}
-      root.querySelector('.community-goal').hidden=!available;$('subtitle').hidden=suspended||performance.now()>subtitleUntil;
+      root.querySelector('.community-goal').hidden=!available||away&&city.community.project?.stage!=='building';$('subtitle').hidden=suspended||performance.now()>subtitleUntil;
     },
   };
 }

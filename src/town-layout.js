@@ -5,6 +5,7 @@ export const districts = [
   {id:'grove', name:'木立の工房', subtitle:'MAKE · MEND · TRY AGAIN', x:14, z:24},
   {id:'wind', name:'風待ちの丘', subtitle:'A LITTLE WIND GOES A LONG WAY', x:-34, z:13},
   {id:'central', name:'中央の塔', subtitle:'FOR A BETTER TOMORROW', x:0, z:32},
+  {id:'memory', name:'記憶の都市', subtitle:'THE CITY IS STILL DREAMING', x:0, z:64},
 ];
 export const places = {
   commons:{name:'みんなの広場',x:0,z:-.6,district:'plaza'},
@@ -20,6 +21,7 @@ export const places = {
   pump:{name:'川の取水ポンプ',x:-18,z:34,district:'river'},
   relay:{name:'集電タワー',x:10,z:31,district:'central'},
   central:{name:'中央棟の受付',x:0,z:28,district:'central'},
+  memory:{name:'記憶の回廊',x:0,z:51,district:'memory'},
 };
 export function outdoorGround(x,z){
   return Number.isFinite(x)&&Number.isFinite(z)&&(
@@ -31,11 +33,13 @@ export function outdoorGround(x,z){
     Math.hypot(x+34,z-13)<12.2 ||
     (x>-35&&x< -19&&z>15&&z<23) ||
     Math.hypot(x,z-32)<11.8 ||
-    (x> -22&&x< -14&&z>29&&z<37)
+    (x> -22&&x< -14&&z>29&&z<37) ||
+    (Math.abs(x)<3.15&&z>39&&z<50) ||
+    (Math.abs(x)<40&&z>=48&&z<88)
   );
 }
 export function districtAt(x,z){
-  return x< -25?'wind':Math.abs(x)<11&&z>27?'central':z<12?'plaza':x<0?'river':'grove';
+  return z>=46?'memory':x< -25?'wind':Math.abs(x)<11&&z>27?'central':z<12?'plaza':x<0?'river':'grove';
 }
 export const townHomes=[
   {x:-21,z:19,rotation:Math.PI/2,label:'WILLOW WALK'},
@@ -54,12 +58,18 @@ export const infrastructureSites={
 };
 export const modernPlots=[
   {x:-7.7,z:31.5,height:8,phase:2,rotation:.12,at:27},
-  {x:-8,z:37,height:11,phase:2,rotation:0,at:38},
-  {x:-4.5,z:40.5,height:13,phase:2,rotation:0,at:48},
-  {x:4.5,z:40.5,height:12,phase:3,rotation:0,at:60},
-  {x:8,z:38.5,height:15,phase:3,rotation:-.12,at:70},
-  {x:0,z:40.5,height:12,phase:3,rotation:0,at:82},
+  {x:-9,z:38,height:11,phase:2,rotation:0,at:38},
+  {x:-6,z:41,height:13,phase:2,rotation:0,at:48},
+  {x:6,z:41,height:12,phase:3,rotation:0,at:60},
+  {x:9,z:38.5,height:15,phase:3,rotation:-.12,at:70},
+  {x:19,z:51,height:12,phase:3,rotation:0,at:82},
 ];
+export const memoryPlots=[
+  ...[-30,-20,-10,10,20,30].map((x,i)=>({x,z:57,height:8+i%3*3,rotation:i%2?.12:0,at:0})),
+  ...[-32,-21,-11,11,21,32].map((x,i)=>({x,z:69,height:12+i%4*2,rotation:0,at:0})),
+  ...[-31,-21,-11,11,21,31].map((x,i)=>({x,z:81,height:17+i%3*3,rotation:0,at:0})),
+];
+export const memoryObstacles=[...memoryPlots.map(({x,z})=>({x,z,hw:2.1,hd:2.1})),{x:0,z:79,hw:4.2,hd:4.2}];
 export const infrastructureObstacles=[
   ...Object.values(infrastructureSites).map(({x,z,hw,hd})=>({x,z,hw,hd})),
   ...modernPlots.map(({x,z})=>({x,z,hw:1.65,hd:1.65})),
@@ -68,6 +78,7 @@ export const infrastructureObstacles=[
 // Different residents can work together without standing inside each other.
 export function workSpot(place,id){
   const p=places[place],offsets={mia:[-.85,.65],ren:[.85,.65],tomo:[-.85,-.65],shell:[.85,-.65]};
+  if(place==='organ'){const d=({mia:[-1.35,1.05],ren:[1.35,1.05],tomo:[-1.4,-.95],shell:[2.3,.65]})[id]||[0,1.1];return {x:p.x+d[0],z:p.z+d[1]};}
   const d=offsets[id]||[0,0];
   // Leave room to approach both sides of the riverside table without grazing its corners.
   const x=place==='reading'?Math.sign(d[0])*1.1:d[0],z=place==='reading'?Math.sign(d[1])*.85:d[1];

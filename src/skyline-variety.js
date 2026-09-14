@@ -4,7 +4,7 @@ import {RoundedBoxGeometry} from '/node_modules/three/examples/jsm/geometries/Ro
 // Six architectural families, all in the little town's ceramic/wood palette.
 // Geometry is instanced by material; floors and silhouettes differ, not just tint.
 export function createVariedSkyline(scene,originalPlots){
-  const plots=originalPlots.map((p,i)=>({...p,...(i===12?{x:12,z:25}:{}),family:i%6}));
+  const plots=originalPlots.map((p,i)=>({...p,family:i%6}));
   const group=new T.Group();group.name='明日の街 · six building families';scene.add(group);
   const geometries={box:new RoundedBoxGeometry(1,1,1,2,.065),cylinder:new T.CylinderGeometry(1,1,1,20),cone:new T.ConeGeometry(1,1,20),sphere:new T.SphereGeometry(1,16,10)};
   const palettes=[{wall:0xd6cbbb,trim:0x83a093,glass:0x648c99},{wall:0x8faba8,trim:0xccc6ac,glass:0x426d83},{wall:0xbda2a1,trim:0x526d7a,glass:0x739398},{wall:0xaec4bc,trim:0x607f88,glass:0x507481},{wall:0xd6c9aa,trim:0x9f7f83,glass:0x729fa8},{wall:0xc4cbb5,trim:0x98a88b,glass:0x70939b}];

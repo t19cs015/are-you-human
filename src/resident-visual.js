@@ -1,6 +1,6 @@
 import {GLTFLoader} from '/node_modules/three/examples/jsm/loaders/GLTFLoader.js';
 import * as T from '/node_modules/three/build/three.module.js';
-export const expressions=['neutral','happy','surprised','confused','suspicious','thinking','glitch'];
+export const expressions=['neutral','happy','surprised','confused','suspicious','thinking','glitch','sync'];
 const profiles={mia:{ink:'#b8f4e9',phase:0,gesture:2.05},ren:{ink:'#c2e1f3',phase:1.1,gesture:.55},tomo:{ink:'#9eeeff',phase:2.2,gesture:2.15},shell:{ink:'#d5edb2',phase:3.3,gesture:1.15}};
 export function createFaceTexture(id){
  const profile=profiles[id];if(!profile)throw new Error('Unknown resident');
@@ -8,7 +8,7 @@ export function createFaceTexture(id){
  function paint(expression='neutral',blink=false){
   ctx.clearRect(0,0,384,224);ctx.fillStyle='#112a35';ctx.beginPath();ctx.roundRect(0,0,384,224,55);ctx.fill();ctx.fillStyle=profile.ink;ctx.strokeStyle=profile.ink;ctx.lineWidth=10;ctx.lineCap='round';
   for(const x of [120,264]){
-   if(blink||expression==='happy'){ctx.beginPath();ctx.moveTo(x-20,100);ctx.quadraticCurveTo(x,expression==='happy'?65:100,x+20,100);ctx.stroke();}
+   if(blink||expression==='happy'||expression==='sync'){ctx.beginPath();ctx.moveTo(x-20,100);ctx.quadraticCurveTo(x,expression==='happy'?65:100,x+20,100);ctx.stroke();}
    else if(expression==='suspicious'){ctx.save();ctx.translate(x,98);ctx.rotate(x<190?-.2:.2);ctx.fillRect(-20,-5,40,15);ctx.restore();}
    else{ctx.beginPath();ctx.ellipse(x,95,expression==='surprised'?21:id==='ren'?14:17,expression==='surprised'?29:expression==='thinking'||id==='shell'?15:id==='ren'?20:24,0,0,Math.PI*2);ctx.fill();}
   }
@@ -47,7 +47,8 @@ export function upgradeResident(n){
   n.body.add(imported);fallback.forEach(o=>o.visible=false);arms.splice(0,arms.length,...newArms);feet.splice(0,feet.length,...newFeet);
   return true;
  }).catch(error=>{console.warn(`${n.name} original model unavailable; keeping existing model.`,error.message);return false;});
- return {ready,get model(){return imported;},wave(time){waveUntil=time+2.1;},update(time,expression='neutral',talking=false,working=false){
+ return {ready,get model(){return imported;},wave(time){waveUntil=time+2.1;},update(time,expression='neutral',talking=false,working=false,frozen=false){
+  if(frozen){if(last!=='sync'){paint('sync');last='sync';}lastPos.copy(n.root.position);return;}
   if(!expressions.includes(expression))expression='neutral';const blink=(time+profile.phase)%4.4<.13,key=expression+blink;if(key!==last){paint(expression,blink);last=key;}
   const moving=lastPos.distanceToSquared(n.root.position)>.000001;lastPos.copy(n.root.position);
   const pace=n.id==='shell'?.7:n.id==='tomo'?1.15:1;

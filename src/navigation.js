@@ -1,6 +1,7 @@
 // Bounded A* with collision checks along every edge, including diagonal corners.
 // Pure JavaScript so the same routes can be checked without WebGL.
-export function clearSegment(a,b,canWalk,step=.24){
+export function clearSegment(a,b,canWalk,step=.075){
+  if(canWalk.segmentClear&&!canWalk.segmentClear(a,b))return false;
   const count=Math.max(1,Math.ceil(Math.hypot(b.x-a.x,b.z-a.z)/step));
   for(let i=1;i<=count;i++)if(!canWalk(a.x+(b.x-a.x)*i/count,a.z+(b.z-a.z)*i/count))return false;
   return true;

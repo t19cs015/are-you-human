@@ -1,4 +1,5 @@
 import {places,workSpot,outdoorGround} from '../src/town-layout.js';
+import {residentIsSynced} from '../src/human-rules.js';
 import {remember} from './memory.mjs';
 import {initializeCommunity,tickCommunity,communityContext} from './community.mjs';
 import {applyAssessment} from './relationships.mjs';
@@ -110,7 +111,7 @@ export function tickCity(s,positions={},held=[],now=Date.now()){
   if(!positions||typeof positions!=='object'||Array.isArray(positions)||!Array.isArray(held)||held.some(id=>!Object.hasOwn(s.agents,id)))throw new Error('INVALID_ACTION');
   for(const [id,p] of Object.entries(positions))if(!Object.hasOwn(s.agents,id)||!p||!outdoorGround(p.x,p.z))throw new Error('INVALID_ACTION');
   const dt=Math.max(0,Math.min(2,(now-(c.lastAt??now))/1000));c.lastAt=now;c.clock+=dt;
-  if(c.community?.active){for(const [id,p] of Object.entries(positions))c.positions[id]={x:p.x,z:p.z};tickCommunity(s,dt,held);return publicCity(s);}
+  if(c.community?.active){for(const [id,p] of Object.entries(positions))if(!residentIsSynced(c,id))c.positions[id]={x:p.x,z:p.z};tickCommunity(s,dt,held);return publicCity(s);}
   if(c.episode?.active){for(const [id,p] of Object.entries(positions))c.positions[id]={x:p.x,z:p.z};tickEpisode(s,dt,held);return publicCity(s);}
   tickInfrastructure(s,dt);
   for(const [id,p] of Object.entries(positions))c.positions[id]={x:p.x,z:p.z};

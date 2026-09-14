@@ -2,6 +2,38 @@
   "generatedWith": "OpenAI Text to speech",
   "lines": [
     {
+      "id": "sync_start",
+      "by": "central",
+      "text": "街の記憶を、そろえます。",
+      "voice": "marin",
+      "model": "gpt-4o-mini-tts",
+      "textHash": "fdaaa775ff2646023387ef0b6b8af1ff3351bcd0b58384cd9aab83c039447faf"
+    },
+    {
+      "id": "human_together",
+      "by": "mia",
+      "text": "同じタイミングじゃなくても、一緒に動けるんだね。",
+      "voice": "coral",
+      "model": "gpt-4o-mini-tts",
+      "textHash": "b6ed2402027f9cb97999d76dc763a29d65d38d9dceb790da216cbb8b9cdf8ea8"
+    },
+    {
+      "id": "central_greeting",
+      "by": "central",
+      "text": "こんばんは。来てくれたんですね。",
+      "voice": "marin",
+      "model": "gpt-4o-mini-tts",
+      "textHash": "f7801127ed5bca63b59031c8cd93f181cbddca1b6dd680c92d52234f807b61dc"
+    },
+    {
+      "id": "archive_greeting",
+      "by": "central",
+      "text": "みんなの続きは、ここにあります。あなたの続きは……あなたと歩いていくのですね。",
+      "voice": "marin",
+      "model": "gpt-4o-mini-tts",
+      "textHash": "e193a367b9d87424f4546e4f42bd89dc3f3d11beb6f2b3095f166b38ac48ab04"
+    },
+    {
       "id": "arrival_mia",
       "by": "mia",
       "text": "……あれ？ 人間？ ねえ、みんな見て！",

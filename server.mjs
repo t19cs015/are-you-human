@@ -2,7 +2,8 @@ import {advanceProject,projectFeedback} from './server/projects.mjs';
 import {startCity,startEpisode,startCommunity,tickCity,thinkCity,controlCity,visitCityFacility,publicCity} from './server/city.mjs';
 import {inspectEpisode,proposeEpisode} from './server/episode.mjs';
 import {episodeSpeech,communitySpeech,residentSpeech} from './server/speech.mjs';
-import {interactCommunity,proposeCommunity} from './server/community.mjs';
+import {interactCommunity,proposeCommunity,emitCommunity} from './server/community.mjs';
+import {humanAction} from './server/human.mjs';
 import {generateCommunityArt,readCommunityArt} from './server/community-art.mjs';
 import {createStorage} from './server/storage.mjs';
 import {memoryPage} from './server/memory.mjs';
@@ -62,6 +63,7 @@ export function createServer({fetcher=fetch,apiKey=defaults.key,model=defaults.m
     if(url.pathname==='/api/episode/propose'&&req.method==='POST'){const result=await proposeEpisode(s.world,data.message,generate);return await commit({...result,city:publicCity(s.world)});}
     if(url.pathname==='/api/episode/speech'&&req.method==='POST')return json(res,200,await episodeSpeech(s,data.event,fetcher));
     if(url.pathname==='/api/community/start'&&req.method==='POST')return await commit(startCommunity(s.world));
+    if(url.pathname==='/api/community/human'&&req.method==='POST'){const r=humanAction(s.world,data,emitCommunity);return await commit({...r,city:publicCity(s.world)});}
     if(url.pathname==='/api/community/interact'&&req.method==='POST'){const result=interactCommunity(s.world,data.object,data.position,data.revision);return await commit({...result,city:publicCity(s.world)});}
     if(url.pathname==='/api/community/propose'&&req.method==='POST'){const result=await proposeCommunity(s.world,data.message,generate);return await commit({...result,city:publicCity(s.world)});}
     if(url.pathname==='/api/community/image'&&req.method==='POST')return await commit(await generateCommunityArt(s,data.revision,fetcher));

@@ -1,6 +1,7 @@
 import {squarePaving} from './paving.js';
 import * as T from '/node_modules/three/build/three.module.js';
 import {GLTFLoader} from '/node_modules/three/examples/jsm/loaders/GLTFLoader.js';
+import {addPropFootprint} from './street-props.js';
 const loader=new GLTFLoader(),cache=new Map(),atlases=new Map();
 export async function asset(name){
  if(!cache.has(name))cache.set(name,loader.loadAsync('/assets/cafe/'+name+'.glb').then(g=>{g.scene.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;const atlas=name.startsWith('house-')||name.startsWith('park-')?'tiny-treats':name.split('-')[0];if(o.material.map){const original=o.material.map;if(!atlases.has(atlas))atlases.set(atlas,original);else if(original!==atlases.get(atlas)){o.material.map=atlases.get(atlas);original.dispose();}}o.material.roughness=name.startsWith('furniture-')?.65:name.startsWith('park-')?.9:.8;o.material.onBeforeCompile=shader=>{shader.fragmentShader=shader.fragmentShader.replace('#include <map_fragment>','#include <map_fragment>\n diffuseColor.rgb = mix(vec3(dot(diffuseColor.rgb, vec3(0.2126,0.7152,0.0722))), diffuseColor.rgb, 0.82);');};}});return g.scene;}));
@@ -12,18 +13,18 @@ export async function upgradeCafe(world){
  const group=new T.Group();group.name='Cafe benchmark • CC0 assets';const sway=[],steam=[],lights=[];
  const palette={cream:0xf3dfb4,green:0x647f6e,wood:0x795a48,metal:0x344952};
  function box(color,x,y,z,w,h,d,parent=group){const m=new T.Mesh(new T.BoxGeometry(w,h,d),new T.MeshStandardMaterial({color,roughness:.75}));m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;}
- function put(name,x,z,scale=1,y=.18,rotation=0){const model=templates[name].clone(true);model.position.set(x,y,z);model.scale.setScalar(scale);model.rotation.y=rotation;group.add(model);return model;}
+ function put(name,x,z,scale=1,y=.18,rotation=0){const model=templates[name].clone(true),holder=new T.Group();holder.add(model);if(name==='house-fence_straight')model.position.x-=.5;holder.position.set(x,y,z);holder.scale.setScalar(scale);holder.rotation.y=rotation;group.add(holder);if(['park-bush','park-hedge_straight','house-fence_straight'].includes(name))addPropFootprint(world.colliders,holder);return holder;}
  // All large and medium forms below are existing licensed meshes.
  const house=put('house-house',-5.35,-6.1,.79,.18);house.name='Tiny Treats house adapted as cafe';
  put('park-bench',-5,2.5,.95,.18,Math.PI/10);
  put('park-street_lantern',-3.1,-3.6,.78,.18);
  put('park-street_lantern',-7.75,-.25,.72,.18);
  for(const [x,z,s] of [[-8.6,-6.3,1.3],[-8.2,-1.1,1.12],[-7.9,2.1,.9]]){const tree=put('park-tree',x,z,s);sway.push({object:tree,amount:.008,phase:x});}
- for(const [x,z,r] of [[-8,-3.4,0],[-7.8,-5.4,0],[-6.8,.8,Math.PI/2]])put('park-hedge_straight',x,z,.8,.18,r);
+ for(const [x,z,r] of [[-8,-3.4,0],[-7.8,-5.4,0],[-7.6,2.1,Math.PI/2]])put('park-hedge_straight',x,z,.8,.18,r);
  for(const [x,z] of [[-7,-3.4],[-3.2,-4.7],[-7.4,.8]])put('park-bush',x,z,.6);
  put('house-fence_straight',-7.4,1.2,.65,.18,Math.PI/2);
  // Keep the central path and original cafe-table collision footprint open.
- for(const [x,z] of [[-5,-2.7],[-6.75,-.45]]){
+ for(const [x,z] of [[-5,-2.7],[-5.8,.3]]){
   put('furniture-table_small',x,z,.75);
   put('furniture-chair_A_wood',x-.75,z,.72,.18,Math.PI/2);put('furniture-chair_A_wood',x+.75,z,.72,.18,-Math.PI/2);
   put('furniture-book_single',x-.15,z,.24,.955,Math.PI/6);
@@ -52,7 +53,7 @@ export async function upgradeCafe(world){
  const fill=new T.PointLight(0xb9cce8,9,10,2);fill.position.set(-5,5,0);group.add(fill);
  // Commit only after every dependency loaded successfully; retain original colliders.
  world.cafeObjects.forEach(o=>o.visible=false);world.scene.add(group);
- world.colliders.push({x:-3.22,z:-2.1,hw:.32,hd:.12},{x:-8.2,z:-1.1,hw:.25,hd:.25},{x:-5.35,z:-3.65,hw:.7,hd:.35},{x:-6.75,z:-.45,hw:.65,hd:.65},{x:-7.75,z:-.25,hw:.18,hd:.18});
+ world.colliders.push({x:-3.22,z:-2.1,hw:.32,hd:.12},{x:-8.2,z:-1.1,hw:.25,hd:.25},{x:-5.35,z:-3.65,hw:.7,hd:.35},{x:-5.8,z:.3,hw:.65,hd:.65},{x:-7.75,z:-.25,hw:.18,hd:.18});
  return {group,assetCount:names.length,update(t,episode){const warmth=episode?.active?Math.max(.08,episode.warmth/100):1;for(const s of sway)s.object.rotation.z=Math.sin(t*1.2+s.phase)*s.amount;for(const s of steam){const p=(t*.23+s.phase)%1;s.object.position.set(s.x+Math.sin(t+s.phase)*.035,1.08+p*.45,s.z);s.object.material.opacity=(1-p)*.12*warmth;s.object.scale.setScalar(.10+p*.15);}for(const l of lights){l.light.intensity=l.power*(.15+.85*warmth)*(1+Math.sin(t*2.4)*.008);l.light.color.set(episode?.active&&warmth<.25?0xb4cedf:0xffc47e);}}};
  function label(title,subtitle,x,y,z,w,h,portrait=false){const canvas=document.createElement('canvas');canvas.width=768;canvas.height=portrait?1106:256;const c=canvas.getContext('2d');if(portrait){c.scale(1,1106/256);}c.fillStyle='#283f3f';c.fillRect(0,0,768,256);c.strokeStyle='#d2b982';c.lineWidth=5;c.strokeRect(12,12,744,232);c.fillStyle='#f1dfb3';c.textAlign='center';c.font=portrait?'bold 116px Georgia':'bold 65px Georgia';c.fillText(title,384,portrait?105:115);c.font=portrait?'32px sans-serif':'22px sans-serif';c.fillText(subtitle,384,177);if(portrait){c.setTransform(1,0,0,1,0,0);c.fillStyle='#283f3f';c.fillRect(0,0,768,1106);c.strokeStyle='#d2b982';c.lineWidth=12;c.strokeRect(24,24,720,1058);c.fillStyle='#f1dfb3';c.font='bold 145px Georgia';c.fillText(title,384,310);c.font='46px sans-serif';c.fillText('COFFEE',384,560);c.fillText('+ IDEAS',384,650);c.font='35px sans-serif';c.fillText('COME ON IN',384,890);}
  const texture=new T.CanvasTexture(canvas);texture.colorSpace=T.SRGBColorSpace;const plane=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshBasicMaterial({map:texture}));plane.position.set(x,y,z);group.add(plane);return plane;}

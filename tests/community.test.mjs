@@ -17,7 +17,7 @@ import {findPath,clearSegment} from '../src/navigation.js';
 import {createServer} from '../server.mjs';
 import {infrastructureObstacles,townObstacles} from '../src/town-layout.js';
 const demo=createGenerator({key:''});
-function scene(){const s=createSociety();let now=1000;startCommunity(s,now);return {s,tick(n=1,held=[]){for(let i=0;i<n;i++)tickCity(s,s.city.positions,held,now+=1000);},arrive(id){s.city.positions[id]=workSpot(s.city.tasks[id].site,id);},switch(){interactCommunity(s,'switch',{x:0,z:6.6});}};}
+function scene(){const s=createSociety();let now=1000;startCommunity(s,now);s.city.community.human.nextAt=1e9;return {s,tick(n=1,held=[]){for(let i=0;i<n;i++)tickCity(s,s.city.positions,held,now+=1000);},arrive(id){s.city.positions[id]=workSpot(s.city.tasks[id].site,id);},switch(){interactCommunity(s,'switch',{x:0,z:6.6});}};}
 test('first physical action is immediate and proximity checked; route and wind have real effects',()=>{
   const {s,tick,switch:flip}=scene();const c=s.city.community;assert.throws(()=>interactCommunity(s,'switch',{x:0,z:28}),/TOO_FAR/);assert.throws(()=>interactCommunity(s,'switch',{x:NaN,z:3}),/INVALID_ACTION/);
   tick(2);assert.ok(c.central>10);flip();const central=c.central,energy=c.energy;tick(2);assert.equal(c.central,central);assert.ok(c.energy>energy);flip();tick(2);assert.ok(c.central>central);

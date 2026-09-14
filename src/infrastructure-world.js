@@ -87,6 +87,6 @@ export function createInfrastructureWorld(world){
     towerGlow.forEach(m=>m.emissiveIntensity=powered?1.1:.03);
     for(const f of flows){const on=f===cooling?g.waterRate>0:f===power?g.windOnline&&g.windEnabled&&g.relayOnline:powered;f.beads.visible=!!on;if(!on)continue;f.phase+=dt*(f===cooling?.045:.07)*(f===toCentral&&g.allocation==='town'?.4:1);for(let i=0;i<12;i++){dummy.position.copy(f.curve.getPointAt((f.phase+i/12)%1));dummy.updateMatrix();f.beads.setMatrixAt(i,dummy.matrix);}f.beads.instanceMatrix.needsUpdate=true;}
     boat.position.y=-.08+Math.sin(time*.7)*.025;boat.rotation.z=Math.sin(time*.5)*.015;
-    updateInscription(g);
+    screen.visible=frontScreen.visible=!city?.community?.active;updateInscription(g);
   }};
 }

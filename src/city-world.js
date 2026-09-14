@@ -2,6 +2,7 @@ import * as T from '/node_modules/three/build/three.module.js';
 import {asset} from './cafe-assets.js';
 import {townHomes,townObstacles,infrastructureObstacles} from './town-layout.js';
 import {createTownSurfaces} from './town-surfaces.js';
+import {createRoadSigns,addPropFootprint} from './street-props.js';
 
 // Extend Hina's existing town kit, palette and original residents.
 // No new character models or external generation services are required to play.
@@ -11,6 +12,7 @@ export function createCityWorld(world){
   function mat(color){if(!materials.has(color))materials.set(color,new T.MeshStandardMaterial({color,roughness:.88}));return materials.get(color);}
   function box(color,x,y,z,w,h,d,parent=group){const m=new T.Mesh(boxGeo,mat(color));m.position.set(x,y,z);m.scale.set(w,h,d);m.receiveShadow=true;m.castShadow=true;parent.add(m);return m;}
   createTownSurfaces(world.scene);
+  createRoadSigns(world);
   for(const cx of [-14,14]){
     const tiles=new T.InstancedMesh(new T.BoxGeometry(.73,.025,.73),mat(0xb0aa94),110);let i=0;const dummy=new T.Object3D();
     for(let a=-5;a<=5;a++)for(let b=-5;b<=4;b++){dummy.position.set(cx+a*.78,.13,24+b*.78);dummy.updateMatrix();tiles.setMatrixAt(i++,dummy.matrix);}
@@ -27,11 +29,6 @@ export function createCityWorld(world){
     const c=document.createElement('canvas');c.width=768;c.height=192;const ctx=c.getContext('2d');ctx.fillStyle='#30474b';ctx.fillRect(0,0,768,192);ctx.strokeStyle='#c9b785';ctx.lineWidth=5;ctx.strokeRect(10,10,748,172);ctx.textAlign='center';ctx.fillStyle='#f2dfb4';ctx.font='bold 58px Georgia';ctx.fillText(text,384,89);ctx.font='22px sans-serif';ctx.fillText(subtitle,384,140);
     const map=new T.CanvasTexture(c);map.colorSpace=T.SRGBColorSpace;const m=new T.Mesh(new T.PlaneGeometry(w,.65),new T.MeshBasicMaterial({map}));m.position.set(x,y,z);m.rotation.y=rotation;group.add(m);return m;
   }
-  sign('RIVERSIDE','BOOKS · LIGHTS · A PLACE TO STAY',-14,1.7,28.8,3.1);
-  sign('JUNIPER GROVE','MAKE · MEND · TRY AGAIN',14,1.7,28.8,3.1);
-  for(const x of [-14,14]){box(0x756854,x,.7,28.85,.12,1.4,.12);}
-  sign('← RIVER  /  GROVE →','THERE IS SOMETHING GOING ON',0,1.6,19,3.4);
-  box(0x756854,0,.65,19.05,.13,1.3,.13);world.colliders.push({x:0,z:19.05,hw:.1,hd:.1});
 
   const riverBulbs=[],riverGlow=new T.MeshBasicMaterial({color:0x69716c}),lanternGlow=new T.MeshBasicMaterial({color:0xffd699});
   const riverLight=new T.PointLight(0xffc68a,0,17,2);riverLight.position.set(-14,3,24);group.add(riverLight);
@@ -63,7 +60,7 @@ export function createCityWorld(world){
   const furnitureReady=(async()=>{
     const names=['house-house','park-tree','park-bush','park-flower_A','park-flower_B','park-bench','park-street_lantern','house-package','furniture-cabinet_medium_decorated'];
     const templates=Object.fromEntries(await Promise.all(names.map(async n=>[n,await asset(n)]))),roots=[];
-    function put(name,x,z,scale=1,rotation=0,y=.13){const m=templates[name].clone(true);m.position.set(x,y,z);m.scale.setScalar(scale);m.rotation.y=rotation;group.add(m);roots.push(m);return m;}
+    function put(name,x,z,scale=1,rotation=0,y=.13){const m=templates[name].clone(true);m.position.set(x,y,z);m.scale.setScalar(scale);m.rotation.y=rotation;group.add(m);roots.push(m);if(name==='park-bush')addPropFootprint(world.colliders,m);return m;}
     for(const h of townHomes){put('house-house',h.x,h.z,.69,h.rotation);const dx=Math.sin(h.rotation)*1.95,dz=Math.cos(h.rotation)*1.95;sign(h.label,'LITTLE ELSEWHERE',h.x+dx,2.9,h.z+dz,2.6,h.rotation);}
     for(const [cx,cz] of [[-14,24],[14,24]])for(let i=0;i<18;i++){
       const a=i/18*Math.PI*2,x=cx+Math.cos(a)*12.3,z=cz+Math.sin(a)*12.3;

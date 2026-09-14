@@ -119,7 +119,7 @@ export function createCentralVoice({api,position,changed,onVoice}){
   };
   addEventListener('pagehide',()=>stop());
   document.addEventListener('visibilitychange',()=>{if(document.hidden)stop('画面を離れたので、マイクをオフにしました。');});
-  return {stop,setMuted(value){output.muted=value;},setAvailable(value,connected){
+  return {get state(){return $('central-conversation').dataset.state;},stop,setMuted(value){output.muted=value;},setAvailable(value,connected){
     if(!value&&current)stop();available=value;configured=connected;controls();
   },reset(){stop();lines.clear();$('central-transcript').replaceChildren();status('中央に、聞いてみたいことはありますか。');}};
 }

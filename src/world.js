@@ -1,6 +1,7 @@
 import * as T from '/node_modules/three/build/three.module.js';
 import {residents} from './story.js';
 import {outdoorGround} from './town-layout.js';
+import {onPlazaApproach,insideObstacle,segmentHitsObstacle} from './street-layout.js';
 export function createWorld(container){
  const scene=new T.Scene();scene.background=new T.Color('#172741');scene.fog=new T.FogExp2('#172741',.022);
  const camera=new T.PerspectiveCamera(64,innerWidth/innerHeight,.06,220);camera.rotation.order='YXZ';
@@ -37,7 +38,7 @@ export function createWorld(container){
  cafeObjects.push(house(-5.2,-6,'CAFE',0xab8070,0x78586b));townObjects.buildings.push(house(0,-7.2,'LIBRARY',0x82949d,0x4a6570),house(5.2,-6,'LAB',0x84918a,0x616b89));
  townObjects.buildings.push(house(-10,-1,'HOME',0x8c847c,0x6c657c),house(10,-1,'HOME',0x9a8e79,0x765e70));
  function lamp(x,z){cyl(scene,0x354351,x,1.55,z,.065,3.1);box(scene,0x3c4a54,x,3,z,.4,.08,.4);ball(scene,0xffbb67,x,2.77,z,.17,.25,.17,1.2);const cap=mesh(new T.ConeGeometry(.32,.3,4),0x334653,scene,x,3.18,z);cap.rotation.y=Math.PI/4;warmLight(x,2.7,z,14,8);colliders.push({x,z,hw:.18,hd:.18});}
- [[-3.1,-3.6],[3.1,-3.6],[-6,4],[6,4],[0,10]].forEach(p=>{const start=scene.children.length;lamp(...p);if(p[0]===-3.1)cafeObjects.push(...scene.children.slice(start));else townObjects.lamps.push(...scene.children.slice(start));});
+ [[-3.1,-3.6],[3.1,-3.6],[-6,4],[6,4],[2.6,10]].forEach(p=>{const start=scene.children.length;lamp(...p);if(p[0]===-3.1)cafeObjects.push(...scene.children.slice(start));else townObjects.lamps.push(...scene.children.slice(start));});
  function bench(x,z){const g=new T.Group();g.position.set(x,0,z);scene.add(g);box(g,0x9f7962,0,.56,0,1.9,.13,.65);box(g,0xa9876b,0,1,-.3,1.9,.62,.1);for(const a of [-.72,.72])box(g,0x344858,a,.28,0,.12,.55,.6);colliders.push({x,z,hw:1.1,hd:.5});return g;}
  cafeObjects.push(bench(-5,2.5));townObjects.benches.push(bench(5,2.5));
  // Cafe terrace: occupied places, rather than empty decorative buildings.
@@ -45,9 +46,8 @@ export function createWorld(container){
  cyl(scene,0xaa8063,-5,-.02,-2.7,.09,.1);cyl(scene,0xb18c69,-5,.78,-2.7,.68,.1);cyl(scene,0x5b6261,-5,.4,-2.7,.075,.7);
  colliders.push({x:-5,z:-2.7,hw:.78,hd:.78});cyl(scene,0xe5d2ad,-5,.92,-2.7,.08,.18);
  cafeObjects.push(...scene.children.slice(terraceStart));
- textSign('LITTLE ELSEWHERE',0,1.05,10.8,2.6,.48);box(scene,0x5b635b,0,.5,10.7,.12,1,.12);
  function tree(x,z,s){const g=new T.Group();townObjects.trees.push(g);g.position.set(x,0,z);g.scale.setScalar(s);scene.add(g);cyl(g,0x74614f,0,1,0,.19,2);ball(g,0x42665d,0,2.6,0,1.15,1.5,1.05);ball(g,0x547264,-.45,3.1,.2,.75,.9,.75);colliders.push({x,z,hw:.4*s,hd:.4*s});}
- for(let i=0;i<24;i++){const a=i/24*Math.PI*2;tree(Math.cos(a)*13,Math.sin(a)*13,.85+(i%3)*.18);}
+ for(let i=0;i<24;i++){const a=i/24*Math.PI*2,x=Math.cos(a)*13,z=Math.sin(a)*13;if(!onPlazaApproach(x,z))tree(x,z,.85+(i%3)*.18);}
  for(const [x,z] of [[-7,4],[7,4],[-8,-4],[8,-4]])tree(x,z,.85);
  const flowersStart=scene.children.length;
  for(let i=0;i<65;i++){const a=i*2.4,r=7.5+(i%4)*.8,x=Math.cos(a)*r,z=Math.sin(a)*r;if(z<-4)continue;ball(scene,i%2?0xb295aa:0xd2b375,x,.23,z,.1,.18,.1);}
@@ -76,8 +76,9 @@ export function createWorld(container){
   const el=document.createElement('div');el.className='bubble';el.hidden=true;document.getElementById('labels').append(el);
   return {...data,root,body,eyes,workProp,el,until:0,target:null,wait:0,activity:'立ち話',social:false,glitch:0};
  });
- function canMove(x,z,includeNPC=true,ignoreId=null){return (outdoorGround(x,z)||(Math.abs(x-40)<5.65&&Math.abs(z)<4.65)||(Math.abs(x-60)<5.65&&Math.abs(z)<4.65))&&!colliders.some(c=>c.active!==false&&Math.abs(x-c.x)<c.hw+.25&&Math.abs(z-c.z)<c.hd+.25)&&(!includeNPC||!npcs.some(n=>n.id!==ignoreId&&Math.hypot(x-n.root.position.x,z-n.root.position.z)<.6));}
+ function canMove(x,z,includeNPC=true,ignoreId=null){return (outdoorGround(x,z)||(Math.abs(x-40)<5.65&&Math.abs(z)<4.65)||(Math.abs(x-60)<5.65&&Math.abs(z)<4.65))&&!colliders.some(c=>insideObstacle(x,z,c))&&(!includeNPC||!npcs.some(n=>n.id!==ignoreId&&Math.hypot(x-n.root.position.x,z-n.root.position.z)<.6));}
  function face(n,p){n.root.rotation.y=Math.atan2(p.x-n.root.position.x,p.z-n.root.position.z);}
+ const navigation=(x,z)=>canMove(x,z,false);navigation.segmentClear=(a,b)=>!colliders.some(c=>segmentHitsObstacle(a,b,c));
  function walk(n,target,dt,time,speed=.7){const dx=target.x-n.root.position.x,dz=target.z-n.root.position.z,d=Math.hypot(dx,dz);if(d<.12){n.body.position.y=0;return true;}
   face(n,target);const step=Math.min(d,speed*dt),x=n.root.position.x+dx/d*step,z=n.root.position.z+dz/d*step;
   if(canMove(x,z,false)){n.root.position.x=x;n.root.position.z=z;}
@@ -88,5 +89,5 @@ export function createWorld(container){
  }
  function resize(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);}
  addEventListener('resize',resize);
- return {scene,camera,renderer,npcs,canMove,face,walk,moon,colliders,cafeObjects,townObjects};
+ return {scene,camera,renderer,npcs,canMove,navigation,face,walk,moon,colliders,cafeObjects,townObjects};
 }

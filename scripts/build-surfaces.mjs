@@ -14,9 +14,13 @@ function path(points,width){
 }
 export function buildSurfaces(){
   const land=[circle(-14,24,13.4),circle(14,24,13.4),rectangle(0,17,17,20),rectangle(0,24,30,12),circle(-34,13,13),circle(0,32,12.6),rectangle(-26,19,20,9),rectangle(-18,33.5,8,9)];
+  land.push(rectangle(0,44.5,7.2,9),rectangle(0,68,82,42));
   const roads=[rectangle(0,17,3.7,17),rectangle(0,24,32,3.7),circle(-14,24,7.7),circle(14,24,7.7),
     ...path([[-34,13],[-29,18],[-22,21],[-14,24]],3.1),...path([[-18,28],[-18,34]],2.4),
     ...path([[0,24],[0,29]],3.8),...path([[5,26],[10,31]],2.5)];
+  roads.push(...path([[0,26],[5.8,27],[5.8,37.5],[0,39],[0,51],[0,85]],3.6));
+  for(const z of [51,63,75,85])roads.push(rectangle(0,z,76,3.2));
+  for(const x of [-36,-25,-15,15,25,36])roads.push(rectangle(x,68,2.6,34));
   // Polygon union removes internal faces rather than hiding z-fighting with depth bias.
   return {land:clipping.union(...land),roads:clipping.union(...roads)};
 }
