@@ -18,6 +18,8 @@ import {gameKey} from './controls.js';
 import {createLocomotion} from './locomotion.js';
 import {createCommunityWorld} from './community-world.js';
 import {createCommunityView} from './community-view.js';
+import {createTownDiscoveries} from './town-discoveries.js';
+import {discoveryTarget,discoveryById} from './discovery-rules.js';
 import {createMemoryCity} from './memory-city.js';
 import {createCentralPresence} from './central-presence.js';
 import {createHumanWorld} from './human-world.js';
@@ -42,6 +44,7 @@ const infrastructureWorld=createInfrastructureWorld(world);
 const episodeWorld=createEpisodeWorld(world);
 const communityWorld=createCommunityWorld(world),locomotion=createLocomotion();
 const memoryCity=createMemoryCity(world),centralPresence=createCentralPresence(world),humanWorld=createHumanWorld(world);
+const townDiscoveries=createTownDiscoveries(world);
 const memoryWorld=createMemoryWorld(world),playerVisual=createPlayerVisual(world);
 let mouseSensitivity=1,reducedMotion=false,communityArrival=false;
 try{mouseSensitivity=Math.max(.4,Math.min(2,Number(localStorage.getItem('ayh-sensitivity'))||1));reducedMotion=localStorage.getItem('ayh-reduced-motion')==='true';}catch{}
@@ -83,11 +86,22 @@ async function humanAction(action,id){
  try{const r=await api('community/human',{action,id,cycle:state.city?.community?.human?.cycle,position:{x:player.x,z:player.z}});syncCity(r.city);if(r.changed&&action==='call'){sound(440,.35,.03);setTimeout(()=>sound(660,.4,.025),100);}}
  catch(e){if(e.message!=='STALE')toast(apiError(e));}finally{humanPending=false;}
 }
+let discoveryPending=false,telescopeUntil=0;
+async function touchTown(id){
+ if(discoveryPending||memoryView.busy)return;const p=discoveryById[id];if(!p)return;discoveryPending=true;
+ townDiscoveries.touch(id,time);p.notes.forEach((n,i)=>setTimeout(()=>sound(n,.65,.035),i*95));
+ if(id==='telescope'){telescopeUntil=time+5;pitch=.42;}
+ try{const r=await api('memory/interact',{id,position:{x:player.x,z:player.z},revision:state.city.memoryGame.revision});syncCity(r.city);if(r.found)toast('新しい記憶が、手元に残った。 Q',2.5);else if(r.note)toast(r.note,3);}
+ catch(e){if(e.message==='STALE'){await refreshState();toast('街が少し変わった。もう一度、触れてみよう。');}else toast(apiError(e));}finally{discoveryPending=false;}
+}
 function humanTarget(){
  if(state.city?.memoryGame?.active){
-  if(memoryView.busy||memoryView.speaking)return null;
+  if(memoryView.busy||discoveryPending)return null;
+  const prop=!room?discoveryTarget(player,yaw,world.navigation):null;
+  const n=nearest();if(prop&&!n)return {label:prop.verb,run:()=>touchTown(prop.id)};
+  if(memoryView.speaking)return null;
   if(state.city.memoryGame.stage==='syncing')return {label:'自分の記憶に触れる',run:()=>memoryView.openEditor()};
-  const n=nearest();if(n)return {label:n.name+'に、今の記憶で話す',run:()=>memoryView.talk(n.id)};
+  if(n)return {label:n.name+'に、今の記憶で話す',run:()=>memoryView.talk(n.id)};
  }
  const h=state.city?.community?.human;
  if(h?.phase==='sync'){
@@ -149,7 +163,7 @@ async function enterTown(reset,episodeStart=false,restore=false,communityStart=f
  $('play-memory').disabled=true;
  $('begin').disabled=true;$('resume').disabled=true;$('play-episode').disabled=true;$('play-community').disabled=true;
  try{
-  await ready;await graphicsReady;if(memoryView.busy||communityView.busy||waiting||projectPending||initiativePending||encounter?.pending||cityPending||cityThinkPending){toast('いまの会話が終わったら、もう一度。');return;}
+  await ready;await graphicsReady;if(discoveryPending||memoryView.busy||communityView.busy||waiting||projectPending||initiativePending||encounter?.pending||cityPending||cityThinkPending){toast('いまの会話が終わったら、もう一度。');return;}
   if(new URLSearchParams(location.search).has('review')&&!document.getElementById('navigation-audit'))navigationAudit(world);
   releaseLook();leaveBorrowed();closeDialog();await infrastructureView.stopVoice();episodeView.stop();communityView.stop();memoryView.stop();communityWorld.reset();mode='idle';epoch++;
   if(episodeStart||communityStart||memoryStart){
@@ -310,12 +324,13 @@ function movePlayer(dt){if(active||blocked()||cityView.overview)return;if(restin
  const down=k=>keys.has(k)||virtualKeys.has(k);
  yaw+=(Number(down('arrowleft'))-Number(down('arrowright')))*dt*1.55;
  const f=Number(down('w')||down('arrowup'))-Number(down('s')||down('arrowdown')),s=Number(down('d'))-Number(down('a'));
+ if(f||s||down('space'))telescopeUntil=0;
  const movement=locomotion.step(player,{forward:f,side:s,yaw,sprint:down('shift'),dash:down('space')},dt,(x,z)=>canMove(x,z,true,borrowed?.id));
  if(movement.fired)sound(220,.12,.025,'triangle');
  if(movement.speed>.2&&time-lastStep>(movement.speed>4?.25:.4)){sound(110+movement.speed*5,.04,.011,'triangle');lastStep=time;}
  if(borrowed){borrowed.root.position.set(player.x,.09,player.z);borrowed.root.rotation.y=yaw+Math.PI;}
  camera.position.copy(player);if(!reducedMotion)camera.position.y+=Math.sin(time*(movement.speed>4?14:10))*.014*Math.min(1,movement.speed);
- const fov=reducedMotion?64:movement.burst?70:movement.speed>4?67:64;camera.fov=T.MathUtils.damp(camera.fov,fov,10,dt);camera.updateProjectionMatrix();camera.rotation.set(pitch,yaw,0,'YXZ');
+ const fov=telescopeUntil>time?36:reducedMotion?64:movement.burst?70:movement.speed>4?67:64;camera.fov=T.MathUtils.damp(camera.fov,fov,10,dt);camera.updateProjectionMatrix();camera.rotation.set(pitch,yaw,0,'YXZ');
 }
 // Click makes a small step; hold walks continuously. Useful without keyboard focus.
 for(const button of $('movement').querySelectorAll('button')){
@@ -432,6 +447,8 @@ function frame(now){requestAnimationFrame(frame);const frameMs=now-last,dt=Math.
  const available=mode==='play'&&!cityView.overview&&!blocked()&&!active&&!resting;
  humanView.frame(state.city,mode==='play',available,available?humanTarget():null,playTime,cityView.overview);
  memoryView.frame(now,mode==='play'&&!cityView.overview&&!humanView.open&&!memoryView.open&&!voiceActive&&$('facility-panel').hidden&&$('settings').hidden&&$('journal').hidden);
+ townDiscoveries.focus(available&&!room&&memoryView.enabled?discoveryTarget(player,yaw,world.navigation):null);townDiscoveries.update(time,state.city);
+ if(cityView.overview){telescopeUntil=0;camera.fov=T.MathUtils.damp(camera.fov,64,5,dt);camera.updateProjectionMatrix();}
  memoryWorld.update(time,state.city);
  playerVisual.update(time,{enabled:mode==='play'&&memoryView.enabled,player,yaw,firstPerson:!cityView.overview&&!borrowed,editing:memoryView.open,selected:memoryView.open?memoryView.selected:state.city?.memoryGame?.blocks.find(b=>b.id===state.city.memoryGame.equipped[0]),moving:keys.has('w')||keys.has('s')||keys.has('a')||keys.has('d'),reducedMotion});
  humanWorld.update(time,state.city);memoryCity.update(time,state.city);centralPresence.update(time,state.city,player,memoryView.speaker==='central'?'speaking':infrastructureView.voiceState==='idle'?communityView.centralVoiceState:infrastructureView.voiceState);

@@ -23,8 +23,11 @@ export const places = {
   central:{name:'中央棟の受付',x:0,z:28,district:'central'},
   memory:{name:'記憶の回廊',x:0,z:51,district:'memory'},
 };
+export const canalRows=[63,75];
+export const canalBridges=[-36,-25,-15,0,15,25,36];
+export function inCityWater(x,z){return Math.abs(x)<41&&canalRows.some(row=>Math.abs(z-row)<1.55)&&!canalBridges.some(bridge=>Math.abs(x-bridge)<1.65);}
 export function outdoorGround(x,z){
-  return Number.isFinite(x)&&Number.isFinite(z)&&(
+  return Number.isFinite(x)&&Number.isFinite(z)&&!inCityWater(x,z)&&(
     Math.hypot(x,z)<11.7 ||
     (Math.abs(x)<7.8&&z>=8&&z<25) ||
     Math.hypot(x+14,z-24)<11.7 ||
@@ -69,7 +72,7 @@ export const memoryPlots=[
   ...[-32,-21,-11,11,21,32].map((x,i)=>({x,z:69,height:12+i%4*2,rotation:0,at:0})),
   ...[-31,-21,-11,11,21,31].map((x,i)=>({x,z:81,height:17+i%3*3,rotation:0,at:0})),
 ];
-export const memoryObstacles=[...memoryPlots.map(({x,z})=>({x,z,hw:2.1,hd:2.1})),{x:0,z:79,hw:4.2,hd:4.2}];
+export const memoryObstacles=[...memoryPlots.map(({x,z})=>({x,z,hw:2.1,hd:2.1})),{x:0,z:82,hw:4.2,hd:4.2}];
 export const infrastructureObstacles=[
   ...Object.values(infrastructureSites).map(({x,z,hw,hd})=>({x,z,hw,hd})),
   ...modernPlots.map(({x,z})=>({x,z,hw:1.65,hd:1.65})),

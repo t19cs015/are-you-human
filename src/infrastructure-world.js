@@ -51,7 +51,7 @@ export function createInfrastructureWorld(world){
     ctx.font='19px monospace';ctx.fillStyle='#a4c6cd';ctx.fillText(g.modelEnabled?'POWER · WATER · MEMORY':'HOLDING THIS MOMENT',512,335);screenMap.needsUpdate=true;
   }
   const skyline=createVariedSkyline(world.scene,modernPlots);
-  const models={};let rotor=null,pumpRotor=null,upper=null;const towerGlow=[];
+  const satelliteRotors=[];const models={};let rotor=null,pumpRotor=null,upper=null;const towerGlow=[];
   const loader=new GLTFLoader();
   const ready=(async()=>{
     const loaded=await Promise.all(['windmill','pump','tower','data-center','city-house'].map(async id=>[id,(await loader.loadAsync('/assets/infrastructure/'+id+'.glb')).scene]));
@@ -59,6 +59,7 @@ export function createInfrastructureWorld(world){
     for(const [site,id] of [['wind','windmill'],['pump','pump'],['relay','tower'],['central','data-center']]){
       const p=infrastructureSites[site],model=templates[id];model.position.set(p.x,.13,p.z);if(site!=='wind')model.rotation.y=Math.PI;model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});group.add(model);models[site]=model;
     }
+    for(const [x,z,scale] of [[-40,7,.54],[-40,16,.42],[-28,8,.46]]){const model=models.wind.clone(true);model.position.set(x,.13,z);model.scale.setScalar(scale);group.add(model);satelliteRotors.push(model.getObjectByName('Rotor'));world.colliders.push({x,z,hw:2.3*scale,hd:2.1*scale});}
     rotor=models.wind.getObjectByName('Rotor');pumpRotor=models.pump.getObjectByName('Rotor');upper=models.central.getObjectByName('UpperWorks');if(upper)upper.scale.y=.001;
     models.relay.traverse(o=>{if(o.isMesh&&o.material.emissiveIntensity>0){o.material=o.material.clone();towerGlow.push(o.material);}});
 
@@ -80,7 +81,7 @@ export function createInfrastructureWorld(world){
   return {group,ready:Promise.all([ready,treesReady]),update(time,city){
     river.update(time);
     const g=city?.infrastructure||{phase:0,modelEnabled:true},dt=Math.min(.05,Math.max(0,time-lastTime));lastTime=time;
-    motor=T.MathUtils.damp(motor,g.windOnline&&g.windEnabled?.8:0,2,dt);if(rotor)rotor.rotation.z-=dt*motor;if(pumpRotor&&g.waterRate>0)pumpRotor.rotation.z+=dt*.9;
+    motor=T.MathUtils.damp(motor,g.windOnline&&g.windEnabled?(city?.memoryGame?.exploration?.windTuned?1.8:.8):0,2,dt);if(rotor)rotor.rotation.z-=dt*motor;satelliteRotors.forEach((r,i)=>{if(r)r.rotation.z-=dt*motor*(1.1+i*.17);});if(pumpRotor&&g.waterRate>0)pumpRotor.rotation.z+=dt*.9;
     growth=T.MathUtils.damp(growth,g.phase>=1?1:0,1.4,dt);newLamps.scale.y=Math.max(.001,growth);newLamps.visible=growth>.003;
     newLights.forEach(l=>l.intensity=growth*(g.allocation==='town'?9:4));
     if(upper)upper.scale.y=T.MathUtils.damp(upper.scale.y,g.phase>=2?1:.001,.65,dt);

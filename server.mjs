@@ -4,7 +4,7 @@ import {inspectEpisode,proposeEpisode} from './server/episode.mjs';
 import {episodeSpeech,communitySpeech,residentSpeech} from './server/speech.mjs';
 import {interactCommunity,proposeCommunity,emitCommunity} from './server/community.mjs';
 import {humanAction} from './server/human.mjs';
-import {initializeMemoryGame,editMemoryGame,talkMemoryGame} from './server/memory-game.mjs';
+import {initializeMemoryGame,editMemoryGame,talkMemoryGame,interactMemoryTown} from './server/memory-game.mjs';
 import {memoryGameSpeech} from './server/speech.mjs';
 import {generateCommunityArt,readCommunityArt} from './server/community-art.mjs';
 import {createStorage} from './server/storage.mjs';
@@ -63,6 +63,7 @@ export function createServer({fetcher=fetch,apiKey=defaults.key,model=defaults.m
     if(url.pathname==='/api/memory/start'&&req.method==='POST'){startCommunity(s.world);initializeMemoryGame(s.world);return await commit(publicCity(s.world));}
     if(url.pathname==='/api/memory/edit'&&req.method==='POST'){const result=editMemoryGame(s.world,data);return await commit({...result,city:publicCity(s.world)});}
     if(url.pathname==='/api/memory/talk'&&req.method==='POST'){const result=await talkMemoryGame(s.world,data,generate);return await commit({...result,city:publicCity(s.world)});}
+    if(url.pathname==='/api/memory/interact'&&req.method==='POST'){const result=interactMemoryTown(s.world,data);return await commit({...result,city:publicCity(s.world)});}
     if(url.pathname==='/api/memory/speech'&&req.method==='POST')return json(res,200,await memoryGameSpeech(s,data.event,fetcher));
     if(url.pathname==='/api/episode/start'&&req.method==='POST')return await commit(startEpisode(s.world));
     if(url.pathname==='/api/episode/inspect'&&req.method==='POST'){const result=inspectEpisode(s.world,data.clue,data.position);return await commit({...result,city:publicCity(s.world)});}

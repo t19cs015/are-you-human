@@ -1,9 +1,11 @@
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {defaults} from '../server/config.mjs';
+import {explorationLines} from '../src/discovery-rules.js';
 import {generateSpeech} from '../server/speech.mjs';
 const directory=new URL('../assets/memory/',import.meta.url);await mkdir(directory,{recursive:true});
 const lines=[
+ ...Object.entries(explorationLines).map(([name,[by,text]])=>['explore_'+name,by,text]),
  ['arrival','tomo','あ、君もここで待つ？ 次の灯り、きれいなんだ。'],
  ['promise_you','player','うん。次の灯りも、ここで一緒に。'],
  ['promise_tomo','tomo','約束！ 灯りが戻ったら、ここで星を見よう。'],

@@ -1,4 +1,5 @@
 import {memoryNames,memoryGoals,selectedMemories} from './memory-rules.js';
+import {explorationGoal} from './discovery-rules.js';
 import {memoryPicture} from './memory-pictures.js';
 
 export function createMemoryView(hooks){
@@ -76,8 +77,8 @@ export function createMemoryView(hooks){
     const icon=document.createElement('span');icon.className='memory-glyph';icon.setAttribute('aria-hidden','true');icon.innerHTML=memoryPicture(block.motif);const label=document.createElement('strong');label.textContent=block.title;const pins=document.createElement('i');pins.className='memory-pins';pins.setAttribute('aria-hidden','true');b.append(icon,label,pins);b.classList.toggle('recalled',used.includes(block.id));return b;
   }
   function render(){
-    if(!city?.memoryGame)return;const m=city.memoryGame,goal=memoryGoals[m.stage]||memoryGoals.together;
-    $('goal').querySelector('h2').textContent=goal[0];$('goal').querySelector('p').textContent=m.preserved.length?'残すと決めた記憶は、次の同期を越えた。':goal[1];
+    if(!city?.memoryGame)return;const m=city.memoryGame,goal=explorationGoal(m)||memoryGoals[m.stage]||memoryGoals.together;
+    $('goal').querySelector('h2').textContent=goal[0];$('goal').querySelector('p').textContent=goal[1];
     if(drag)return;
     $('pocket').replaceChildren();for(const block of selectedMemories(m)){const b=chip(block,true);b.onclick=()=>{selected=block.id;open();};b.setAttribute('aria-label',block.title+'の記憶を開く');$('pocket').append(b);}
     $('slots').replaceChildren();
@@ -114,7 +115,7 @@ export function createMemoryView(hooks){
   return {get open(){return !$('drawer').hidden;},get enabled(){return enabled;},get busy(){return pending||editPending;},get speaking(){return !!current||queue.length>0;},get used(){return used;},get speaker(){return current?.by;},get selected(){return city?.memoryGame?.blocks.find(b=>b.id===selected);},get held(){return pending||current||queue.length?talkPartner?[talkPartner]:[]:[];},openEditor:open,close,toggle,talk,
     activate(next,fresh){revision++;queue=[];quiet();city=next;enabled=!!next?.memoryGame?.active;root.hidden=!enabled;document.body.classList.toggle('memory-playing',enabled);seen=fresh?0:next?.memoryGame?.serial||0;selected='light';lastSignature='';speech.clear();picked=null;editId=null;$('backdrop').hidden=true;$('drawer').hidden=true;if(enabled)this.update(next);},
     stop(){revision++;queue=[];quiet();cancelDrag();enabled=false;root.hidden=true;$('backdrop').hidden=true;$('drawer').hidden=true;},setMuted(value){muted=value;if(value)quiet();},
-    update(next){city=next;if(!enabled||!next?.memoryGame)return;const m=next.memoryGame;for(const event of m.events.filter(e=>e.id>seen)){queue.push(event);requestVoice(event);}seen=m.serial;const sig=m.revision+':'+m.stage+':'+m.serial;if(lastSignature!==sig){lastSignature=sig;render();}},
+    update(next){city=next;if(!enabled||!next?.memoryGame)return;const m=next.memoryGame;for(const event of m.events.filter(e=>e.id>seen)){if(event.kind==='discovery'){queue=queue.filter(e=>e.kind!=='discovery');if(current?.kind==='discovery')quiet();}queue.push(event);requestVoice(event);}seen=m.serial;const sig=m.revision+':'+m.stage+':'+m.serial;if(lastSignature!==sig){lastSignature=sig;render();}},
     frame(now,visible){if(!enabled)return;$('goal').hidden=!visible;$('open').hidden=!visible;$('pocket').hidden=!visible;if(!visible){if(current){queue.unshift(current);quiet();}return;}if(current&&now>=current.until)quiet();if(!current&&queue.length)speak(queue.shift());if(!pending&&!current&&!queue.length)talkPartner=null;},
   };
 }
