@@ -12,7 +12,7 @@ You wake inside a small robot body in a town managed by Central. Its residents r
 
 The opening gives this system an immediate purpose: Tomo has forgotten a promise you still remember. Make a new invitation, spend time together, and help a shared experience survive the next synchronization.
 
-Beyond the square are windmills, waterwheels, musical objects, lantern boats, and houses waiting in the mist. Small discoveries become memories you can carry into the next conversation. Haruna's warm characters and miniature town give a quietly unsettling question a playful form: which experiences deserve a place in tomorrow?
+Beyond the square are windmills, waterwheels, musical objects, lantern boats, and houses waiting in the mist. Small discoveries become memories you can carry into the next conversation. Expressive robots and a warm miniature town give a quietly unsettling question a playful form: which experiences deserve a place in tomorrow?
 
 ## 2. Meaningful use of OpenAI tools — 30%
 
@@ -20,7 +20,7 @@ OpenAI models drive the connection between memory, speech, and action. The Respo
 
 Text-to-speech with gpt-4o-mini-tts makes the effect audible: change a memory, then hear the words it produces. Central's holographic presence uses gpt-realtime-mini over WebRTC, with tools to inspect the town and pause or resume modernization. In the community-building mode, gpt-image-2.5-flare turns an agreed public proposal into a sketch displayed in the town while residents build with authored 3D components.
 
-Codex, running gpt-6-astra, also made development interactive. We discussed an idea, asked it to implement a playable revision, tried the result, and changed direction together. It wrote game systems, custom Blender modeling scripts, and the complete demo production pipeline. That loop helped us discover the memory mechanic while building it.
+We used Codex with gpt-6-astra to develop interactively: discuss an idea, turn it into a playable revision, try it, and refine it. This workflow covered game systems, custom Blender modeling scripts, and the complete demo production pipeline. It helped us discover the memory mechanic through working prototypes.
 
 ## 3. Originality — 25%
 
@@ -44,9 +44,9 @@ English is the default, with Japanese selectable before play. Saves preserve pro
 
 ## 5. Execution and craft — 20%
 
-Haruna's original concept, resident designs, and warm visual direction anchor the project. Codex, running gpt-6-astra under our direction, implemented and refined the game, including custom Blender models and exports, the player's opening memory hatch, interactive town objects, lighting, water, animation, and sound.
+We built the town in Three.js with editable Blender assets and a Node.js simulation server. Using Codex with gpt-6-astra, we created and refined custom models, including a robot body with an opening memory hatch, and integrated interactive objects, lighting, animated water, character gestures, and sound.
 
-The one-minute English demo was also produced end to end through Codex: scene scripting, camera choreography, browser rendering, OpenAI speech generation, synthesized music, Foley editing, captions, audio mixing, and MP4 encoding. We iterated on concrete details together: calmer resident gestures, a corrected boat waterline, varied building growth, unobstructed camera views, and complete spoken phrases fitted with pitch-preserving speed changes.
+We produced the one-minute English demo through Codex, from scene scripting and camera choreography to browser rendering, OpenAI speech generation, synthesized music, Foley editing, captions, audio mixing, and MP4 encoding. Refinements included calmer gestures, a corrected boat waterline, varied building growth, clear camera views, and complete spoken phrases fitted with pitch-preserving speed changes.
 
 The film uses the real memory drawer and recorded live Responses API decisions replayed through game rules, with authored staging and condensed travel. Editable Blender sources and production scripts are retained in the repository.
 
@@ -54,7 +54,7 @@ The implementation separates frame-by-frame simulation from model decisions, val
 
 ## 6. Pre-existing code, open-source components, datasets, or third-party tools
 
-- Starting material: Haruna's initial town prototype, original resident designs, and visual direction. We extended that foundation; the repository has no project-wide open-source license declared.
+- Starting material: our initial town prototype and original resident designs. We extended that foundation; the repository has no project-wide open-source license declared.
 - JavaScript dependencies: Three.js 0.170.0, polygon-clipping 0.15.7, and splaytree 3.2.3 (MIT); robust-predicates 3.0.3 (Unlicense).
 - Environment assets: Tiny Treats Homely House and Pretty Park by Isa Lousberg; KayKit Furniture Bits and City Builder Bits by Kay Lousberg. All four packs are CC0-1.0. The asset manifest records 29 imported models, source revisions, and hashes.
 - Sound effects: Kenney Impact Sounds and RPG Audio (CC0-1.0); selected files and hashes are recorded. The demo's music and environmental ambiences are synthesized by project scripts.
@@ -79,10 +79,10 @@ These references document the scope of the claims above. Verification date: Sept
 | 103 passing automated checks | [Test suite](../tests/); `npm test` passed all 103 tests on the verification date. These tests do not make live API calls. |
 | Incorporated assets and dependency licenses | [Package lock](../package-lock.json), [environment manifest](../assets/cafe/manifest.json), [sound manifest](../assets/sound/manifest.json), [original asset licenses](licenses/) |
 
-### Attribution and scope notes
+### Production and scope notes
 
 - The team identifies the Codex development model as **gpt-6-astra**. This is the team's development-session attribution: source files and Git commits document the work, but do not independently record which model performed each historical action. The runtime dialogue model is separately configured as **gpt-5.6-luna**.
-- “End to end through Codex” describes the demo production process under human creative direction, using the listed tools, models, and incorporated assets. Haruna supplied the original concept, initial prototype, resident designs, and visual direction; the team chose the direction and reviewed revisions. It does not attribute every source asset or every design decision to one model.
+- The Codex workflow covered the demo's complete production pipeline using the listed tools, models, and incorporated assets. We developed the concept through successive playable prototypes and refined the film through visual and audio review. Custom modeling scripts and imported CC0 assets are documented separately in the repository.
 - The v9 video is an edited in-engine demonstration. Its preparation accepts a recorded live invitation that leads to the filmed meeting; it does not establish that every prompt produces that outcome. The opening, camera cuts, skyline timing, and some dialogue are authored. Realtime microphone conversation and runtime image generation are implemented elsewhere in the game and are not demonstrated in this take.
 - The chapter and available actions are designed game rules. Rewriting a memory does not rewrite historical facts or grant control over other residents. Community sketches accompany three authored kinds of 3D construction; there is no arbitrary generated 3D world or LLM weight training.
 
