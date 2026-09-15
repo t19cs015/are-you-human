@@ -6,114 +6,146 @@ https://github.com/user-attachments/assets/7579595f-eb28-4ede-bc77-58cb868f7f98
 
 [GIF preview (no audio)](docs/media/words-you-keep-demo-v9.gif)
 
-記憶を組み替え、自分の言葉で住民と関わり、街の未来を変えていく。陽菜（Haruna）が用意した住民モデルと、暖かい夜の街の雰囲気を引き継いでいます。
+Rearrange your memories, find your own words, and shape the future of a small AI town. Words You Keep carries forward Haruna's charming residents and the warmth of a town at night.
 
-デモに対応する最新のゲームと制作ファイルは [`ilya` ブランチ](https://github.com/t19cs015/are-you-human/tree/ilya) にあります。
+The latest playable game and demo production files are on the [`ilya` branch](https://github.com/t19cs015/are-you-human/tree/ilya). The instructions below describe that version.
 
-Three.js と Node.js（20.12以降）のローカルプロトタイプ。`npm install`、`npm start` で http://127.0.0.1:4173/ を開く。
+## Run locally
 
-## 遊び方
+Requires **Node.js 20.12 or later** and a browser with WebGL2 support. The game uses Three.js and a local Node.js server.
 
-タイトル画面で **English / 日本語** を選んでから開始できます。初期値は英語です。画面表示、記憶ブロック、物語、AI住民の返答、中央とのRealtime音声、生成音声が選択した言語に揃います。選択は同じタブの再読み込み中も保持されます。
+```sh
+git clone --branch ilya https://github.com/t19cs015/are-you-human.git
+cd are-you-human
+npm install
+npm start
+```
 
-新しいメインは **「この身体で、目を覚ます」**。Tomoとの約束が中央の同期で抜け落ち、自分だけが覚えている。Qで記憶のブロックを組み替え、自然言語で書き直すと、自分の身体から生まれる言葉が変わります。住人は聞いた言葉から行動を選び、共有に同意した経験は次の同期へ残せます。操作と実装範囲は [記憶の最初の章](docs/MEMORY_GAME.md)。
+Open [http://127.0.0.1:4173/](http://127.0.0.1:4173/). You can try the controls and scripted demo behavior without an API key. To enable AI features, follow [AI connection and API keys](#ai-connection-and-api-keys).
 
-続く探索では、中央の裏の都市に水路・橋・店先・庭・音の遊び場を追加。街の39か所にEで触れ、風車や水車を動かしたり、小舟を流したりできます。集めた9種類の記憶で住人を寄り道へ誘い、思い出を中央に預けるか、庭で直接伝えるかを試せます。詳しくは [街で拾う、役に立たない時間](docs/A_TOWN_TO_TOUCH.md)。
+## How to play
 
-街の端は、まだ復元していない記憶の岸。川は曲がって霧の水門へ消え、その向こうに家の輪郭が残ります。小舟の返事を現地で確かめる、記憶を届けて窓を一つ灯す、といった出来事を街の寄り道につなげました。[境界と物語のつながり](docs/THE_UNRESTORED_SHORE.md)。
+Choose **English** or **Japanese** on the title screen before starting. English is the default. Interface text, memory blocks, story dialogue, AI residents' replies, Central's Realtime conversations, and generated speech follow your selection. The choice persists when you reload the same tab.
 
-「ほかの遊び方」にある **「みんなと街をつくる」** は共同制作の試作。人間の到着に住人が振り返り、目の前の分配器をEで切り替えると、灯りと反応がすぐ変わります。自由な案を住人に相談すると、二人が合意して現地へ歩き、庭・音の遊び場・星を見る場所を作ります。提案からプレイ中に生成した絵は、街のスケッチボードへ。中央のAIともRealtimeで話せます。詳しくは [あなたから変わる街](docs/COMMUNITY_PLAYTEST.md)。
+Start with **Wake up in this body**. A synchronization with Central has erased Tomo's memory of a promise, but you still remember it. Press **Q** to rearrange your memory blocks or rewrite them in natural language. What you keep changes the words your body speaks. Residents choose how to act on what they hear, and experiences they agree to share can survive the next synchronization. See [the first memory chapter](https://github.com/t19cs015/are-you-human/blob/ilya/docs/MEMORY_GAME.md).
 
-新しく、中央の同期中にも自分だけ動ける場面を追加しました。一人に声をかけると、住人から住人へ動きが戻っていきます。中央にはこちらを向くホログラムの顔があり、橋の奥には常に動く「記憶の都市」が広がります。詳しくは [自分だけが人間](docs/HUMAN_TOWN.md)。
+Explore the city behind Central, with canals, bridges, storefronts, gardens, and a musical playground. Press **E** at 39 interactive locations to turn windmills and waterwheels, launch a little boat, and discover other small moments. Collect nine kinds of memories, invite residents on detours, and choose whether to entrust an experience to Central or share it directly in the garden. See [a town to touch](https://github.com/t19cs015/are-you-human/blob/ilya/docs/A_TOWN_TO_TOUCH.md).
 
-WASDで歩く、Shiftで小走り、Spaceでダッシュ、Eで触る・話す、Mで街を見る。普段のボタンを減らし、スケッチ・地区への移動・設定・記録を右上のメニューにまとめました。マウス感度と画面の揺れは設定で調整できます。再読み込み後は「保存した街の続きから」で再開。
+At the map's edge lies a shore of memories that have not yet been restored. The river bends into a misty floodgate, with the outlines of houses beyond it. Follow a little boat's reply or deliver a memory to light a window. These discoveries connect exploration to the story. See [the unrestored shore](https://github.com/t19cs015/are-you-human/blob/ilya/docs/THE_UNRESTORED_SHORE.md).
 
-「小さな物語 · Miaのカフェ」は従来の3〜5分のエピソードです。中央の更新とカフェの暖かさを両立する方法を探します。詳細は [One Warm Light](docs/ONE_WARM_LIGHT.md)。新しいメインとエピソードは毎回別の街として始まります。
+### Controls
 
-「自由に街をのぞく」では、以下の街シミュレーションを遊べます。
+| Input | Action |
+| --- | --- |
+| WASD | Walk |
+| Click the game, then move the mouse | Look around |
+| Esc | Release the cursor; click the game to resume mouse look |
+| Shift | Jog |
+| Space | Dash |
+| E | Interact or talk |
+| Q | Open your memories |
+| M | View the whole town |
+| F near a facility | Open its terminal |
+| R while controlling a resident | Return to your own view |
 
-従来の試作は「中央に電力・水・会話の記録が集まり、街が近代化されていく夜」。詳しくは [明日のために変わっていく街](docs/MODERNIZING_TOWN.md)。
+The menu in the upper right groups sketches, district travel, settings, and records. Adjust mouse sensitivity and screen motion in settings. After reloading, choose **Continue from a saved town** to resume.
 
-- 風待ちの丘と中央地区を追加した5地区。住民が風車・ポンプ・集電塔を動かすと、電力と水が中央へ届く。
-- 中央は古い記録から新しい街灯を作り、その先には住民との会話の記録が必要になる。記録を持つ住民が中央へ運ぶと、増築や背の高い住宅へ進む。近代化は3段階。
-- 施設の名前をクリックすると設備を確認できる。「そばへ降りる」で現地へ。施設の近くでFを押すと端末を開く。風車・取水・配電・中央の更新を操作できる。
-- 「この話は二人だけにして」で、その住民の未配達の記録を中央へ送らなくできる。「これからは送っていい」で再開。中央棟へ行くと、実際に届いた言葉を読める。
-- 中央棟のそばで「声で話す」を押すと、中央AIとRealtime音声会話。「声を聴く」はマイクなしで、文字への返事を声で聴ける。接続しなくても文字で話せる。「街の更新を止めて」「再開して」で実際の更新を操作できる。音声はAIが生成する。
+Touch controls use swipes and the onscreen movement arrows. Browsers without pointer lock support use dragging to look around. The left and right arrow keys also turn the camera. Talking to a nearby resident releases the cursor.
 
-- 「自由に街をのぞく」で俯瞰から開始。広場・川辺の庭・木立の工房・風待ちの丘・中央地区を、ドラッグ／WASDとスクロールで見渡す。住民の名前や下のカードを選ぶと、その住民をカメラが追いかける。
-- 「そばへ」でその住民の近くに降りる。「目線を借りる」で住民の目線から体を動かせる。Rまたは「目線を返す」で人間の目線に戻り、住民は元の用事を再開する。Mでいつでも街全体へ。
-- 一人称ではWASDまたは画面の矢印で歩く。ゲーム画面をクリックすると、マウスを動かすだけで見回せる。Escでカーソルを戻し、再クリックで再開。Eで近くの住民と話すとカーソルが戻る。タッチ操作はスワイプ、マウスの固定に未対応のブラウザではドラッグで見回す。左右矢印キーでも向きを変えられる。
-- 川辺の消えた灯りと、準備中の読書席がある。住民は部品・ランタン・本を運び、二人で修理や準備を進める。作業は現地に着いてから進み、目線を借りている住民は自動作業を休止する。
-- 会話で「ランタンを借りてきて」「本を運ぶのを手伝って」など提案できる。API接続時は住民が提案を解釈し、実行できる行動を選ぶ。未接続時は明示されたデモ判断。
-- Lab / Library の入口へ近づくと入室ボタンが出る。室内でも歩ける。「街へ戻る」で退出。
-- Labではポスターと短い曲の制作物を見られる。作品への感想は作者だけの記憶に残る。曲は試聴・停止できる。
-- Libraryでは文字の可読性、音楽、歩行実験の短い資料を読める。住民も資料を読む作業を行い、作業内容を記憶する。
-- 入力しなくても街の用事が進み、近くの住民が声をかける。中央の近代化が3段階目に達すると既存の制作と講評も進む。試作→講評→作者の判断→修正／公開／保留。結果は固定しない。デモ時は工程確認用の定型判断。
-- 公開されたポスターは広場の掲示板へ、公開された曲はカフェ付近のBGMへ反映する。
-- 「目を閉じて休む」で近くの住民だけが人間の休息を目撃する。「目を開ける」で戻る。
-- 「住民のこと」で個別の関係・理由・記憶件数を確認。記憶を検索・ページ送りできる。SYSTEM UPDATEはここから任意実行。
-- 保存された進行がある場合はタイトルの「保存した街の続きから」。自由な街の開始ボタンと「最初から」はその街を初期化する。エピソードの再挑戦は別のセッションを作る。
+### Other ways to play
 
-## AI接続とキー
+**Build a town with everyone** is the community-building prototype under **Other ways to play**. Residents turn toward the arriving human. Press **E** at the nearby distributor to change the lights and see an immediate reaction. Propose an idea to the residents: two of them can agree, walk to the site, and build a garden, a musical playground, or a stargazing spot. An image generated from your proposal appears on the town's sketch board. You can also speak with Central through the Realtime API. See [community play](https://github.com/t19cs015/are-you-human/blob/ilya/docs/COMMUNITY_PLAYTEST.md).
 
-既定モデルは `gpt-5.6-luna`、推論は `none` にして応答速度を優先する。中央とのリアルタイム会話には `gpt-realtime-mini`、住民の読み上げには `gpt-4o-mini-tts`、入力音声の字幕には `gpt-4o-mini-transcribe` を使う。[モデル仕様](https://developers.openai.com/api/docs/models/gpt-5.6-luna) / [公式料金](https://developers.openai.com/api/docs/pricing)。
+During Central's synchronization, you can keep moving while the residents pause. Speak to one resident and activity returns from one resident to the next. Central has a holographic face that turns toward you; beyond the bridge, the memory city keeps moving. See [the human-town prototype](https://github.com/t19cs015/are-you-human/blob/ilya/docs/HUMAN_TOWN.md).
 
-初回は `.env.example` を `.env` にコピーして `OPENAI_API_KEY` を設定する。起動時に自動で読み込むので、画面での再入力は不要。`OPENAI_MODEL`、`OPENAI_REALTIME_MODEL`、`OPENAI_IMAGE_MODEL` で変更でき、シェルに明示した環境変数が優先される。既存の `server/local-config.mjs` はキーの互換用フォールバック。`.env` と旧キー設定はGitとHTTP公開対象外。
+**A little story · Mia's Café** is the earlier three-to-five-minute episode. Find a way to complete Central's update while keeping Mia's café warm. Explore, talk, and propose a solution in your own words; residents discuss it and move to their tasks. Key dialogue and generated discussions have synthesized voices and captions. See [One Warm Light](https://github.com/t19cs015/are-you-human/blob/ilya/docs/ONE_WARM_LIGHT.md). The memory chapter and this episode each start in a separate town session.
 
-画面で入力したキーは、そのタブ用のサーバーメモリで保持する。空欄でモデルだけ変更してもキーは維持する。「デモに戻す」はタブの接続を外し、「既定の接続に戻す」で復帰する。ゲームのセーブデータにはキー・接続設定を保存しない。再起動時は既定キーを読み込む。ページ再読み込みではタブに保存した不透明なセッションIDで復元する。
+**Explore the town freely** opens the earlier town simulation described below.
 
-自由会話、声かけ、住民同士の会話、街での行動選択、制作判断にAPIリクエストを使用。設定ごと120回まで。API失敗・待機・上限到達時はデモ表示。未接続でも操作と工程を試せる。プロジェクト生成は構造化出力、サーバー検証後に反映。任意HTMLやコードを生成実行しない。
+## The town simulation
 
-中央の音声は [WebRTCの統合接続](https://developers.openai.com/api/docs/guides/voice-webrtc?api=realtime#connecting-using-the-unified-interface) を使い、SDPをサーバーで交換する。通常のAPIキーをブラウザへ渡さない。1タブ1接続、1回5分まで。音声は上記120回とは別に課金される。終了ボタン・施設を閉じる・タブを隠す・再読み込みでマイクと接続を閉じ、サーバー側も時間切れで通話を終了する。マイクの初回許可が必要で、許可されない場合は文字か「声を聴く」を使える。
+Power, water, and conversation records flow toward Central as the town modernizes. The original simulation spans five districts, including the windmill hill and Central; the latest game extends the walkable world to six. See [the modernizing town](https://github.com/t19cs015/are-you-human/blob/ilya/docs/MODERNIZING_TOWN.md).
 
-中央に渡すのは現在の資源・設備・住民の仕事・配達済み記録のみ。住民の秘密や未配達の会話本文は渡さない。中央からの設備操作はサーバーで距離・許可された種類・通話の所属を検証する。中央との会話履歴は通話中／サーバーのタブ用メモリだけで保持し、音声自体や中央との会話をセーブ・学習用記録には追加しない。
+- Residents operate windmills, pumps, and the collection tower to supply Central with power and water.
+- Central first uses old records to create new streetlights. Further development requires conversation records delivered by residents, leading to extensions and taller housing across three modernization stages.
+- Click a facility's name to inspect it, or choose **Drop down near a facility** to visit. Use its terminal to control wind power, water intake, distribution, and Central's updates.
+- Ask a resident to keep a conversation between the two of you to prevent their undelivered records from reaching Central. Allow sharing again to resume deliveries. At Central, you can read the words that actually arrived.
+- Near Central, choose **Talk by voice** for a Realtime conversation. **Listen to voice · No mic** lets you type and hear spoken replies. Text chat is also available. Requests to pause or resume town updates can change the simulation. Voices are AI-generated.
+- In the overhead view, drag or use WASD to move and scroll to zoom. Select a resident's name or card to follow them. **Drop down nearby** brings you to their location.
+- **See through their eyes** lets you control a resident's body. Press **R** or choose **Return to your view** to leave; the resident resumes their previous task. Press **M** to return to the town view.
+- Residents carry parts, lanterns, and books to repair the riverside lights and prepare a reading area together. Work progresses only after they arrive. A resident under your control pauses their autonomous work.
+- Suggest actions such as borrowing a lantern or helping carry books. With an API connection, residents interpret the proposal and choose an available action. Without one, the game clearly labels its scripted demo decisions.
+- Approach the Lab or Library entrance to enter and walk inside. Choose **Return to Town** to leave.
+- In the Lab, inspect posters and short musical pieces, play or stop the music, and give feedback. Only the work's author remembers your feedback.
+- In the Library, read short notes about text legibility, music, and walking experiments. Residents can read the material too and remember doing so.
+- The town keeps working without player input, and nearby residents may approach you. At the third modernization stage, existing creative projects move through drafting, critique, the author's decision, and revision, publication, or a hold. Live outcomes are not fixed; demo mode uses scripted decisions to demonstrate the process.
+- Published posters appear on the plaza's bulletin board. Published music becomes background music near the café.
+- Choose **Close Your Eyes and Rest**; only nearby residents witness the human resting. Open your eyes to return.
+- **About the Resident** shows individual relationships, reasons, and memory counts. Search or page through memories and optionally trigger **SYSTEM UPDATE** from this panel.
+- Continue an existing save with **Continue from a saved town**. Starting a new free town or choosing **Start from the Beginning** resets that town. Retrying an episode creates a separate session, and **Return to Previous Town** takes you back to the earlier free town.
 
-## 個別記憶と保存
+## AI connection and API keys
 
-住民ごとに出来事最大5,000件、会話原文最大10,000発言、関係の振り返り最大500件。直近会話24発言と関連記憶最大16件・約6,000文字をプロンプトに選ぶ。検索は文字・単語の一致、重要度、直近性。埋め込み検索やモデル自体の追加学習ではない。
+The configured default for resident dialogue is `gpt-5.6-luna`, with reasoning set to `none` to prioritize response speed. Central uses `gpt-realtime-mini` for live voice conversations, resident speech uses `gpt-4o-mini-tts`, and incoming voice captions use `gpt-4o-mini-transcribe`. See [model documentation](https://developers.openai.com/api/docs/models/gpt-5.6-luna) and [OpenAI pricing](https://developers.openai.com/api/docs/pricing).
 
-直接証言・目撃・伝聞・自分の作業を区別。訂正前の記録を残し、現在有効な記憶から除外する。住民同士の記憶を一斉共有しない。上限を超えると古い記録を削除し、その件数を表示する。
+Copy `.env.example` to `.env`, set `OPENAI_API_KEY`, and restart the server. The key loads automatically at startup. You can override the configured models with `OPENAI_MODEL`, `OPENAI_REALTIME_MODEL`, and `OPENAI_IMAGE_MODEL`; explicit shell environment variables take precedence. An existing `server/local-config.mjs` is supported as a legacy key fallback. Both local key files are excluded from Git and HTTP serving.
 
-ゲーム状態は `data/sessions/` に原子的に保存する。セッション間は分離。サーバー再起動後も同じタブで復元できる。ブラウザのタブ情報を消した場合は、そのセッションを自動では特定できない。古いバージョンでメモリにしかなかった進行の移行機構はない。
+A key entered through the interface stays in server memory for that tab. Changing only the model keeps the current key. **Return to Demo** disconnects the tab's API configuration; **Restore default connection** restores the server default. Keys and connection settings are not included in game saves. Reloading the page restores the session through an opaque tab session ID; restarting the server reloads the default key.
 
-## 実装範囲と制約
+Free conversation, greetings, resident-to-resident dialogue, town action selection, and creative decisions make API requests, with a limit of 120 requests per connection configuration. A failed request, a waiting period, or an exhausted limit produces a labeled demo response. Project proposals use structured output and server validation before changing the world. The game does not generate and execute arbitrary HTML or code.
 
-記憶のメインは、約束・同期・再会・住人の記憶の持ち越しと、その先の都市を探索する章です。従来の共同制作の試作では、最初の操作から共同制作までを遊べます。3Dの成果は3種類・3拠点、近代化の建物は6種類。自由な案の解釈・協力・台詞と、案を描くスケッチに生成AIを使います。任意の3D形状生成やモデルの追加学習は行いません。詳細と検証範囲は [今回の実装](docs/COMMUNITY_PLAYTEST.md)。
+Central's voice connection uses the [unified WebRTC interface](https://developers.openai.com/api/docs/guides/voice-webrtc?api=realtime#connecting-using-the-unified-interface). The server exchanges SDP without exposing the regular API key to the browser. Each tab supports one call of up to five minutes. Voice usage is billed separately from the text request allowance. Ending the call, closing the facility, hiding the tab, or reloading closes the microphone and connection; the server also ends expired calls. If microphone permission is unavailable, use text chat or **Listen to voice · No mic**.
 
-エピソードは二つの解法を持つ一場面。AIがプレイヤーの提案を解釈し、住民の協力・担当・台詞を決める。資源のルールや仕事・主要な物語の台詞は設計済み。詳しい境界は [エピソードの実装範囲](docs/ONE_WARM_LIGHT.md#aiが決めることとゲームが決めること)。
+Central receives the current resources, facilities, residents' jobs, and delivered records. Residents' secrets and undelivered conversation text are excluded. The server validates the player's distance, the allowed action type, and session ownership before applying a facility action from Central. Call history stays in memory during the call or tab session; voice recordings and Central conversations are not added to game saves or the town's learning records.
 
-4人、歩いて行き来できる6地区、Lab一室、Library一室。街の仕事は設備の運転、記録の運搬、中央の更新、川辺の灯りの復旧と読書席の準備。中央の学習はゲーム内の進行であり、LLMの重みの追加学習ではない。既存の制作はポスターと短い音列の2案件。モデルの実訓練、自由な3D生成、交際成立、制度的排除、汎用的な街の改築は未実装。作業の種類・資源・成果には設計した枠があり、AIはその中で行動や担当を選ぶ。街のシミュレーションはゲームを開いている間に進み、ブラウザを閉じている間の常駐実行はしない。住民それぞれへの音声入力、fal.ai／Replicateによる生成、住民数の拡大は次の段階。自由な街の勝敗・長期の周回ルールは未実装。
+## Individual memories and saves
 
-長期記憶の保存量は増えているが、毎回すべてを正確に思い出せる保証はない。APIモデルの性能と、記憶の検索精度を分けて評価する。
+Each resident can store up to 5,000 events, 10,000 original dialogue messages, and 500 relationship reflections. A prompt selects the latest 24 dialogue messages and up to 16 relevant memories, totaling approximately 6,000 characters. Retrieval uses text and word matches, importance, and recency. It does not use embeddings or train the model's weights.
 
-## 検証と計画
+Memories distinguish direct testimony, witnessed events, hearsay, and a resident's own work. Corrections preserve the earlier record while excluding it from active recall. Residents do not instantly share all memories. When a storage limit is reached, the oldest records are removed and the count is reported.
 
-`npm test`。実APIなしのテストで記憶の分離、訂正、検索、保存復元、制作遷移、保留、感想の宛先、HTTP境界を確認。
+Game state is saved atomically in `data/sessions/`, with separate sessions isolated from one another. The same tab can restore its session after a server restart. Clearing the browser's tab data removes the information needed to identify that session automatically. There is no migration for progress kept only in memory by older versions.
 
-新しい方向性と今回の範囲: [街の観察と介入](docs/CITY_OBSERVATION_PLAN.md)。従来の社会・記憶の設計: `docs/SOCIETY_IMPLEMENTATION_PLAN.md`。元企画: `ARE_YOU_HUMAN_Astra_Initial_Prompt.txt`。
+## Implemented scope and limitations
 
-## 街のビジュアル
+The main chapter covers a promise, synchronization, reunion, carrying residents' memories forward, and exploring the city beyond. The community prototype supports the path from the first interaction to a shared creation, with three kinds of 3D outcomes at three sites and six modernization building families. Generative AI interprets ideas, supports cooperation and dialogue, and draws proposal sketches within this designed framework. See [implementation and validation details](https://github.com/t19cs015/are-you-human/blob/ilya/docs/COMMUNITY_PLAYTEST.md).
 
-夜空、柔らかい陰影、窓の明かり、石畳の材質、揺れる水面を調整しました。画質は設定から「自動・きれい・軽く」を選べます。最新の確認用URLは `/?visual=1`。変更点と確認範囲は [夜のグラフィック調整](docs/NIGHT_GRAPHICS.md)。
+The café episode is one scene with two solutions. AI interprets player proposals and chooses cooperation, responsibilities, and dialogue. Resource rules, jobs, and the main story lines are authored. See [the episode's AI and game rules](https://github.com/t19cs015/are-you-human/blob/ilya/docs/ONE_WARM_LIGHT.md).
 
-カフェの方向性をLibrary・Lab・住宅・広場へ展開しました。屋根色・看板・植栽・石畳を揃え、LabとLibraryの室内にも木製家具や本棚、照明を追加しています。一人称操作、制作モニター、資料閲覧はそのまま使えます。
+The latest game has four residents, six connected districts, one Lab interior, and one Library interior. Jobs include operating infrastructure, delivering records, updating Central, repairing riverside lights, and preparing reading seats. The earlier creative system includes two projects: a poster and a short musical sequence. Central's learning is an in-game progression system; it does not train an LLM's weights.
 
-確認ページは `/cafe-review.html?town=1`。全景・一人称・室内の視点を切り替えられます。詳細は [街全体の変更報告](docs/TOWN_VISUAL_UPGRADE.md)。カフェだけの比較ページ `/cafe-review.html` と [最初の比較報告](docs/CAFE_VISUAL_REVIEW.md) は過去の基準として残しています。
+Arbitrary 3D generation, unrestricted town reconstruction, model training, established romantic relationships, and institutional exclusion are not implemented. Voice input for each resident, fal.ai or Replicate integration, and a larger resident population remain future work. The free-town mode has no complete win/loss system or long-term replay loop. The simulation advances while the game is open and does not run persistently after the browser closes.
 
-取得した無料アセット29点の出典・固定コミット・ハッシュは `assets/cafe/manifest.json`、ライセンス原文は `docs/licenses/`。読み込みに失敗した区画は従来の外観を残します。AI住民4人にはBlenderで制作したオリジナルモデルを使用しています。
+Larger memory stores do not guarantee perfect recall. Model capability and memory retrieval accuracy are separate concerns.
 
-## 住民の3Dモデル
+## Verification and design notes
 
-Mia・Ren・Tomo・Shellを、それぞれ異なる外装・アクセサリー・表情・しぐさで制作しました。`/character-review.html` で4人を並べたり、個別に回転して表情を確認できます（API不要）。編集用のBlenderファイルは `art/characters/`。詳細は [住民モデルの制作・編集ガイド](docs/RESIDENT_MODELS.md)。
+Run `npm test` for checks that do not require live API calls. They cover memory isolation, corrections, retrieval, save restoration, creative project transitions, holds, feedback recipients, and HTTP boundaries.
 
-新しいインフラ5種類はBlenderで制作したオリジナル。編集用ファイルは `art/infrastructure/`、再生成スクリプトは `scripts/build-infrastructure.py`、出所とハッシュは `assets/infrastructure/manifest.json`。
+Development references include [town observation and intervention](https://github.com/t19cs015/are-you-human/blob/ilya/docs/CITY_OBSERVATION_PLAN.md), [the social and memory system plan](https://github.com/t19cs015/are-you-human/blob/ilya/docs/SOCIETY_IMPLEMENTATION_PLAN.md), and [the original project brief](https://github.com/t19cs015/are-you-human/blob/ilya/ARE_YOU_HUMAN_Astra_Initial_Prompt.txt). Some linked development notes are in Japanese.
 
-拡張地区の地面・道路はポリゴンの和集合で一面にまとめ、交差点の重なりによるちらつきを除去。形状は `scripts/build-surfaces.mjs` を編集し、`npm run build:surfaces` で再生成する。生成済み形状は `src/surface-data.js`。石畳や橋は道路より上に配置する。
+## Town visuals
 
-## 英語の1分デモ動画
+The night sky, soft shading, illuminated windows, cobblestone materials, and moving water have been refined. Graphics settings offer **Auto**, **Pretty**, and **Lightweight** modes. Use `/?visual=1` for the visual review view. See [night graphics](https://github.com/t19cs015/are-you-human/blob/ilya/docs/NIGHT_GRAPHICS.md).
 
-最新版は [Words You Keep — Demo v9](https://github.com/user-attachments/assets/7579595f-eb28-4ede-bc77-58cb868f7f98)。英語音声・字幕・音楽付きの60秒デモを、冒頭で再生できます。README用は720p・30fps、音声は元のMP4と同一です。記憶を組み替え、自分の言葉が変わり、住民の選択が街へ広がる体験を収録しています。1080pの元動画はローカルの `exports/words-you-keep-demo-v9.mp4` に保存しています。[v9の制作ファイル](art/demo-v9/README.md)。
+The café's visual direction extends to the Library, Lab, homes, and plaza, with coordinated roofs, signs, planting, and paving. The Lab and Library interiors include wooden furniture, bookshelves, and lighting, while retaining first-person movement and interactive monitors and reading material.
 
-旧タイトルの街づくりデモは `exports/are-you-human-demo-v3.mp4`。英語音声・字幕・音楽付き、60秒・1080p。全編を人間の目線に統一し、住民が振り返って声を重ねる冒頭、6系統の建物が増える8秒のタイムラプス、自由な提案から住民が協力して行動する場面を収録。主人公のモデルは表示しません。冒頭と街の成長はゲーム内アセットを使った演出、協力場面はver1の実API判断とゲーム進行の記録を一人称で再描画したものです。制作手順と台本は [動画の制作ファイル](art/timelapse/README.md)。ver2のMP4も残しています。
+Open `/cafe-review.html?town=1` to switch between overhead, first-person, and interior views. See [the town visual upgrade](https://github.com/t19cs015/are-you-human/blob/ilya/docs/TOWN_VISUAL_UPGRADE.md). The earlier `/cafe-review.html` comparison and [café review notes](https://github.com/t19cs015/are-you-human/blob/ilya/docs/CAFE_VISUAL_REVIEW.md) remain as historical references.
 
-以前のMiaのエピソード動画は `exports/are-you-human-60s-en.mp4` に残しています。こちらは実際のゲームのルールと実APIの住民判断を使った映像編集です。[以前の動画の制作ファイル](art/demo/README.md)。
+Sources, pinned commits, and hashes for 29 downloaded free assets are recorded in `assets/cafe/manifest.json`; original licenses are in `docs/licenses/`. A district falls back to its earlier appearance if an asset fails to load. The four AI residents use original Blender models.
+
+## Resident models and infrastructure
+
+Mia, Ren, Tomo, and Shell each have distinct bodies, accessories, expressions, and gestures. Open `/character-review.html` to compare all four or rotate and inspect them individually, without an API key. Editable Blender files are in `art/characters/`. See [the resident modeling guide](https://github.com/t19cs015/are-you-human/blob/ilya/docs/RESIDENT_MODELS.md).
+
+The five infrastructure models are original Blender assets. Editable files are in `art/infrastructure/`, their generator is `scripts/build-infrastructure.py`, and provenance and hashes are in `assets/infrastructure/manifest.json`.
+
+District ground and road shapes are combined using polygon unions to eliminate flicker from overlapping intersections. Edit `scripts/build-surfaces.mjs` and run `npm run build:surfaces` to regenerate `src/surface-data.js`. Paving and bridges sit above the road surface.
+
+## One-minute English demo
+
+[Words You Keep — Demo v9](https://github.com/user-attachments/assets/7579595f-eb28-4ede-bc77-58cb868f7f98) plays at the top of this README with English voices, captions, and music. It shows memory editing, the resulting changes in your words, and residents' choices spreading through the town. The README version is 720p at 30 fps, with the original audio preserved. The 1080p master is kept locally at `exports/words-you-keep-demo-v9.mp4`. See [v9 production files](https://github.com/t19cs015/are-you-human/blob/ilya/art/demo-v9/README.md).
+
+The earlier town-building demo, under the former title, is `exports/are-you-human-demo-v3.mp4`: a 60-second, 1080p film with English voices, captions, and music. It stays in first person, opens with residents turning and murmuring, shows six building families growing in an eight-second time-lapse, and follows residents cooperating on an open-ended proposal. The player character is not shown. The opening and growth sequences are staged with game assets; cooperation replays the first demo's real API decisions and game progression from a first-person camera. Version 2 is also preserved. See [the earlier production files](https://github.com/t19cs015/are-you-human/blob/ilya/art/timelapse/README.md).
+
+The older Mia episode film is kept locally at `exports/are-you-human-60s-en.mp4`. It is an edited sequence using the game's actual rules and recorded API decisions. See [episode demo production files](https://github.com/t19cs015/are-you-human/blob/ilya/art/demo/README.md). Files under `exports/` are local build outputs and are not committed to the repository.
