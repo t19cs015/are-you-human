@@ -1,6 +1,6 @@
 # AI TOWN
 
-https://github.com/user-attachments/assets/7579595f-eb28-4ede-bc77-58cb868f7f98
+[https://github.com/user-attachments/assets/7579595f-eb28-4ede-bc77-58cb868f7f98](https://github.com/user-attachments/assets/e4c1d7a2-76c3-4319-a9e3-0921ad7891f7)
 
 **Demo v9 · 60 seconds · English voices & captions**
 
@@ -11,6 +11,8 @@ In **AI TOWN**, Central keeps a miniature town running by choosing the memories 
 You inhabit a similar robot body, but choose your own memories. Drag memory blocks into place or rewrite them in ordinary language, then hear them become your character's words. Each resident decides how to respond: join you, share an experience, or return to work. Explore windmills, waterways, and the city beyond Central, and help the moments you make together survive the next update. A warm, playful town hides an unsettling question: who decides what tomorrow remembers?
 
 [GIF preview (no audio)](docs/media/ai-town-demo-v9.gif)
+
+
 
 The playable game and demo production files are maintained together on `main`.
 
