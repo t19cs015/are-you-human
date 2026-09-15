@@ -1,0 +1,20 @@
+import {readFile,writeFile,access} from 'node:fs/promises';
+import {execFileSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
+import {defaults} from '../server/config.mjs';
+const root=fileURLToPath(new URL('../',import.meta.url)),dir=root+'data/film-v6/';
+const manifest=JSON.parse(await readFile(dir+'audio-manifest.json','utf8'));
+const replay=JSON.parse(await readFile(dir+'replay.json','utf8'));
+if(replay.decision.mode!=='live'||replay.decision.action!=='meet'||!replay.states.restored.memoryGame.exploration.borderShared)throw new Error('The recorded game outcome is incomplete');
+const expected=manifest.clips.filter(c=>c.start>=6.5).map(c=>c.text).join(' ');
+if(/[\u3040-\u30ff\u3400-\u9fff]/.test(expected))throw new Error('Non-English dialogue in the mix');
+let source=dir+'master.wav';try{await access(root+'exports/are-you-human-demo-v6.mp4');source=root+'exports/are-you-human-demo-v6.mp4';}catch{}
+execFileSync('ffmpeg',['-y','-v','error','-ss','6.5','-i',source,'-t','53.5','-ac','1',dir+'verification.wav']);
+const form=new FormData();form.set('model','gpt-4o-mini-transcribe');form.set('language','en');form.set('file',new File([await readFile(dir+'verification.wav')],'demo-v6.wav',{type:'audio/wav'}));
+const r=await fetch('https://api.openai.com/v1/audio/transcriptions',{method:'POST',headers:{Authorization:'Bearer '+defaults.key},body:form,signal:AbortSignal.timeout(60000)});
+if(!r.ok)throw new Error('Transcription verification HTTP '+r.status);
+const {text:transcript}=await r.json();
+const normalize=s=>s.toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,'').replace(/\s+/g,' ').trim();
+const matches=normalize(expected)===normalize(transcript);
+await writeFile(dir+'narration-verification.json',JSON.stringify({matches,source,range:'6.5–60 seconds; the opening crowd intentionally overlaps',expected,transcript,liveDecision:replay.decision.action},null,2));
+console.log(JSON.stringify({matches,expected,transcript},null,2));

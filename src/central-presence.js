@@ -1,8 +1,13 @@
 import * as T from '/node_modules/three/build/three.module.js';
+import {craftBox,craftRing} from './town-craft.js';
 export function createCentralPresence(world){
   const group=new T.Group();group.name='中央 · always present';group.position.set(0,.15,28.9);world.scene.add(group);
   const lightMat=new T.MeshBasicMaterial({color:0xbce6d9,transparent:true,opacity:.45,depthWrite:false});
   const pedestal=new T.Mesh(new T.CylinderGeometry(.75,.95,.25,36),new T.MeshStandardMaterial({color:0x7a9b93,roughness:.5}));pedestal.position.y=.12;group.add(pedestal);
+  craftRing(group,0xc8b48d,0,.23,0,.72,.04,true);
+  craftRing(group,0x8ac0b1,0,.255,0,.51,.025,true);
+  for(let i=0;i<16;i++){const a=i*Math.PI/8,m=craftBox(group,0x344f58,Math.sin(a)*.63,.255,Math.cos(a)*.63,.035,.016,.1,'metal');m.rotation.y=a;}
+  for(let i=0;i<6;i++){const a=i*Math.PI/3,m=craftBox(group,0xc4ae82,Math.sin(a)*.79,.12,Math.cos(a)*.79,.1,.13,.04,'metal');m.rotation.y=a;}
   world.colliders.push({x:0,z:28.9,hw:.8,hd:.8});
   const beam=new T.Mesh(new T.CylinderGeometry(.9,.3,2.3,40,1,true),new T.MeshBasicMaterial({color:0x9ddbd5,transparent:true,opacity:.05,depthWrite:false,side:T.DoubleSide}));beam.position.y=1.4;group.add(beam);
   const head=new T.Group();head.position.y=2.65;head.rotation.y=Math.PI;group.add(head);

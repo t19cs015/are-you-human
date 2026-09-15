@@ -23,7 +23,7 @@ The render loop checks camera height for all 1,800 frames.
 `skyline-variety.js` replaces v2's identical repeated towers with six architectural
 families: terraced apartments, round towers, unequal twin towers, glazed offices,
 stepped crowns, and low civic buildings with greenhouse roofs. Heights, roofs,
-window layouts and muted ceramic colors vary. Hina's café, shops, planting and
+window layouts and muted ceramic colors vary. Haruna's café, shops, planting and
 resident assets remain the basis of the little world.
 
 ## V3 implementation boundaries
@@ -80,7 +80,7 @@ The user requested an MP4 file, not an HTML viewing page.
 | 40–55s | Return to the residents at street level, with the new skyline looming behind them. Working with Central or opposing it shapes trust, cooperation and the community. |
 | 55–60s | “Are You Human?” / “A community shaped by you.” |
 
-The little world and resident assets supplied by Hina remain the visual basis.
+The little world and resident assets supplied by Haruna remain the visual basis.
 The human visitor is an original procedural model, distinct from the residents'
 screen faces. Additional towers reuse the existing Blender `city-house.glb`.
 Central's new floors are modeled in Three.js. The scene uses the original café,

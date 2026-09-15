@@ -3,6 +3,7 @@ import {RoundedBoxGeometry} from '/node_modules/three/examples/jsm/geometries/Ro
 import {createVariedSkyline} from './skyline-variety.js';
 import {memoryPlots,memoryObstacles} from './town-layout.js';
 import {createFaceTexture} from './resident-visual.js';
+import {dressMemoryCore} from './town-craft.js';
 
 export function createMemoryCity(world){
   const group=new T.Group();group.name='記憶の都市 · a city that computes';world.scene.add(group);world.colliders.push(...memoryObstacles);
@@ -53,6 +54,7 @@ export function createMemoryCity(world){
   }
   const core=new T.Group();core.position.set(0,0,82);group.add(core);
   box(0x6c8685,0,.5,0,8,1,8,core);box(0xa5bcb0,0,2.4,0,5,3,5,core);
+  dressMemoryCore(core);
   const heart=new T.Mesh(new T.IcosahedronGeometry(2.6,1),new T.MeshPhysicalMaterial({color:0x9bd2cb,roughness:.22,metalness:.25,transparent:true,opacity:.65,emissive:0x508f8d,emissiveIntensity:.35,wireframe:true}));heart.position.y=7;core.add(heart);
   const gyros=[ring(0,7,0,3.5,[Math.PI/2,.3,0],0xcbd8af,core),ring(0,7,0,3.2,[.3,.3,.3],0x9bcac9,core),ring(0,7,0,2.95,[1,0,.5],0xe6c699,core)];
   for(const x of [-3,3])for(const z of [-3,3]){box(0xb8c5b2,x,3.3,z,.45,5.8,.45,core);orb(0xc1e2d3,x,6.4,z,.2,core);}
@@ -72,7 +74,7 @@ export function createMemoryCity(world){
     for(const side of [-1,1])orb(0xc9e8db,side*.1,.49,.41,.04,courier);group.add(courier);const phase=i/10,p=deliveryPoint(phase),collider={x:p.x,z:p.z,hw:.3,hd:.4,transient:true};courier.position.set(p.x,.13,p.z);world.colliders.push(collider);couriers.push({courier,phase,collider});
   }
   let flowClock=0,last=0;
-  return {group,update(time,city){
+  return {group,develop:progress=>skyline.develop(progress),update(time,city){
     const dt=Math.min(.05,Math.max(0,time-last));last=time;const enabled=city?.infrastructure?.modelEnabled!==false;flowClock+=dt*(enabled?1:.28);
     heart.rotation.y=flowClock*.13;heart.rotation.z=Math.sin(flowClock*.17)*.13;heart.scale.setScalar(1+Math.sin(flowClock*.9)*.035);
     gyros.forEach((g,i)=>{g.rotation.y=flowClock*(i%2?-.13:.1);g.rotation.z=flowClock*(.08+i*.03);});rotors.forEach((r,i)=>r.rotation.z=flowClock*(i%2?-1.1:.9)*(1+(city?.memoryGame?.exploration?.clockOffset||0)*i*.04));

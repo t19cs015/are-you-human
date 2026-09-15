@@ -34,6 +34,8 @@ import {openingStage,routePoints} from './story.js';
 import {createMemoryView} from './memory-view.js';
 import {createMemoryWorld} from './memory-world.js';
 import {createPlayerVisual} from './player-visual.js';
+import {initLanguage,language} from './language.js';
+initLanguage();
 const $=id=>document.getElementById(id);
 let world;
 try{world=createWorld($('world'));}catch(e){$('error').hidden=false;throw e;}
@@ -126,7 +128,7 @@ function syncCity(next){state.city=next;cityView.update(next,state.agents);infra
 function toast(text,duration=5){$('toast').textContent=text;$('toast').hidden=false;toastUntil=time+duration;}
 function apiError(e){if(e.message==='SAVE_WRITE_FAILED')return '進行を保存できませんでした。ディスクの空き容量を確認してください。';if(e.message==='SAVE_READ_FAILED')return '保存データを読み込めませんでした。データを残したまま確認が必要です。';return e.message==='BUSY'?'今、別の住民と話しています。少し待ってね。':e.message==='SESSION_EXPIRED'?'接続が切れました。ページを再読み込みしてください。':'通信できませんでした。もう一度試してください。';}
 async function api(path,data,{signal,timeout=45000}={}){
- const response=await fetch('/api/'+path,{method:data===undefined?'GET':'POST',headers:{'Content-Type':'application/json','X-Session':session},...(data===undefined?{}:{body:JSON.stringify(data)}),signal:signal?AbortSignal.any([signal,AbortSignal.timeout(timeout)]):AbortSignal.timeout(timeout)});
+ const response=await fetch('/api/'+path,{method:data===undefined?'GET':'POST',headers:{'Content-Type':'application/json','X-Session':session,'X-Language':language},...(data===undefined?{}:{body:JSON.stringify(data)}),signal:signal?AbortSignal.any([signal,AbortSignal.timeout(timeout)]):AbortSignal.timeout(timeout)});
  const value=await response.json();if(!response.ok)throw new Error(value.error||'NETWORK');return value;
 }
 async function refreshState(){state=await api('state');connected=state.connected;studio.update(state);syncCity(state.city);$('resume').hidden=!state.city?.active&&!state.agents.some(a=>a.memoryCount>0)&&!state.projects?.some(p=>p.revision>0);version=state.version;if($('settings').hidden)$('model').value=state.model;$('realtime-model').textContent=state.realtimeModel;$('default-config').disabled=!state.defaultConfigured;$('connection').textContent=connected?'API設定済み · '+state.model:'DEMO · キー未設定';}
@@ -281,7 +283,7 @@ $('journal-button').onclick=async()=>{
  for(const event of [...(state.changes||[])].reverse().slice(0,12)){
   const row=document.createElement('p');row.textContent=`#${event.step} ${getNPC(event.observer)?.name} → ${event.target==='player'?'あなた':getNPC(event.target)?.name}：${event.reason}`;$('journal-content').append(row);
  }
- const save=document.createElement('button');save.textContent='観察記録を保存';save.onclick=()=>{const blob=new Blob([JSON.stringify({version:state.version,agents:state.agents,changes:state.changes,events:state.events},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='are-you-human-observation.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};$('journal-content').append(save);
+ const save=document.createElement('button');save.textContent='観察記録を保存';save.onclick=()=>{const blob=new Blob([JSON.stringify({version:state.version,agents:state.agents,changes:state.changes,events:state.events},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='words-you-keep-observation.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};$('journal-content').append(save);
 
  if(version==='4.2'&&mode==='play'){const b=document.createElement('button');b.textContent='街の更新イベントを試す';b.onclick=()=>{setModal('journal',false);systemUpdate();};$('journal-content').append(b);}
  }catch(e){$('journal-content').textContent=apiError(e);}

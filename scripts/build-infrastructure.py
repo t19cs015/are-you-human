@@ -14,7 +14,12 @@ def material(name,hex,emission=0):
     rgb=[v/12.92 if v<=.04045 else ((v+.055)/1.055)**2.4 for v in rgb]
     m=bpy.data.materials.new(name);m.diffuse_color=(*rgb,1);m.use_nodes=True
     p=m.node_tree.nodes.get('Principled BSDF');p.inputs['Base Color'].default_value=(*rgb,1)
-    p.inputs['Roughness'].default_value=.65
+    p.inputs['Roughness'].default_value=.47
+    if 'brass' in name.lower():
+        p.inputs['Metallic'].default_value=.72;p.inputs['Roughness'].default_value=.31
+    if any(t in name.lower() for t in ['porcelain','enamel','ceramic']):
+        p.inputs['Coat Weight'].default_value=.28;p.inputs['Coat Roughness'].default_value=.26
+    if 'wood' in name.lower() or 'roof' in name.lower():p.inputs['Roughness'].default_value=.72
     if emission:p.inputs['Emission Color'].default_value=(*rgb,1);p.inputs['Emission Strength'].default_value=emission
     return m
 
@@ -36,9 +41,15 @@ def box(name,loc,size,m,r=.08,parent=None):
         mod=o.modifiers.new('Weighted corner normals','WEIGHTED_NORMAL');bpy.ops.object.modifier_apply(modifier=mod.name)
     return finish(o,name,m,parent)
 
-def cylinder(name,loc,r,depth,m,vertices=24,parent=None,top=None):
+def cylinder(name,loc,r,depth,m,vertices=48,parent=None,top=None):
     bpy.ops.mesh.primitive_cone_add(vertices=vertices,radius1=r,radius2=r if top is None else top,depth=depth,location=loc)
-    return finish(bpy.context.object,name,m,parent)
+    o=bpy.context.object
+    for f in o.data.polygons:f.use_smooth=len(f.vertices)==4
+    if depth>.06 and r>.08:
+        mod=o.modifiers.new('Turned softened lip','BEVEL');mod.width=min(.026,depth*.12,r*.05);mod.segments=3
+        bpy.ops.object.modifier_apply(modifier=mod.name)
+        mod=o.modifiers.new('Weighted normals','WEIGHTED_NORMAL');bpy.ops.object.modifier_apply(modifier=mod.name)
+    return finish(o,name,m,parent)
 
 def sphere(name,loc,scale,m,parent=None):
     bpy.ops.mesh.primitive_uv_sphere_add(segments=20,ring_count=12,radius=1,location=loc);o=bpy.context.object;o.scale=scale
@@ -58,6 +69,8 @@ def window(name,x,y,z,w,h,parent=None):
     box(name+' frame',(x,y,z),(w+.16,.16,h+.16),slate,.06,parent)
     box(name+' glass',(x,y-.09,z),(w,.055,h),glow,.045,parent)
     box(name+' mullion',(x,y-.14,z),(.055,.045,h),brass,.015,parent)
+    box(name+' sill',(x,y-.15,z-h/2-.09),(w+.28,.27,.11),cream,.035,parent)
+    box(name+' transom',(x,y-.15,z+h*.15),(w,.04,.04),brass,.012,parent)
 
 manifest=[]
 for kind in ['windmill','pump','tower','data-center','city-house']:
@@ -66,6 +79,7 @@ for kind in ['windmill','pump','tower','data-center','city-house']:
     cream=material('Warm porcelain','D4D7C6');slate=material('Midnight enamel','465F70')
     teal=material('Sage ceramic','86A69A');wood=material('Old honey wood','A88867');brass=material('Dull brass','BBA477')
     rose=material('Dusty rose roof','AD827F');glass=material('Quiet blue glass','739BA7')
+    linen=material('Woven sail linen','D8CEB3');linen.node_tree.nodes.get('Principled BSDF').inputs['Roughness'].default_value=.94
     glow=material('Window glow','F3D69B',.65);cool=material('New window glow','B8DADF',.65)
     root=empty(kind)
     if kind=='windmill':
@@ -79,10 +93,10 @@ for kind in ['windmill','pump','tower','data-center','city-house']:
         sphere('Rotor hub',(0,-1.9,5.3),(.32,.38,.32),brass,rotor)
         for i in range(4):
             a=i*math.pi/2+.28
-            for name,dist,width,length,m in [('Blade arm',1.78,.13,3.5,wood),('Linen sail',2.3,.63,1.65,cream)]:
+            for name,dist,width,length,m in [('Blade arm',1.78,.13,3.5,wood),('Linen sail',2.3,.63,1.65,linen)]:
                 o=box(name,(math.sin(a)*dist,-1.83,5.3+math.cos(a)*dist),(width,.12,length),m,.035,rotor);o.rotation_euler.y=a
             for j in range(5):
-                d=1.6+j*.31;o=box('Sail stitch',(math.sin(a)*d,-1.91,5.3+math.cos(a)*d),(.64,.028,.038),brass,.005,rotor);o.rotation_euler.y=a
+                d=1.6+j*.31;o=box('Sail stitch',(math.sin(a)*d,-1.91,5.3+math.cos(a)*d),(.64,.028,.038),wood,.005,rotor);o.rotation_euler.y=a
         box('Service box',(1.5,-.8,.65),(.7,.65,1.1),teal,.12,root)
         pipe('Copper cable',[(1.5,-.8,1),(2,-.8,.45),(2,-2,.45)],.055,brass,root)
     elif kind=='pump':
@@ -139,6 +153,69 @@ for kind in ['windmill','pump','tower','data-center','city-house']:
         box('Rooftop garden',(0,0,7.64),(2.6,2.6,.16),wood,.1,root)
         sphere('Roof shrub',(-.65,.6,7.95),(.5,.55,.42),teal,root)
         box('Rooftop service',(1,.6,7.9),(.7,.8,.6),slate,.1,root)
+    # Handcrafted details stay inside each existing collision footprint.
+    if kind=='windmill':
+        for z in [4.9]:cylinder('Turned stone and eave bands',(0,0,z),1.9 if z<1 else 1.4,.13,wood if z>1 else cream,parent=root)
+        for i in range(24):
+            a=i*math.tau/24
+            pipe('Standing roof seam',[(math.cos(a)*1.78,math.sin(a)*1.78,5.3),(math.cos(a)*.18,math.sin(a)*.18,6.4)],.024,wood,root)
+        sphere('Roof finial',(0,0,6.61),(.12,.12,.17),brass,root)
+        for x in [-.32,0,.32]:box('Door timber slats',(x,-1.876,1.05),(.018,.025,1.48),wood,.005,root)
+        for z in [.46,1.53]:box('Forged door hinge',(0,-1.90,z),(.65,.035,.065),slate,.01,root)
+        sphere('Door latch',(.24,-1.94,1.05),(.055,.055,.055),brass,root)
+        for i in range(4):
+            a=i*math.pi/2+.28
+            for side in [-1,1]:
+                dx=math.cos(a)*side*.34;dz=-math.sin(a)*side*.34
+                pipe('Sail timber edging',[(math.sin(a)*1.48+dx,-1.935,5.3+math.cos(a)*1.48+dz),(math.sin(a)*3.13+dx,-1.935,5.3+math.cos(a)*3.13+dz)],.026,wood,rotor)
+        for z in [.35,.8]:box('Service panel edging',(1.5,-1.15,z),(.54,.05,.045),brass,.012,root)
+        for i in range(4):box('Service louvers',(1.5,-1.145,.48+i*.10),(.38,.04,.035),slate,.008,root)
+    elif kind=='pump':
+        for z in [.55,1.83]:cylinder('Tank retaining band',(1,.2,z),.499,.09,brass,parent=root)
+        for x in [-1.24,.24]:
+            for z in [.4,2.45]:sphere('Shed brass fastener',(x,-.62,z),(.038,.025,.038),brass,root)
+        for i in range(7):box('Cooling grille',(-.5,.3+i*.21,2.878),(1.45,.045,.025),slate,.007,root)
+        gauge=cylinder('Round gauge surround',(1,-.315,1.6),.255,.10,brass,parent=root);gauge.rotation_euler.x=math.pi/2
+        face=cylinder('Ivory gauge dial',(1,-.382,1.6),.218,.025,cream,parent=root);face.rotation_euler.x=math.pi/2
+        for i in range(9):
+            a=-2.3+i*.575
+            tick=box('Gauge calibration',(1+math.sin(a)*.17,-.406,1.6+math.cos(a)*.17),(.018,.012,.043),slate,.002,root);tick.rotation_euler.y=a
+        needle=box('Gauge needle',(1.055,-.421,1.66),(.025,.02,.19),rose,.006,root);needle.rotation_euler.y=.7
+        for y in [.7,1.3,1.7]:
+            collar=cylinder('Pipe compression collar',(1,y,.65),.218,.09,slate,parent=root);collar.rotation_euler.x=math.pi/2
+        for x in [-1.17,-.5,.17]:box('Shed standing roof seam',(x,.3,2.872),(.025,1.88,.02),wood,.005,root)
+    elif kind=='tower':
+        for i in range(8):
+            a=i*math.pi/4
+            pipe('Crown roof seam',[(math.cos(a)*1.45,math.sin(a)*1.45,12.81),(math.cos(a)*.55,math.sin(a)*.55,13.4)],.027,brass,root)
+            for z in [11.25,12.8]:
+                pipe('Lantern rail',[(math.cos(a)*1.15,math.sin(a)*1.15,z),(math.cos(a+math.pi/4)*1.15,math.sin(a+math.pi/4)*1.15,z)],.034,brass,root)
+    elif kind=='data-center':
+        for x in [-3.76,3.76]:
+            box('Hall corner pilaster',(x,-3.05,1.9),(.27,.26,3.05),teal,.065,root)
+            for z in [.55,3.25]:box('Pilaster capital',(x,-3.08,z),(.39,.34,.13),brass,.025,root)
+        for x in [-2.15,2.15]:
+            box('Porch column',(x,-3.77,1.5),(.18,.18,2.35),teal,.035,root)
+            sphere('Porch opal lamp',(x,-3.77,2.35),(.14,.14,.18),glow,root)
+        for y in [-2,-.7,.6,1.9]:
+            for x in [-4.012,4.012]:
+                box('Hall side frame',(x,y,1.83),(.08,.76,1.17),slate,.04,root)
+                box('Hall side pane',(x+math.copysign(.05,x),y,1.83),(.035,.62,1.03),glow,.035,root)
+        for x in [-.55,0,.55]:box('Entrance inset',(x,-3.20,1.25),(.38,.04,1.8),glass,.075,root)
+        for z in [.55,3.43]:box('Facade cornice',(0,-3.075,z),(7.5,.14,.11),brass,.025,root)
+        for i in range(12):
+            a=i*math.tau/12
+            pipe('Dome rib',[(math.cos(a)*1.49,math.sin(a)*1.49,6.08),(math.cos(a)*1.25,math.sin(a)*1.25,6.48),(math.cos(a)*.5,math.sin(a)*.5,6.80),(0,0,6.85)],.025,brass,upper)
+    # Merge by animation parent and material. Detailed models keep a small draw-call
+    # budget; Rotor and UpperWorks remain independently animated editable nodes.
+    buckets={}
+    for o in list(bpy.context.scene.objects):
+        if o.type=='MESH':buckets.setdefault((o.parent.name if o.parent else '',o.data.materials[0].name),[]).append(o)
+    for (parent_name,mat_name),objects in buckets.items():
+        if len(objects)<2:continue
+        bpy.ops.object.select_all(action='DESELECT')
+        for o in objects:o.select_set(True)
+        bpy.context.view_layer.objects.active=objects[0];bpy.ops.object.join();bpy.context.object.name=parent_name+' · '+mat_name
     bpy.context.preferences.filepaths.save_version=0
     bpy.ops.wm.save_as_mainfile(filepath=str(SOURCE/(kind+'.blend')))
     path=OUT/(kind+'.glb')

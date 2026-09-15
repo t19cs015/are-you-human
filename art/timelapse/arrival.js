@@ -121,7 +121,7 @@ function draw(t){
     const shade=ctx.createLinearGradient(0,0,920,0);shade.addColorStop(0,'#142a36eb');shade.addColorStop(.68,'#142a36cc');shade.addColorStop(1,'#142a3600');ctx.fillStyle=shade;ctx.fillRect(0,90,920,909);
     tracking('ONE HUMAN. A CONNECTED WORLD.',83,211,15,mint,2.2);text('Are You',77,344,103,ink,'Georgia');text('Human?',77,467,114,gold,'italic Georgia');
     text('A community shaped by you.',83,561,36,ink,'Georgia');text('Speak. Listen. See what they choose.',83,621,25,'#bdd2d3');
-    text('Original residents & little world by Hina · Built with OpenAI',83,700,16,'#adc0c6');
+    text('Original residents & little world by Haruna · Built with OpenAI',83,700,16,'#adc0c6');
   }
   const clip=manifest.clips.find(c=>t>=c.start&&t<Math.min(c.end,c.start+c.duration/c.tempo)+.2);
   if(clip){

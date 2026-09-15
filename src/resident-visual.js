@@ -47,13 +47,13 @@ export function upgradeResident(n){
   n.body.add(imported);fallback.forEach(o=>o.visible=false);arms.splice(0,arms.length,...newArms);feet.splice(0,feet.length,...newFeet);
   return true;
  }).catch(error=>{console.warn(`${n.name} original model unavailable; keeping existing model.`,error.message);return false;});
- return {ready,get model(){return imported;},wave(time){waveUntil=time+2.1;},update(time,expression='neutral',talking=false,working=false,frozen=false){
+ return {ready,get model(){return imported;},wave(time){waveUntil=Math.max(waveUntil,time+1.65);},update(time,expression='neutral',talking=false,working=false,frozen=false,movement='auto'){
   if(frozen){if(last!=='sync'){paint('sync');last='sync';}lastPos.copy(n.root.position);return;}
   if(!expressions.includes(expression))expression='neutral';const blink=(time+profile.phase)%4.4<.13,key=expression+blink;if(key!==last){paint(expression,blink);last=key;}
-  const moving=lastPos.distanceToSquared(n.root.position)>.000001;lastPos.copy(n.root.position);
+  const moving=movement==='still'?false:lastPos.distanceToSquared(n.root.position)>.000004;lastPos.copy(n.root.position);
   const pace=n.id==='shell'?.7:n.id==='tomo'?1.15:1;
-  arms.forEach((a,i)=>{a.rotation.x=working?-.65:moving?Math.sin(time*8+i*Math.PI)*.38*pace:talking?Math.sin(time*3+i)*.12*pace:Math.sin(time*1.4+i)*.025;a.rotation.z=!working&&time<waveUntil&&i===1?profile.gesture+Math.sin(time*9)*.13*pace:(i===0?.08:-.08);});
-  feet.forEach((f,i)=>f.rotation.x=moving?Math.sin(time*8+i*Math.PI)*.25*pace:0);
+  arms.forEach((a,i)=>{a.rotation.x=working?-.65:moving?Math.sin(time*6.2+i*Math.PI)*.3*pace:talking?Math.sin(time*2.5+i)*.1*pace:Math.sin(time*1.25+i)*.02;a.rotation.z=!working&&time<waveUntil&&i===1?profile.gesture+Math.sin(time*5.2)*.075*pace:(i===0?.08:-.08);});
+  feet.forEach((f,i)=>f.rotation.x=moving?Math.sin(time*6.2+i*Math.PI)*.2*pace:0);
   if(head){head.rotation.z=expression==='confused'?.12:expression==='thinking'?-.07:0;head.rotation.x=working?.05:talking?Math.sin(time*2.5)*.018*pace:0;}
   if(tail)tail.rotation.y=Math.sin(time*2.2)*.13;
  }};

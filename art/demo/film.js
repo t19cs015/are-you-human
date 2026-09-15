@@ -98,7 +98,7 @@ function draw(t){
   else if(t<54){header('TWO WISHES. ONE TOMORROW.','The update finishes.','The café stays.');pill('CENTRAL  /  UPDATED',88,334,280,mint);pill('CAFÉ  /  WARM',88,391,235,gold);}
   else{
     panel(70,151,826,519,.81);tracking('ONE WARM LIGHT',113,211,17,gold,3.3);text('Are You',108,325,100,ink,'Georgia');text('Human?',108,432,100,gold,'Georgia','italic');text('Conversation becomes cooperation.',113,509,33,ink,'Georgia');
-    text('Observe. Propose. Watch them act.',113,567,25,'#c2d3d4');text('Built with OpenAI · Original resident characters by Hina',113,622,18,'#a4bcc5');
+    text('Observe. Propose. Watch them act.',113,567,25,'#c2d3d4');text('Built with OpenAI · Original resident characters by Haruna',113,622,18,'#a4bcc5');
   }
   const subtitle=subtitles.find(s=>t>=s.start&&t<s.end);
   if(subtitle){const max=1600;ctx.font='400 34px Arial';const words=subtitle.text.split(/\s+/),lines=[];let line='';for(const word of words){if(ctx.measureText(line+' '+word).width>max&&line){lines.push(line);line=word;}else line+=(line?' ':'')+word;}if(line)lines.push(line);

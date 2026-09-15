@@ -131,7 +131,7 @@ function draw(t){
     const shade=ctx.createLinearGradient(0,0,940,0);shade.addColorStop(0,'#142a36eb');shade.addColorStop(.6,'#142a36b8');shade.addColorStop(1,'#142a3600');ctx.fillStyle=shade;ctx.fillRect(0,90,940,909);
     tracking('A COMMUNITY SHAPED BY YOU.',81,218,14,mint,2.2);text('Are You',75,342,98,ink,'Georgia');text('Human?',75,458,108,gold,'italic Georgia');
     text('Speak. Listen. See what they choose.',81,553,28,ink);text('Work with Central. Or push back.',81,602,27,gold,'Georgia');
-    text('Hina’s little world · Built with OpenAI',81,697,18,'#afc8cb');
+    text('Haruna’s little world · Built with OpenAI',81,697,18,'#afc8cb');
   }
   if(state&&t<53){panel(1463,128,375,194,.84);meter('CENTRAL UPDATE',state.episode.update,1498,179,mint);meter('CAFÉ WARMTH',state.episode.warmth,1498,260,gold);}
   const clip=manifest.clips.find(c=>!c.crowd&&t>=c.start&&t<Math.min(c.end,c.start+c.duration/c.tempo)+.18);

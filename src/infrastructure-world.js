@@ -5,6 +5,7 @@ import {createVariedSkyline} from './skyline-variety.js';
 import {infrastructureSites,infrastructureObstacles,modernPlots} from './town-layout.js';
 import {createRiverMaterial} from './river-material.js';
 import {riverSample} from './boundary-layout.js';
+import {createLanternSkiff} from './town-craft.js';
 
 export function createInfrastructureWorld(world){
   const group=new T.Group();group.name='明日のための街';world.scene.add(group);
@@ -29,7 +30,7 @@ export function createInfrastructureWorld(world){
   for(let i=0;i<192;i++)for(let j=0;j<8;j++){const a=i*9+j,b=a+9;indices.push(a,a+1,b,b,a+1,b+1);}
   const riverGeometry=new T.BufferGeometry();riverGeometry.setAttribute('position',new T.Float32BufferAttribute(vertices,3));riverGeometry.setAttribute('uv',new T.Float32BufferAttribute(uvs,2));riverGeometry.setIndex(indices);riverGeometry.computeVertexNormals();
   const water=new T.Mesh(riverGeometry,river.material);water.name='River between the two mist gates';water.rotation.x=-Math.PI/2;water.position.y=-.29;water.receiveShadow=true;group.add(water);
-  const boat=new T.Group();boat.position.set(-30,-.08,39);group.add(boat);box(0x8b7764,0,0,0,1.5,.26,.75,boat);box(0xc2bca0,0,.2,0,1,.15,.6,boat);
+  const boat=createLanternSkiff();boat.position.set(-30,-.19,39);boat.scale.setScalar(1.4);group.add(boat);
 
   const flows=[];
   function flow(points,color,radius){
@@ -80,10 +81,10 @@ export function createInfrastructureWorld(world){
     // Batch the repeated vegetation exactly as the existing town does.
     group.updateMatrixWorld(true);const batches=new Map();
     for(const root of roots)root.traverse(o=>{if(!o.isMesh)return;const key=o.geometry.uuid+':'+o.material.uuid;if(!batches.has(key))batches.set(key,{geometry:o.geometry,material:o.material,matrices:[]});batches.get(key).matrices.push(o.matrixWorld.clone());});
-    for(const b of batches.values()){const m=new T.InstancedMesh(b.geometry,b.material,b.matrices.length);b.matrices.forEach((matrix,i)=>m.setMatrixAt(i,matrix));m.castShadow=true;m.receiveShadow=true;group.add(m);}roots.forEach(o=>o.removeFromParent());
+    for(const b of batches.values()){const m=new T.InstancedMesh(b.geometry,b.material,b.matrices.length);b.matrices.forEach((matrix,i)=>m.setMatrixAt(i,matrix));m.castShadow=true;m.receiveShadow=true;m.userData.infrastructureTrees=true;group.add(m);}roots.forEach(o=>o.removeFromParent());
   })().catch(()=>{});
   let lastTime=0,motor=0,growth=0;
-  return {group,ready:Promise.all([ready,treesReady]),update(time,city){
+  return {group,ready:Promise.all([ready,treesReady]),setTreesVisible(visible){for(const o of group.children)if(o.userData.infrastructureTrees)o.visible=visible;},update(time,city){
     river.update(time);
     const g=city?.infrastructure||{phase:0,modelEnabled:true},dt=Math.min(.05,Math.max(0,time-lastTime));lastTime=time;
     motor=T.MathUtils.damp(motor,g.windOnline&&g.windEnabled?(city?.memoryGame?.exploration?.windTuned?1.8:.8):0,2,dt);if(rotor)rotor.rotation.z-=dt*motor;satelliteRotors.forEach((r,i)=>{if(r)r.rotation.z-=dt*motor*(1.1+i*.17);});if(pumpRotor&&g.waterRate>0)pumpRotor.rotation.z+=dt*.9;
@@ -94,7 +95,7 @@ export function createInfrastructureWorld(world){
     const powered=g.relayOnline&&(city?.community?.active?g.energyRate>0:g.energyRate>0||g.energy>1);beacon.intensity=powered?36:0;halo.visible=!!powered;halo.rotation.z=time*.2;halo.material.opacity=.28+Math.sin(time*1.6)*.12;
     towerGlow.forEach(m=>m.emissiveIntensity=powered?1.1:.03);
     for(const f of flows){const on=f===cooling?g.waterRate>0:f===power?g.windOnline&&g.windEnabled&&g.relayOnline:powered;f.beads.visible=!!on;if(!on)continue;f.phase+=dt*(f===cooling?.045:.07)*(f===toCentral&&g.allocation==='town'?.4:1);for(let i=0;i<12;i++){dummy.position.copy(f.curve.getPointAt((f.phase+i/12)%1));dummy.updateMatrix();f.beads.setMatrixAt(i,dummy.matrix);}f.beads.instanceMatrix.needsUpdate=true;}
-    boat.position.y=-.08+Math.sin(time*.7)*.025;boat.rotation.z=Math.sin(time*.5)*.015;
+    boat.position.y=-.19+Math.sin(time*.7)*.018;boat.rotation.z=Math.sin(time*.5)*.015;
     screen.visible=frontScreen.visible=!city?.community?.active;updateInscription(g);
   }};
 }

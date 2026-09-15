@@ -5,8 +5,8 @@
     "source": "Original Blender construction for Are You Human?",
     "editable": "art/infrastructure/windmill.blend",
     "generator": "scripts/build-infrastructure.py",
-    "sha256": "9c5f0f56a001fbf5f9d361e06fcfd816e819193663d609b2a36229a139f28c1f",
-    "bytes": 400844
+    "sha256": "d9487a7ad724abeca3ca8d7db0f29b5acf804b06c2a9bd5bf9fa55675a9eb0ce",
+    "bytes": 706880
   },
   {
     "id": "pump",
@@ -14,8 +14,8 @@
     "source": "Original Blender construction for Are You Human?",
     "editable": "art/infrastructure/pump.blend",
     "generator": "scripts/build-infrastructure.py",
-    "sha256": "2d8113831eec577306bd63ccffac1bae349fded4849215ce96a633f23b6f3085",
-    "bytes": 143392
+    "sha256": "aebfe07f815ed469a61526bf0f58072e1f7d7f96864b76553218f452a1fb8329",
+    "bytes": 629036
   },
   {
     "id": "tower",
@@ -23,8 +23,8 @@
     "source": "Original Blender construction for Are You Human?",
     "editable": "art/infrastructure/tower.blend",
     "generator": "scripts/build-infrastructure.py",
-    "sha256": "3eecb6c0627978d47e8b4c4a542fe2bee4981c678985863cd84113801f359975",
-    "bytes": 231984
+    "sha256": "ba518f7b9d3b807d5caab8290298b20e50ffd686532dc68532675f30eb00d0f1",
+    "bytes": 495672
   },
   {
     "id": "data-center",
@@ -32,8 +32,8 @@
     "source": "Original Blender construction for Are You Human?",
     "editable": "art/infrastructure/data-center.blend",
     "generator": "scripts/build-infrastructure.py",
-    "sha256": "1e101d601c3f4083448d7900b77a5ce7fa99dfeb920d07d8b3914246b61033b3",
-    "bytes": 372428
+    "sha256": "b66613ec6952aba7288366ee0e49a20eed329a969023251f9226364bc3e21a19",
+    "bytes": 796716
   },
   {
     "id": "city-house",
@@ -41,7 +41,7 @@
     "source": "Original Blender construction for Are You Human?",
     "editable": "art/infrastructure/city-house.blend",
     "generator": "scripts/build-infrastructure.py",
-    "sha256": "c1823267f5545b10d19dc3285415ac64111580950a1b149d01a5b22bdcd89f65",
-    "bytes": 225168
+    "sha256": "914186597bd2f587f25fee7158b7a83900aefca012e03bf94ca127625939c545",
+    "bytes": 231508
   }
 ]

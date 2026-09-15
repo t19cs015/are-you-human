@@ -16,7 +16,7 @@ export async function upgradeTown(world,studio){
  const names=['house-house','house-fence_straight','house-package','park-bench','park-street_lantern','park-tree','park-bush','park-hedge_straight','park-flower_A','park-flower_B','park-grass_A','furniture-book_set','furniture-book_single','furniture-shelf_B_large_decorated','furniture-table_medium_long','furniture-chair_C','furniture-lamp_standing','furniture-rug_rectangle_A','furniture-armchair_pillows','furniture-cabinet_medium_decorated','furniture-cactus_small_A'];
  const templates=Object.fromEntries(await Promise.all(names.map(async name=>[name,await asset(name)])));
  const group=new T.Group();group.name='Little Elsewhere • town upgrade';
- const pools={town:[],lab:[],library:[]},motions=[],lights=[],colliders=[];
+ const pools={town:[],openingTrees:[],lab:[],library:[]},motions=[],lights=[],colliders=[];
  const materials=new Map(),unitBox=new T.BoxGeometry(1,1,1);
  function material(color,glow=0){const key=color+':'+glow;if(!materials.has(key))materials.set(key,new T.MeshStandardMaterial({color,roughness:.83,emissive:glow?color:0,emissiveIntensity:glow}));return materials.get(key);}
  function box(color,x,y,z,w,h,d,parent=group){const m=new T.Mesh(unitBox,material(color));m.position.set(x,y,z);m.scale.set(w,h,d);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;}
@@ -97,9 +97,11 @@ export async function upgradeTown(world,studio){
  for(let i=0;i<24;i++){
   const a=i/24*Math.PI*2,x=Math.cos(a)*13,z=Math.sin(a)*13;
   if(onPlazaApproach(x,z))continue;
-  put('park-tree',x,z,.95+(i%3)*.13,.13,a);
+  put('park-tree',x,z,.95+(i%3)*.13,.13,a,'openingTrees');
  }
- for(const [x,z] of [[-7,4],[7,4],[-8,-4],[8,-4]])put('park-tree',x,z,.88,.15,x);
+ // Keep the four foreground trees in their own batch. The demo can clear them
+ // for its crowded opening composition without changing the playable town.
+ for(const [x,z] of [[-7,4],[7,4],[-8,-4],[8,-4]])put('park-tree',x,z,.88,.15,x,'openingTrees');
  for(const [x,z,rot] of townHedges)put('park-hedge_straight',x,z,.72,.18,rot);
  for(let i=0;i<90;i++){
   const side=i%2?1:-1,z=4.6+Math.floor(i/2)*.13,x=side*(2.3+(i%5)*.22);
@@ -157,7 +159,7 @@ export async function upgradeTown(world,studio){
  for(const [zone,roots] of Object.entries(pools)){
   group.updateMatrixWorld(true);const batches=new Map();
   for(const root of roots)root.traverse(o=>{if(!o.isMesh)return;const key=o.geometry.uuid+':'+o.material.uuid;if(!batches.has(key))batches.set(key,{geometry:o.geometry,material:o.material,matrices:[]});batches.get(key).matrices.push(o.matrixWorld.clone());});
-  for(const b of batches.values()){const m=new T.InstancedMesh(b.geometry,b.material,b.matrices.length);b.matrices.forEach((matrix,i)=>m.setMatrixAt(i,matrix));m.castShadow=true;m.receiveShadow=true;m.computeBoundingSphere();m.userData.room=zone==='town'?null:zone;group.add(m);}
+  for(const b of batches.values()){const m=new T.InstancedMesh(b.geometry,b.material,b.matrices.length);b.matrices.forEach((matrix,i)=>m.setMatrixAt(i,matrix));m.castShadow=true;m.receiveShadow=true;m.computeBoundingSphere();m.userData.room=['town','openingTrees'].includes(zone)?null:zone;m.userData.openingTrees=zone==='openingTrees';group.add(m);}
   for(const root of roots)root.removeFromParent();
  }
  // Atomic visual swap after all assets loaded. Existing gameplay objects are preserved.
@@ -168,5 +170,5 @@ export async function upgradeTown(world,studio){
  originals.forEach(([x,z],i)=>{const c=world.colliders.find(c=>c.x===x&&c.z===z&&c.hw===2.12);if(c)Object.assign(c,townFootprints[i]);});
  for(const x of [-10,10]){const light=world.scene.children.find(o=>o.isPointLight&&o.position.x===x&&o.position.z===1);if(light)light.position.set(x+(x<0?2.4:-2.4),2,-1);}
  world.colliders.push(...colliders);world.scene.add(group);
- return {group,assetCount:names.length,setRoom(room){for(const o of group.children){const zone=o.userData.room||roomAt(o.position.x,o.position.z);if(zone)o.visible=zone===room;}},update(t,community){const lightLevel=community?.active?(community.route==='central'?.08:community.route==='shared'?.7:1):1;bulbMat.color.set(lightLevel<.2?0x657e84:0xffd49b);for(const light of lights){light.userData.originalPower??=light.intensity;light.intensity=light.userData.originalPower*lightLevel;}for(const m of motions)m.bulb.position.y=m.y+Math.sin(t*.8+m.phase*.4)*.012;}};
+ return {group,assetCount:names.length,setOpeningTreesVisible(visible){for(const o of group.children)if(o.userData.openingTrees)o.visible=visible;},setRoom(room){for(const o of group.children){const zone=o.userData.room||roomAt(o.position.x,o.position.z);if(zone)o.visible=zone===room;}},update(t,community){const lightLevel=community?.active?(community.route==='central'?.08:community.route==='shared'?.7:1):1;bulbMat.color.set(lightLevel<.2?0x657e84:0xffd49b);for(const light of lights){light.userData.originalPower??=light.intensity;light.intensity=light.userData.originalPower*lightLevel;}for(const m of motions)m.bulb.position.y=m.y+Math.sin(t*.8+m.phase*.4)*.012;}};
 }

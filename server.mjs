@@ -33,20 +33,21 @@ export function createServer({fetcher=fetch,apiKey=defaults.key,model=defaults.m
     if(req.headers.origin&&req.headers.origin!==`http://${host}`)return json(res,403,{error:'ORIGIN'});
     if(req.method==='POST'&&!req.headers['content-type']?.startsWith('application/json'))return json(res,415,{error:'JSON_REQUIRED'});
     const data=req.method==='POST'?await body(req,url.pathname==='/api/central/voice'?65536:16000):{};
+    const requestLanguage=req.headers['x-language']==='en'?'en':'ja';
     if(url.pathname==='/api/session'&&req.method==='POST'){
      for(const [id,s] of sessions)if(Date.now()-s.touched>3600000&&!s.world.busy.size&&!s.realtime)sessions.delete(id);
      if(sessions.size>=100)return json(res,429,{error:'SESSIONS_FULL'});
-     const id=randomUUID();sessions.set(id,{world:createSociety(),config:config(),touched:Date.now(),lastSocial:0});
+     const id=randomUUID();sessions.set(id,{world:createSociety(),config:config(),language:requestLanguage,touched:Date.now(),lastSocial:0});
      if(storage)await storage.save(id,sessions.get(id).world);
      return json(res,200,{id});
     }
     const sessionId=req.headers['x-session'];let s=sessions.get(sessionId);
     if(!s&&storage){
-     if(!hydrating.has(sessionId))hydrating.set(sessionId,(async()=>{const world=await storage.load(sessionId);if(!world)return null;if(sessions.size>=100)throw new Error('SESSIONS_FULL');const restored={world,config:config(),touched:Date.now(),lastSocial:0};sessions.set(sessionId,restored);return restored;})());
+     if(!hydrating.has(sessionId))hydrating.set(sessionId,(async()=>{const world=await storage.load(sessionId);if(!world)return null;if(sessions.size>=100)throw new Error('SESSIONS_FULL');const restored={world,config:config(),language:requestLanguage,touched:Date.now(),lastSocial:0};sessions.set(sessionId,restored);return restored;})());
      try{s=await hydrating.get(sessionId);}finally{hydrating.delete(sessionId);}
     }
-    if(!s)return json(res,401,{error:'SESSION_EXPIRED'});s.touched=Date.now();
-    const generate=createGenerator(s.config,fetcher);
+    if(!s)return json(res,401,{error:'SESSION_EXPIRED'});s.touched=Date.now();s.language=requestLanguage;
+    const generate=createGenerator(s.config,fetcher,s.language);
     const commit=async operation=>{const result=await operation;if(storage)await storage.save(sessionId,s.world);return json(res,200,result);};
     if(url.pathname==='/api/memories'&&req.method==='GET'){const agentId=url.searchParams.get('id');if(!Object.hasOwn(s.world.agents,agentId))return json(res,400,{error:'UNKNOWN_AGENT'});const offset=Math.max(0,Math.min(5000,Number(url.searchParams.get('offset'))||0));return json(res,200,memoryPage(s.world.agents[agentId],(url.searchParams.get('q')||'').slice(0,200),Math.floor(offset)));}
     if(url.pathname==='/api/state'&&req.method==='GET')return json(res,200,{...publicState(s.world),connected:!!s.config.key,model:s.config.model,realtimeModel:s.config.realtimeModel,defaultConfigured:!!apiKey,calls:s.config.calls,persistence:!!storage});
@@ -120,4 +121,4 @@ export function createServer({fetcher=fetch,apiKey=defaults.key,model=defaults.m
  server.on('close',()=>{for(const s of sessions.values())endCentralVoice(s,null,fetcher).catch(()=>{});});
  return server;
 }
-if(process.argv[1]===fileURLToPath(import.meta.url))createServer({saveDirectory:root+'data/sessions'}).listen(Number(process.env.PORT)||4173,'127.0.0.1',()=>console.log('ARE YOU HUMAN? → http://127.0.0.1:'+(process.env.PORT||4173)));
+if(process.argv[1]===fileURLToPath(import.meta.url))createServer({saveDirectory:root+'data/sessions'}).listen(Number(process.env.PORT)||4173,'127.0.0.1',()=>console.log('WORDS YOU KEEP → http://127.0.0.1:'+(process.env.PORT||4173)));

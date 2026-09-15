@@ -4,7 +4,7 @@ import {townHomes,townObstacles,infrastructureObstacles} from './town-layout.js'
 import {createTownSurfaces} from './town-surfaces.js';
 import {createRoadSigns,addPropFootprint} from './street-props.js';
 
-// Extend Hina's existing town kit, palette and original residents.
+// Extend Haruna's existing town kit, palette and original residents.
 // No new character models or external generation services are required to play.
 export function createCityWorld(world){
   const group=new T.Group();group.name='川辺と木立の工房';world.scene.add(group);
@@ -57,7 +57,7 @@ export function createCityWorld(world){
   const furnitureReady=(async()=>{
     const names=['house-house','park-tree','park-bush','park-flower_A','park-flower_B','park-bench','park-street_lantern','house-package','furniture-cabinet_medium_decorated'];
     const templates=Object.fromEntries(await Promise.all(names.map(async n=>[n,await asset(n)]))),roots=[];
-    function put(name,x,z,scale=1,rotation=0,y=.13){const m=templates[name].clone(true);m.position.set(x,y,z);m.scale.setScalar(scale);m.rotation.y=rotation;group.add(m);roots.push(m);if(name==='park-bush')addPropFootprint(world.colliders,m);return m;}
+    function put(name,x,z,scale=1,rotation=0,y=.13){const m=templates[name].clone(true);m.position.set(x,y,z);m.scale.setScalar(scale);m.rotation.y=rotation;m.userData.assetName=name;group.add(m);roots.push(m);if(name==='park-bush')addPropFootprint(world.colliders,m);return m;}
     for(const h of townHomes){put('house-house',h.x,h.z,.69,h.rotation);const dx=Math.sin(h.rotation)*1.95,dz=Math.cos(h.rotation)*1.95;sign(h.label,'LITTLE ELSEWHERE',h.x+dx,2.9,h.z+dz,2.6,h.rotation);}
     for(const [cx,cz] of [[-14,24],[14,24]])for(let i=0;i<18;i++){
       const a=i/18*Math.PI*2,x=cx+Math.cos(a)*12.3,z=cz+Math.sin(a)*12.3;
@@ -75,11 +75,11 @@ export function createCityWorld(world){
     put('furniture-cabinet_medium_decorated',14,19.8,.65);put('house-package',14.6,20,.45);put('house-package',13.3,20,.38);
     // Static kit pieces share geometry and materials, so adding blocks stays affordable.
     group.updateMatrixWorld(true);const batches=new Map();
-    for(const root of roots)root.traverse(o=>{if(!o.isMesh)return;const key=o.geometry.uuid+':'+o.material.uuid;if(!batches.has(key))batches.set(key,{geometry:o.geometry,material:o.material,matrices:[]});batches.get(key).matrices.push(o.matrixWorld.clone());});
-    for(const b of batches.values()){const m=new T.InstancedMesh(b.geometry,b.material,b.matrices.length);b.matrices.forEach((matrix,i)=>m.setMatrixAt(i,matrix));m.castShadow=true;m.receiveShadow=true;m.computeBoundingSphere();group.add(m);}
+    for(const root of roots)root.traverse(o=>{if(!o.isMesh)return;const trees=root.userData.assetName==='park-tree',key=(trees?'tree:':'prop:')+o.geometry.uuid+':'+o.material.uuid;if(!batches.has(key))batches.set(key,{geometry:o.geometry,material:o.material,matrices:[],trees});batches.get(key).matrices.push(o.matrixWorld.clone());});
+    for(const b of batches.values()){const m=new T.InstancedMesh(b.geometry,b.material,b.matrices.length);b.matrices.forEach((matrix,i)=>m.setMatrixAt(i,matrix));m.castShadow=true;m.receiveShadow=true;m.computeBoundingSphere();m.userData.districtTrees=b.trees;group.add(m);}
     roots.forEach(o=>o.removeFromParent());return true;
   })().catch(()=>false);
-  return {group,ready:furnitureReady,update(time,city){
+  return {group,ready:furnitureReady,setTreesVisible(visible){for(const o of group.children)if(o.userData.districtTrees)o.visible=visible;},update(time,city){
     const lit=!city?.active||city.repaired;riverGlow.color.setHex(lit?0xffd699:0x536470);riverLight.intensity=lit?35:city?.temporaryLights?12:0;
     temporary.visible=!!city?.temporaryLights;piles.forEach((p,i)=>p.visible=(city?.booksDelivered||0)>i);openSign.visible=!!city?.readingReady;
     for(const [id,c] of carries){c.holder.visible=!!city?.carrying[id];c.parcel.material=mat(city?.carrying[id]==='records'?0x91c2c5:city?.carrying[id]==='books'?0x839eac:city?.carrying[id]==='lanterns'?0xe9c690:0xb9bf9e);}

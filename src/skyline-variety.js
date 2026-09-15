@@ -7,13 +7,16 @@ export function createVariedSkyline(scene,originalPlots){
   const plots=originalPlots.map((p,i)=>({...p,family:i%6}));
   const group=new T.Group();group.name='明日の街 · six building families';scene.add(group);
   const geometries={box:new RoundedBoxGeometry(1,1,1,2,.065),pane:new T.BoxGeometry(1,1,1),cylinder:new T.CylinderGeometry(1,1,1,20),cone:new T.ConeGeometry(1,1,20),sphere:new T.SphereGeometry(1,16,10)};
+  for(const geometry of Object.values(geometries))geometry.computeBoundingBox();
   const palettes=[{wall:0xd6cbbb,trim:0x83a093,glass:0x648c99},{wall:0x8faba8,trim:0xccc6ac,glass:0x426d83},{wall:0xbda2a1,trim:0x526d7a,glass:0x739398},{wall:0xaec4bc,trim:0x607f88,glass:0x507481},{wall:0xd6c9aa,trim:0x9f7f83,glass:0x729fa8},{wall:0xc4cbb5,trim:0x98a88b,glass:0x70939b}];
   const pools=new Map(),materials=new Map(),local=new T.Object3D();
   function piece(id,shape,color,x,y,z,w,h,d,rotation=0,glow=0){
     const key=shape+':'+color+':'+glow;
-    if(!materials.has(color+':'+glow))materials.set(color+':'+glow,new T.MeshStandardMaterial({color,roughness:glow?.35:.72,emissive:glow?color:0,emissiveIntensity:glow}));
+    if(!materials.has(color+':'+glow))materials.set(color+':'+glow,new T.MeshPhysicalMaterial({color,roughness:glow?.28:.54,metalness:glow?.1:.025,clearcoat:glow?.38:.16,clearcoatRoughness:.3,emissive:glow?color:0,emissiveIntensity:glow}));
     if(!pools.has(key))pools.set(key,{geometry:geometries[shape],material:materials.get(color+':'+glow),parts:[]});
-    local.position.set(x,y,z);local.rotation.set(0,rotation,0);local.scale.set(w,h,d);local.updateMatrix();pools.get(key).parts.push({id,matrix:local.matrix.clone()});
+    local.position.set(x,y,z);local.rotation.set(0,rotation,0);local.scale.set(w,h,d);local.updateMatrix();
+    const bounds=geometries[shape].boundingBox;
+    pools.get(key).parts.push({id,matrix:local.matrix.clone(),bottom:y+bounds.min.y*h,top:y+bounds.max.y*h});
   }
   function block(id,color,x,y,z,w,h,d,glow=0){piece(id,'box',color,x,y,z,w,h,d,0,glow);}
   function windowStyle(id,y,col,side){const n=Math.abs(id*17+Math.round(y*10)+col*7+side*11)%11;return n<3?{color:0x355663,glow:0}:n<6?{color:0x9cc6c5,glow:.4}:{color:0xefc989,glow:.55};}
@@ -24,6 +27,8 @@ export function createVariedSkyline(scene,originalPlots){
         piece(id,'pane',0x536970,px,y,z+side*(d/2+.025),ww+.09,height+.1,.07);
         piece(id,'pane',s.color,px,y,z+side*(d/2+.07),ww,height,.024,0,s.glow);
         piece(id,'pane',0x627876,px,y,z+side*(d/2+.09),.028,height,.028);
+        piece(id,'pane',0x849b93,px,y-height*.53,z+side*(d/2+.105),ww+.15,.07,.17);
+        piece(id,'pane',0x627876,px,y+height*.14,z+side*(d/2+.095),ww,.027,.028);
       }
       for(let col=0;col<2;col++){
         const pz=z+(col-.5)*d/2.1,ww=d/3.7,s=windowStyle(id,y,col+columns,side);
@@ -87,10 +92,34 @@ export function createVariedSkyline(scene,originalPlots){
   for(const pool of pools.values()){const mesh=new T.InstancedMesh(pool.geometry,pool.material,pool.parts.length);mesh.castShadow=pool.geometry!==geometries.pane;mesh.receiveShadow=true;group.add(mesh);batches.push({...pool,mesh});}
   const roots=plots.map(()=>new T.Matrix4()),root=new T.Object3D(),m=new T.Matrix4();
   const smooth=t=>{t=Math.max(0,Math.min(1,t));return t*t*(3-2*t);};
-  const finishedAt=Math.max(...plots.map(p=>p.at))+2.7;let previousTime=null;
+  const finishedAt=Math.max(...plots.map(p=>p.at))+2.7;let previousTime=null,previousDevelopment=null;
+  const heights=plots.map((_,id)=>Math.max(...batches.flatMap(b=>b.parts.filter(p=>p.id===id).map(p=>p.top)))),pieceMatrix=new T.Matrix4(),hiddenScale=new T.Vector3(.000001,.000001,.000001);let previousCaps=heights;
   return {group,plots,update(time){
-    time=Math.min(time,finishedAt);if(time===previousTime)return;previousTime=time;
+    time=Math.min(time,finishedAt);if(time===previousTime&&previousDevelopment===null)return;previousTime=time;previousDevelopment=null;
     plots.forEach((p,i)=>{root.position.set(p.x,.13,p.z);root.rotation.set(0,p.rotation,0);root.scale.set(1,Math.max(.00001,smooth((time-p.at)/2.7)),1);root.updateMatrix();roots[i].copy(root.matrix);});
     for(const b of batches){b.parts.forEach((part,i)=>{m.multiplyMatrices(roots[part.id],part.matrix);b.mesh.setMatrixAt(i,m);});b.mesh.instanceMatrix.needsUpdate=true;b.mesh.computeBoundingSphere();}
+  },develop(progress){
+    // Reveal the current buildings from the ground up. Existing floors, windows
+    // and doors keep their proportions; roofs arrive after the final floor.
+    progress=T.MathUtils.clamp(progress,0,1);if(progress===previousDevelopment)return previousCaps;
+    previousDevelopment=progress;previousTime=null;
+    // Each block has a deterministic start and pace. The skyline feels like
+    // many local decisions accumulating instead of one duplicated extrusion.
+    const caps=plots.map((p,i)=>{
+      const delay=((i*7)%18)/18*.34;
+      // Four landmark buildings take the whole remaining shot to finish. The
+      // rest range from quick infill to medium growth, all in a shuffled order.
+      const duration=i%5===0?1-delay:Math.min(1-delay,.24+((i*11)%7)/6*.36);
+      const g=smooth((progress-delay)/duration);
+      return T.MathUtils.lerp(Math.min(3.65,heights[i]),heights[i],g);
+    });
+    plots.forEach((p,i)=>{root.position.set(p.x,.13,p.z);root.rotation.set(0,p.rotation,0);root.scale.set(1,1,1);root.updateMatrix();roots[i].copy(root.matrix);});
+    for(const b of batches){b.parts.forEach((part,i)=>{
+      pieceMatrix.copy(part.matrix);const cap=caps[part.id];
+      if(cap<=part.bottom)pieceMatrix.scale(hiddenScale);
+      else if(cap<part.top){const ratio=(cap-part.bottom)/(part.top-part.bottom);pieceMatrix.elements[5]*=ratio;pieceMatrix.elements[13]=(part.bottom+cap)/2;}
+      m.multiplyMatrices(roots[part.id],pieceMatrix);b.mesh.setMatrixAt(i,m);
+    });b.mesh.instanceMatrix.needsUpdate=true;b.mesh.computeBoundingSphere();}
+    previousCaps=caps;return caps;
   }};
 }

@@ -2,10 +2,11 @@ import * as T from '/node_modules/three/build/three.module.js';
 import {RoundedBoxGeometry} from '/node_modules/three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import {canalRows} from './town-layout.js';
 import {riverSample,mistGates,boundarySpots} from './boundary-layout.js';
+import {batchCraft} from './town-craft.js';
 
 export function createTownBoundary(world){
   const group=new T.Group(),staticRoot=new T.Group();group.name='The edge of the remembered town';group.add(staticRoot);world.scene.add(group);
-  const boxGeo=new RoundedBoxGeometry(1,1,1,2,.06),roundGeo=new T.SphereGeometry(1,14,9),roofGeo=new T.ConeGeometry(1,1,4),materials=new Map();
+  const boxGeo=new RoundedBoxGeometry(1,1,1,2,.06),roundGeo=new T.SphereGeometry(1,24,16),materials=new Map();
   function mat(color){if(!materials.has(color))materials.set(color,new T.MeshStandardMaterial({color,roughness:.88}));return materials.get(color);}
   function piece(geo,color,x,y,z,sx,sy,sz,parent=staticRoot){const m=new T.Mesh(geo,mat(color));m.position.set(x,y,z);m.scale.set(sx,sy,sz);m.receiveShadow=true;parent.add(m);return m;}
   const box=(color,x,y,z,w,h,d,parent)=>piece(boxGeo,color,x,y,z,w,h,d,parent);
@@ -64,12 +65,48 @@ export function createTownBoundary(world){
     const g=new T.Group();g.position.set(x,0,z);group.add(g);
     const ghost=new T.MeshStandardMaterial({color:i%2?0x97aaa1:0xb9b4a1,roughness:.8,transparent:true,opacity:.13,depthWrite:false});
     const wall=new T.Mesh(boxGeo,ghost);wall.position.y=h/2;wall.scale.set(3.9,h,3.2);g.add(wall);
-    const roof=new T.Mesh(roofGeo,ghost);roof.position.y=h+.85;roof.scale.set(3.2,2,2.7);roof.rotation.y=Math.PI/4;g.add(roof);
+    const finishes=[];
+    function tint(color){const m=ghost.clone();m.color.setHex(color);finishes.push(m);return m;}
+    const rose=tint(0xaa9995),sage=tint(0x809c90),ivory=tint(0xc9c5ad),shadow=tint(0x395e68);
+    function detail(color,x,y,z,w,hh,d){const m=new T.Mesh(boxGeo,color);m.position.set(x,y,z);m.scale.set(w,hh,d);g.add(m);return m;}
+    const roofShape=new T.Shape();roofShape.moveTo(-2.2,0);roofShape.lineTo(0,1.55);roofShape.lineTo(2.2,0);roofShape.closePath();
+    const roof=new T.Mesh(new T.ExtrudeGeometry(roofShape,{depth:3.65,bevelEnabled:true,bevelSegments:2,bevelSize:.04,bevelThickness:.04,steps:1}),rose);roof.position.set(0,h-.06,-1.825);g.add(roof);
+    detail(ivory,0,h-.02,-1.87,4.5,.13,.2);
+    for(const side of [-1,1]){
+      const verge=detail(ivory,side*1.08,h+.735,-1.9,2.69,.12,.12);verge.rotation.z=-side*.614;
+      detail(sage,side*1.84,h/2,-1.65,.15,h,.13);
+      for(let j=0;j<4;j++)detail(ivory,side*1.83,.4+j*.32,-1.7,.22,.12,.18);
+      for(let k=0;k<6;k++){const seam=detail(rose,side*(.18+k*.33),h+1.42-k*.235,0,.035,.024,3.65);seam.rotation.z=-side*.61;}
+    }
+    detail(sage,0,1.04,-1.665,.86,1.76,.1);detail(ivory,0,.16,-1.87,1.08,.14,.52);
+    detail(ivory,0,2,-1.8,1.17,.12,.45);detail(shadow,0,1.43,-1.73,.48,.38,.024);
+    detail(ivory,.27,.91,-1.755,.055,.09,.04);
+    detail(ivory,0,h*.47,-1.655,3.85,.09,.11);
+    const attic=new T.Mesh(new T.CircleGeometry(.25,32),shadow);attic.position.set(0,h+.49,-1.876);attic.rotation.y=Math.PI;g.add(attic);
+    const atticRim=new T.Mesh(new T.TorusGeometry(.27,.035,8,40),ivory);atticRim.position.copy(attic.position);atticRim.position.z-=.03;g.add(atticRim);
+    for(const side of [-1,1]){
+      const wx=side*.94,wy=h*.65;
+      detail(shadow,wx,wy,-1.64,.85,1.05,.04);
+      for(const dx of [-.38,.38])detail(ivory,wx+dx,wy,-1.706,.07,1.01,.08);
+      for(const dy of [-.48,.48])detail(ivory,wx,wy+dy,-1.706,.83,.07,.08);
+      detail(ivory,wx,wy,-1.719,.035,.94,.04);detail(ivory,wx,wy+.09,-1.719,.75,.035,.04);
+      detail(ivory,wx,wy-.56,-1.78,.96,.12,.29);
+      detail(sage,wx+side*.55,wy,-1.674,.22,.94,.045);
+      for(let j=0;j<6;j++)detail(ivory,wx+side*.55,wy-.33+j*.13,-1.703,.16,.027,.019);
+    }
     const edge=new T.LineSegments(new T.EdgesGeometry(new T.BoxGeometry(3.9,h,3.2)),new T.LineBasicMaterial({color:0x9cbab1,transparent:true,opacity:.24,depthWrite:false}));edge.position.y=h/2;g.add(edge);
     const light=new T.MeshBasicMaterial({color:0xf4d5a2,transparent:true,opacity:.06,depthWrite:false});
-    for(const side of [-1,1]){const window=new T.Mesh(new T.PlaneGeometry(.65,.85),side<0?light:light.clone());window.position.set(side*.94,h*.65,-1.63);window.rotation.y=Math.PI;g.add(window);}
-    ghostHouses.push({ghost,light,edge,i});
+    for(const side of [-1,1]){const window=new T.Mesh(new T.PlaneGeometry(.65,.85),side<0?light:light.clone());window.position.set(side*.94,h*.65,-1.687);window.rotation.y=Math.PI;g.add(window);}
+    batchCraft(g);ghostHouses.push({ghost,light,edge,i,finishes});
   }
+  // When the central house returns, a low warm halo and drifting memory motes
+  // make the change readable from the path while keeping the house uncanny.
+  const restoredGlow=new T.PointLight(0xffc988,0,13,2);restoredGlow.position.set(0,3.1,93.7);group.add(restoredGlow);
+  const haloMaterial=new T.MeshBasicMaterial({color:0xf0c98d,transparent:true,opacity:0,depthWrite:false,side:T.DoubleSide});
+  const halo=new T.Mesh(new T.RingGeometry(2.3,2.38,64),haloMaterial);halo.position.set(0,.24,97);halo.rotation.x=-Math.PI/2;group.add(halo);
+  const motePositions=new Float32Array(24*3),moteGeometry=new T.BufferGeometry();moteGeometry.setAttribute('position',new T.BufferAttribute(motePositions,3));
+  const moteMaterial=new T.PointsMaterial({color:0xf2d5a0,size:.11,transparent:true,opacity:0,depthWrite:false});
+  const motes=new T.Points(moteGeometry,moteMaterial);motes.frustumCulled=false;group.add(motes);
   // Small boundary lamps repeat the three-note motif; no text floating over the edge.
   const lampGeo=new T.SphereGeometry(.105,10,7),lampMat=new T.MeshBasicMaterial({color:0xe9d6a9,transparent:true,opacity:.6}),lamps=[];
   for(let i=0;i<20;i++){
@@ -104,7 +141,9 @@ export function createTownBoundary(world){
   return {group,touch(id,time){if(id==='river_bell')echoAt=time;},update(time,city){
     const dt=Math.min(.06,Math.max(0,time-last));last=time;const e=city?.memoryGame?.exploration,chorus=e?.joined?.some(j=>j.endsWith(':music')),local=e?.localReadAt!==undefined;
     mistMaterial.uniforms.uTime.value=time;for(const m of mists)m.lookAt(world.camera.position.x,m.position.y,world.camera.position.z);
-    for(const {ghost,light,edge,i} of ghostHouses){const restored=!!e?.borderShared&&i===2;ghost.opacity=T.MathUtils.damp(ghost.opacity,restored?.82:.13,1,dt);light.opacity=T.MathUtils.damp(light.opacity,restored?.95:.06,1,dt);edge.material.opacity=restored?.12:.24;}
+    for(const {ghost,light,edge,i,finishes} of ghostHouses){const restored=!!e?.borderShared&&i===2;ghost.opacity=T.MathUtils.damp(ghost.opacity,restored?.82:.13,1,dt);finishes.forEach(m=>m.opacity=ghost.opacity);light.opacity=T.MathUtils.damp(light.opacity,restored?.95:.06,1,dt);edge.material.opacity=restored?.12:.24;}
+    const restored=!!e?.borderShared;restoredGlow.intensity=T.MathUtils.damp(restoredGlow.intensity,restored?22:0,2.2,dt);haloMaterial.opacity=T.MathUtils.damp(haloMaterial.opacity,restored?.32:0,2,dt);halo.scale.setScalar(1+Math.sin(time*.8)*.035);
+    for(let i=0;i<24;i++){const a=i*2.399+time*.18,r=2.05+(i%4)*.42,y=.55+(i%8)*.43+Math.sin(time*.75+i)*.12;motePositions.set([Math.cos(a)*r,y,97+Math.sin(a)*r*.58],i*3);}moteGeometry.attributes.position.needsUpdate=true;moteMaterial.opacity=T.MathUtils.damp(moteMaterial.opacity,restored?.7:0,2,dt);
     for(const {m,i} of lamps){const energy=e?.windTuned?.5:.12,phase=time*(chorus?1.6:.65)+i*(1.35-(e?.clockOffset||0)*.22);m.material.opacity=energy+(e?.waterOpen?.15:0)+Math.sin(phase)*.12;m.scale.setScalar(chorus?1.2:1);}
     const echoAge=time-echoAt-.65,echo=e?.shoreRead&&echoAge>=0&&echoAge<.55;
     reply.forEach((m,i)=>{m.material.opacity=echo?(Math.floor(echoAge/.08)%2?.2:1):e?.shoreReplyAt!==undefined?.58+Math.sin(time*1.8+i*1.4)*.32:i===0?.18:0;m.position.y=1.35+i*.4+Math.sin(time*.8+i)*.13;});

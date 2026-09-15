@@ -1,4 +1,4 @@
-"""Build the player's editable memory body from Hina's resident proportions.
+"""Build the player's editable memory body from Haruna's resident proportions.
 Run Blender --background --python scripts/build-player.py.
 Only player.blend and player.glb are written; resident sources are untouched.
 """
@@ -35,7 +35,7 @@ for side,suffix in [(-1,'L'),(1,'R')]:
 cube('Quiet collar',(0,-.008,1.088),(.43,.37,.069),.032,sage,root)
 head=bpy.data.objects['Head']
 for side in [-1,1]:ball('Ear accent',(side*.495,0,1.46),(.021,.092,.13),sage,head)
-root['character']='Player';root['source']='Original Are You Human? memory body; shares Hina resident proportions'
+root['character']='Player';root['source']='Original Are You Human? memory body; shares Haruna resident proportions'
 root['interaction']='MemoryHatch opens on its vertical pivot; three removable memory blocks'
 objects=[root]+list(root.children_recursive)
 bpy.ops.object.select_all(action='DESELECT')
