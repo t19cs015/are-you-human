@@ -33,6 +33,7 @@ import {createGraphicsReview} from './graphics-review.js';
 import {openingStage,routePoints} from './story.js';
 import {createMemoryView} from './memory-view.js';
 import {createMemoryWorld} from './memory-world.js';
+import {memoryGuide} from './memory-guide.js';
 import {createPlayerVisual} from './player-visual.js';
 import {initLanguage,language} from './language.js';
 initLanguage();
@@ -81,7 +82,7 @@ const episodeView=createEpisodeView({api,changed:syncCity,notice:toast,error:e=>
 const communityView=createCommunityView({api,changed:syncCity,refresh:refreshState,position:()=>({x:player.x,z:player.z}),focus:()=>surface.focus({preventScroll:true}),prepare(){closeDialog();releaseLook();cityView.hide();infrastructureView.close();},home(){infrastructureView.close();closeDialog();releaseLook();cityView.hide();leaveBorrowed();room=null;player.set(0,1.68,6.6);yaw=pitch=0;},central(){visitFacility('central');cityView.hide();infrastructureView.open('central');},lookProject(p){cityView.hide();const q=places[p.site];yaw=Math.atan2(player.x-q.x,player.z-q.z);pitch=-.07;},say(id,text,kind){const n=getNPC(id);if(n&&n!==active){residentVisuals.get(id)?.wave(time);if(kind==='human-relay')say(n,text,2.3);}},art:url=>communityWorld.setArt(url),pulse:(id,site)=>communityWorld.pulse(time,site),notice:toast,error:e=>toast(apiError(e)),chime(kind){const shift=kind==='place'?([1,1.125,1.25,1.5][Math.floor(time*3)%4]):1;const notes=(kind==='switch'?[392,523,659]:kind==='wind'?[523,659,784,1047]:[523,659,784,988]).map(n=>n*shift);notes.forEach((f,i)=>setTimeout(()=>sound(f,.5,.026,'sine'),i*85));}});
 const humanView=createHumanView({focus:()=>surface.focus({preventScroll:true}),prepare(){closeDialog();communityView.close();infrastructureView.close();releaseLook();},map:()=>cityView.toggle(),sketch:()=>communityView.openBoard(),central(){visitFacility('central');cityView.hide();infrastructureView.open('central');},memory:()=>visitMemory(),home:()=>returnToPlaza(),settings:()=>$('settings-button').click(),sound:()=>$('sound').click(),journal:()=>$('journal-button').click(),restart:()=>$('restart').click()});
 let centralWasNear=false,humanPending=false;
-const memoryView=createMemoryView({api,changed:syncCity,refresh:refreshState,position:()=>({x:player.x,z:player.z}),focus:()=>surface.focus({preventScroll:true}),prepare(){closeDialog();humanView.close();communityView.close();infrastructureView.close();releaseLook();cityView.hide();keys.clear();},notice:toast,say(id,text){const n=getNPC(id);if(n){face(n,player);residentVisuals.get(id)?.wave(time);}},chime(kind){const notes=kind==='open'?[330,440]:kind==='insert'?[440,660,880]:[523,659,784];notes.forEach((f,i)=>setTimeout(()=>sound(f,.25,.022),i*75));}});
+const memoryView=createMemoryView({api,changed:syncCity,refresh:refreshState,position:()=>({x:player.x,z:player.z}),heading:()=>yaw,focus:()=>surface.focus({preventScroll:true}),prepare(){closeDialog();humanView.close();communityView.close();infrastructureView.close();releaseLook();cityView.hide();keys.clear();},notice:toast,say(id,text){const n=getNPC(id);if(n){face(n,player);residentVisuals.get(id)?.wave(time);}},chime(kind){const notes=kind==='open'?[330,440]:kind==='insert'?[440,660,880]:[523,659,784];notes.forEach((f,i)=>setTimeout(()=>sound(f,.25,.022),i*75));}});
 const graphicsReview=new URLSearchParams(location.search).has('visual')?createGraphicsReview({graphics:townRenderer,renderer,visit(view){closeDialog();humanView.close();communityView.close();infrastructureView.close();releaseLook();cityView.hide();room=null;player.set(...view.position);const [x,y,z]=view.look;yaw=Math.atan2(player.x-x,player.z-z);pitch=Math.atan2(y-player.y,Math.hypot(player.x-x,player.z-z));keys.clear();locomotion.reset();}}):null;
 function returnToPlaza(){infrastructureView.close();closeDialog();releaseLook();cityView.hide();leaveBorrowed();room=null;player.set(0,1.68,6.6);yaw=pitch=0;}
 function visitMemory(){infrastructureView.close();closeDialog();releaseLook();cityView.hide();leaveBorrowed();room=null;player.set(0,1.68,48.3);yaw=Math.PI;pitch=.04;}
@@ -107,7 +108,11 @@ function humanTarget(){
   const n=nearest();if(prop&&!n)return {label:prop.verb,run:()=>touchTown(prop.id)};
   if(memoryView.speaking)return null;
   if(state.city.memoryGame.stage==='syncing')return {label:'自分の記憶に触れる',run:()=>memoryView.openEditor()};
-  if(n)return {label:n.name+'に、今の記憶で話す',run:()=>memoryView.talk(n.id)};
+  if(n){
+    const stage=state.city.memoryGame.stage;
+    const label=n.id==='tomo'&&stage==='arrival'?(language==='en'?'Make a promise':'約束する'):n.id==='tomo'&&stage==='changed'?(language==='en'?'Ask about the promise':'さっきの約束を聞く'):language==='en'?'Talk to '+n.name:n.name+'に話しかける';
+    return {label,run:()=>memoryView.talk(n.id)};
+  }
  }
  const h=state.city?.community?.human;
  if(h?.phase==='sync'){
@@ -456,7 +461,7 @@ function frame(now){requestAnimationFrame(frame);const frameMs=now-last,dt=Math.
  townDiscoveries.focus(available&&!room&&memoryView.enabled?discoveryTarget(player,yaw,world.navigation):null);townDiscoveries.update(time,state.city);
  townBoundary.update(time,state.city);
  if(cityView.overview){telescopeUntil=0;camera.fov=T.MathUtils.damp(camera.fov,64,5,dt);camera.updateProjectionMatrix();}
- memoryWorld.update(time,state.city);
+ memoryWorld.update(time,state.city,memoryView.enabled&&!blocked()&&!cityView.overview?memoryGuide(state.city)?.target:null);
  playerVisual.update(time,{enabled:mode==='play'&&memoryView.enabled,player,yaw,firstPerson:!cityView.overview&&!borrowed,editing:memoryView.open,selected:memoryView.open?memoryView.selected:state.city?.memoryGame?.blocks.find(b=>b.id===state.city.memoryGame.equipped[0]),moving:keys.has('w')||keys.has('s')||keys.has('a')||keys.has('d'),reducedMotion});
  humanWorld.update(time,state.city);memoryCity.update(time,state.city);centralPresence.update(time,state.city,player,memoryView.speaker==='central'?'speaking':infrastructureView.voiceState==='idle'?communityView.centralVoiceState:infrastructureView.voiceState);
  if(state.city?.community?.active&&!state.city?.memoryGame?.active&&available){

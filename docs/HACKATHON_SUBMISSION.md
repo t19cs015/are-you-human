@@ -50,7 +50,7 @@ We produced the one-minute English demo through Codex, from scene scripting and 
 
 The film uses the real memory drawer and recorded live Responses API decisions replayed through game rules, with authored staging and condensed travel. Editable Blender sources and production scripts are retained in the repository.
 
-The implementation separates frame-by-frame simulation from model decisions, validates actions before applying them, isolates sessions, and saves atomically. All 103 automated tests pass, covering memory boundaries, consent, synchronization, persistence, language behavior, navigation, assets, and HTTP handling. The result is a playable prototype with a reproducible production workflow.
+The implementation separates frame-by-frame simulation from model decisions, validates actions before applying them, isolates sessions, and saves atomically. All 108 automated tests pass, covering memory boundaries, consent, synchronization, onboarding, persistence, language behavior, navigation, assets, and HTTP handling. The result is a playable prototype with a reproducible production workflow.
 
 ## 6. Pre-existing code, open-source components, datasets, or third-party tools
 
@@ -76,7 +76,7 @@ These references document the scope of the claims above. Verification date: Sept
 | Explorable scope and consequences | [Town interactions](A_TOWN_TO_TOUCH.md), [the unrestored shore](THE_UNRESTORED_SHORE.md), [controls and setup](../README.md) |
 | Custom modeling with editable sources | [Resident modeling](RESIDENT_MODELS.md), [player generator](../scripts/build-player.py), [infrastructure generator](../scripts/build-infrastructure.py), [character sources](../art/characters/), [infrastructure sources](../art/infrastructure/) |
 | Complete demo production and the boundary between recording and staging | [v9 production notes](../art/demo-v9/README.md), [live-decision preparation](../scripts/prepare-demo-v9.mjs), [renderer](../scripts/render-demo-v9.mjs), [speech timing](../scripts/build-demo-v9-audio.mjs), [music and sound mix](../scripts/mix-demo-v9-audio.py), [MP4 assembly](../scripts/finish-demo-v9.mjs) |
-| 103 passing automated checks | [Test suite](../tests/); `npm test` passed all 103 tests on the verification date. These tests do not make live API calls. |
+| 108 passing automated checks | [Test suite](../tests/); `npm test` passed all 108 tests on the verification date. These tests do not make live API calls. |
 | Incorporated assets and dependency licenses | [Package lock](../package-lock.json), [environment manifest](../assets/cafe/manifest.json), [sound manifest](../assets/sound/manifest.json), [original asset licenses](licenses/) |
 
 ### Production and scope notes

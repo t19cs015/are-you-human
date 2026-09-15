@@ -1,28 +1,35 @@
-import {memoryNames,memoryGoals,selectedMemories} from './memory-rules.js';
-import {explorationGoal} from './discovery-rules.js';
+import {memoryNames,selectedMemories} from './memory-rules.js';
+import {memoryGuide,guideDirection} from './memory-guide.js';
 import {memoryPicture} from './memory-pictures.js';
+import {language,t} from './language.js';
 
 export function createMemoryView(hooks){
   const root=document.createElement('div');root.id='memory-play';root.hidden=true;
   root.innerHTML=`<aside id="memory-goal"><small>THE ONE WHO REMEMBERS</small><h2></h2><p></p></aside><button id="memory-open"><span aria-hidden="true">▧</span> 記憶 <kbd>Q</kbd></button><div id="memory-pocket" aria-label="身体に入っている記憶"></div><div id="memory-subtitle" hidden aria-live="polite"><small></small><p></p><button id="memory-quiet" aria-label="この声を止める">×</button></div><p id="memory-wait" role="status" hidden></p><section id="memory-drawer" role="dialog" aria-modal="true" aria-labelledby="memory-title" hidden><button id="memory-close" class="close" aria-label="記憶を閉じて街へ戻る">×</button><small class="memory-eyebrow">YOUR BODY. YOUR MEMORIES.</small><h2 id="memory-title">いま、大切にするもの。</h2><p class="memory-help" id="memory-gesture-hint">つまんで、はめる。ダブルクリック・長押しで、言葉を書く。</p><div id="memory-device"><div class="memory-device-edge" aria-hidden="true"><i></i><span>●</span><i></i></div><div id="memory-slots" aria-label="身体の記憶スロット"></div><div class="memory-device-caption"><span>左ほど、声に強く残る。</span><span aria-hidden="true">● ───── ● ───── ●</span></div></div><div id="memory-tray" role="button" tabindex="0" aria-label="記憶の保管場所。選んだブロックを身体から外す"><small class="memory-tray-label">持っている思い出</small><div id="memory-library"></div><span id="memory-tray-hint">ここへ戻すと、保管できる。</span></div><p id="memory-status" role="status"></p><div class="memory-footnotes"><details class="memory-inspect"><summary>あなたが見たこと</summary><ol id="memory-facts"></ol></details></div><div id="memory-backdrop" hidden><section id="memory-back"><small class="memory-eyebrow">この記憶の、裏側。</small><label for="memory-text" id="memory-selected-title"></label><small id="memory-origin"></small><textarea id="memory-text" maxlength="240" rows="5" spellcheck="false" placeholder="例：誰かと星に変な名前をつけて、笑っていた。もう一度、そんな時間を過ごしたい。" aria-describedby="memory-edit-note"></textarea><p id="memory-edit-note">書き終えたら Enter。外側を触れても、そのまま残ります。</p><small class="memory-back-fine">起きた出来事は残る。変わるのは、身体がどう覚えるか。</small></section></div></section>`;
   document.body.append(root);const $=id=>root.querySelector('#memory-'+id);
+  root.insertAdjacentHTML('beforeend','<div id="memory-wayfinder" hidden><span aria-hidden="true">↑</span><strong></strong><small></small></div><p id="memory-orient" hidden>WASDで歩く · 画面をクリックしてマウスで見回す</p>');
+  const preview=document.createElement('div');preview.id='memory-preview';preview.innerHTML='<small></small><p></p>';$('device').before(preview);
+  const cause=document.createElement('div');cause.id='memory-cause';$('subtitle').prepend(cause);
+  $('open').setAttribute('aria-controls','memory-drawer');
   let city=null,enabled=false,seen=0,selected='light',pending=false,editPending=false,revision=0,queue=[],current=null,clip=null,muted=false,voiceStamp=0,talkPartner=null,used=[],lastSignature='',picked=null,drag=null,ignoreClickUntil=0,editId=null;
+  let guide=null,editInitial='';
   const speech=new Map();
+  function text(el,value){if(el.textContent!==value)el.textContent=value;}
   function status(text){$('status').textContent=text;}
-  async function close(){if($('drawer').hidden)return;if(!await fold())return;cancelDrag();picked=null;$('drawer').hidden=true;hooks.focus();}
-  function open(){if(!enabled)return;hooks.prepare();$('drawer').hidden=false;render();$('close').focus();hooks.chime('open');}
+  async function close(){if($('drawer').hidden)return;if(!await fold())return;cancelDrag();picked=null;$('drawer').hidden=true;status('');hooks.focus();}
+  function open(id){if(!enabled)return;hooks.prepare();selected=typeof id==='string'?id:guide?.block||city.memoryGame.equipped[0]||selected;$('drawer').hidden=false;status('');render();$('close').focus();hooks.chime('open');}
   function toggle(){if($('drawer').hidden)open();else close();}
   $('open').onclick=toggle;$('close').onclick=close;
   $('drawer').addEventListener('keydown',e=>{if(e.key!=='Tab')return;const scope=$('backdrop').hidden?$('drawer'):$('back');const controls=[...scope.querySelectorAll('button,textarea,summary,[tabindex="0"]')].filter(el=>!el.disabled&&el.getClientRects().length);const first=controls[0],last=controls.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}});
   $('text').oninput=()=>$('text').setCustomValidity('');
   $('text').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();fold();}if(e.key==='Escape'){e.preventDefault();e.stopPropagation();fold();}};
   $('backdrop').onpointerdown=e=>{if(e.target===$('backdrop'))fold();};
-  function flip(id){if(editPending||pending||drag?.moved)return;const b=city.memoryGame.blocks.find(b=>b.id===id);if(!b)return;selected=id;editId=id;picked=null;$('text').setCustomValidity('');$('selected-title').textContent=b.title;$('origin').textContent=b.source;$('text').value=b.text;$('back').style.setProperty('--memory-color',b.color);$('backdrop').hidden=false;$('text').focus();hooks.chime('open');highlight();}
+  function flip(id){if(editPending||pending||drag?.moved)return;const b=city.memoryGame.blocks.find(b=>b.id===id);if(!b)return;selected=id;editId=id;picked=null;$('text').setCustomValidity('');$('selected-title').textContent=b.title;$('origin').textContent=b.source;editInitial=(b.edited?b.text:t(b.text)).trim();$('text').value=editInitial;$('back').style.setProperty('--memory-color',b.color);$('backdrop').hidden=false;$('text').focus();hooks.chime('open');highlight();}
   async function fold(){
     if($('backdrop').hidden)return true;if(editPending)return false;
     const text=$('text').value.trim(),b=city.memoryGame.blocks.find(b=>b.id===editId);
     if(!text&&b?.text){$('text').setCustomValidity('記憶の言葉を、ひとつ残しておこう。');$('text').reportValidity();return false;}
-    if(b&&b.text!==text&&!await edit({action:'rewrite',id:editId,text},'あなたの言葉で、覚え直した。')){$('text').setCustomValidity($('status').textContent);$('text').reportValidity();return false;}
+    if(b&&editInitial!==text&&!await edit({action:'rewrite',id:editId,text},'あなたの言葉で、覚え直した。')){$('text').setCustomValidity($('status').textContent);$('text').reportValidity();return false;}
     $('backdrop').hidden=true;editId=null;render();return true;
   }
   async function edit(data,success){
@@ -43,19 +50,25 @@ export function createMemoryView(hooks){
   function store(id){picked=null;return edit({action:'equip',equipped:city.memoryGame.equipped.filter(i=>i!==id)},'この思い出は、ここに置いておこう。');}
   $('tray').onclick=e=>{if(picked&&!e.target.closest('.memory-block'))store(picked);};
   $('tray').onkeydown=e=>{if(e.target===$('tray')&&['Enter',' '].includes(e.key)&&picked){e.preventDefault();store(picked);}};
-  function highlight(){root.querySelectorAll('.memory-block').forEach(b=>b.classList.toggle('picked',b.dataset.id===picked));$('device').classList.toggle('holding',!!picked);$('tray').classList.toggle('holding',!!picked);}
+  function showPreview(){
+    const block=city?.memoryGame?.blocks.find(b=>b.id===selected);if(!block)return;
+    text(preview.querySelector('small'),t(block.title));text(preview.querySelector('p'),t(block.text||'ダブルクリックで、あなたの思い出や願いを書こう。'));
+    preview.style.setProperty('--memory-color',block.color);
+  }
+  function highlight(){root.querySelectorAll('.memory-block').forEach(b=>b.classList.toggle('picked',b.dataset.id===picked));$('device').classList.toggle('holding',!!picked);$('tray').classList.toggle('holding',!!picked);showPreview();}
   function targetAt(x,y){
     const exact=document.elementFromPoint(x,y)?.closest('[data-memory-slot],#memory-tray');if(exact&&root.contains(exact))return exact;
     for(const slot of $('slots').children){const r=slot.getBoundingClientRect();if(x>r.left-15&&x<r.right+15&&y>r.top-15&&y<r.bottom+15)return slot;}return null;
   }
   function cancelDrag(){if(!drag)return;clearTimeout(drag.timer);drag.ghost?.remove();drag.origin?.classList.remove('drag-origin');root.querySelectorAll('.over').forEach(el=>el.classList.remove('over'));drag=null;}
   function wireBlock(b,block){
-    b.setAttribute('aria-label',block.title+'。つまんで移動、ダブルクリック・長押しで書き換え');b.setAttribute('aria-keyshortcuts','F2');b.title='ダブルクリック・長押しで、自分の言葉を書けます';
+    b.setAttribute('aria-label',language==='en'?t(block.title)+'. Drag to move; double-click or long-press to rewrite.':block.title+'。つまんで移動、ダブルクリック・長押しで書き換え');b.setAttribute('aria-keyshortcuts','F2');b.title='ダブルクリック・長押しで、自分の言葉を書けます';
     b.onclick=e=>{e.stopPropagation();if(performance.now()<ignoreClickUntil||editPending||pending)return;if(!block.text){flip(block.id);return;}const slot=b.closest('[data-memory-slot]');if(picked&&picked!==block.id&&slot){equip(picked,Number(slot.dataset.memorySlot));return;}selected=block.id;picked=picked===block.id?null:block.id;highlight();status(picked?'置き場所に触れると、はまります。':'');};
     b.ondblclick=e=>{e.preventDefault();e.stopPropagation();flip(block.id);};
+    b.onfocus=()=>{selected=block.id;showPreview();};
     b.onkeydown=e=>{if(e.key==='F2'){e.preventDefault();flip(block.id);}};
     b.onpointerdown=e=>{
-      if(e.button!==0||editPending||pending)return;e.stopPropagation();cancelDrag();const rect=b.getBoundingClientRect();selected=block.id;
+      if(e.button!==0||editPending||pending)return;e.stopPropagation();cancelDrag();const rect=b.getBoundingClientRect();selected=block.id;showPreview();
       drag={id:block.id,startX:e.clientX,startY:e.clientY,offsetX:e.clientX-rect.left,offsetY:e.clientY-rect.top,rect,origin:b,pointer:e.pointerId,moved:false,ghost:null,target:null};
       b.setPointerCapture(e.pointerId);if(e.pointerType==='touch')drag.timer=setTimeout(()=>{if(drag&&!drag.moved){cancelDrag();ignoreClickUntil=performance.now()+500;flip(block.id);}},480);
     };
@@ -77,10 +90,14 @@ export function createMemoryView(hooks){
     const icon=document.createElement('span');icon.className='memory-glyph';icon.setAttribute('aria-hidden','true');icon.innerHTML=memoryPicture(block.motif);const label=document.createElement('strong');label.textContent=block.title;const pins=document.createElement('i');pins.className='memory-pins';pins.setAttribute('aria-hidden','true');b.append(icon,label,pins);b.classList.toggle('recalled',used.includes(block.id));return b;
   }
   function render(){
-    if(!city?.memoryGame)return;const m=city.memoryGame,goal=explorationGoal(m)||memoryGoals[m.stage]||memoryGoals.together;
-    $('goal').querySelector('h2').textContent=goal[0];$('goal').querySelector('p').textContent=goal[1];
+    if(!city?.memoryGame)return;const m=city.memoryGame,previousGuide=guide;guide=memoryGuide(city);if(!guide)return;
+    if(guide.gesture==='equip'&&previousGuide?.id!==guide.id&&!picked&&!drag&&!editId)selected=guide.block;
+    text($('goal').querySelector('small'),guide.part<4?t('小さな約束')+' · '+guide.part+' / 3':t('あなたが残した、ひとつの記憶'));
+    text($('goal').querySelector('h2'),t(guide.title));text($('goal').querySelector('p'),t(guide.detail));
+    $('goal').dataset.complete=String(guide.part===4);$('open').classList.toggle('suggested',guide.gesture==='equip');
+    text($('gesture-hint'),t(guide.gesture==='equip'?'光っている記憶を、一番左へ。':guide.part<4?'準備できたら Q で戻り、Tomoに E。ダブルクリックで文章も変えられる。':'つまんで、はめる。ダブルクリック・長押しで、言葉を書く。'));
     if(drag)return;
-    $('pocket').replaceChildren();for(const block of selectedMemories(m)){const b=chip(block,true);b.onclick=()=>{selected=block.id;open();};b.setAttribute('aria-label',block.title+'の記憶を開く');$('pocket').append(b);}
+    $('pocket').replaceChildren();for(const block of selectedMemories(m)){const b=chip(block,true);b.onclick=()=>open(block.id);b.setAttribute('aria-label',block.title+'の記憶を開く');$('pocket').append(b);}
     $('slots').replaceChildren();
     for(let i=0;i<3;i++){
       const slot=document.createElement('div');slot.className='memory-slot';slot.dataset.memorySlot=i;slot.tabIndex=0;slot.setAttribute('role','button');slot.setAttribute('aria-label',i===0?'いちばん大切な場所に記憶を置く':(i+1)+'番目の場所に記憶を置く');const hint=document.createElement('small');hint.textContent=i===0?'01 · 声の中心':'0'+(i+1);slot.append(hint);
@@ -90,19 +107,25 @@ export function createMemoryView(hooks){
     }
     $('library').replaceChildren();for(const block of m.blocks.filter(b=>!m.equipped.includes(b.id))){const b=chip(block);wireBlock(b,block);$('library').append(b);}
     $('tray-hint').hidden=$('library').children.length>0;$('facts').replaceChildren();for(const f of m.facts.slice(-8)){const li=document.createElement('li');li.textContent=f.text;$('facts').append(li);}highlight();
+    if(guide.gesture==='equip'){
+      $('slots').firstElementChild?.classList.add('suggested');
+      $('library').querySelector('[data-id="'+guide.block+'"]')?.classList.add('suggested');
+    }
   }
   function quiet(){voiceStamp++;clip?.pause();clip=null;if('speechSynthesis' in window)speechSynthesis.cancel();current=null;used=[];$('subtitle').hidden=true;render();}
   $('quiet').onclick=()=>{queue=[];quiet();talkPartner=null;};
   function requestVoice(event){if(muted||speech.has(event.id))return;speech.set(event.id,hooks.api('memory/speech',{event:event.id}).catch(()=>({mode:'unavailable'})));if(speech.size>36)speech.delete(speech.keys().next().value);}
   function speak(event){
     quiet();current={...event,until:performance.now()+Math.min(8500,Math.max(2600,event.text.length*85))};used=event.used||[];const stamp=voiceStamp;
-    $('subtitle').hidden=false;$('subtitle').querySelector('small').textContent=memoryNames[event.by]||event.by;$('subtitle').querySelector('p').textContent=event.text;
-    if(event.by!=='player'&&event.by!=='central')hooks.say(event.by,event.text);if(event.kind==='promise'||event.kind==='together')hooks.chime('receive');render();
+    $('subtitle').hidden=false;$('subtitle').querySelector('small').textContent=t(memoryNames[event.by]||event.by);$('subtitle').querySelector('p').textContent=t(event.text);
+    const remembered=event.used?.map(id=>city.memoryGame.blocks.find(b=>b.id===id)).filter(Boolean)||[];
+    cause.hidden=!remembered.length&&event.kind!=='remembered';cause.textContent=event.kind==='remembered'?t('次の同期にも、残った。'):t('この記憶から生まれた言葉')+' · '+remembered.map(b=>t(b.title)).join(' + ');
+    if(event.by!=='player'&&event.by!=='central')hooks.say(event.by,event.text);if(['promise','together','remembered'].includes(event.kind))hooks.chime('receive');render();
     if(muted)return;requestVoice(event);
     speech.get(event.id)?.then(async r=>{
       if(stamp!==voiceStamp||!current||muted)return;
-      if(r.url){clip=new Audio(r.url);clip.volume=.85;clip.onended=()=>{if(current?.id===event.id)current.until=performance.now()+500;};clip.onloadedmetadata=()=>{if(current?.id===event.id)current.until=performance.now()+Math.min(14000,clip.duration*1000+600);};try{await clip.play();}catch{};}
-      else if('speechSynthesis' in window){const utterance=new SpeechSynthesisUtterance(event.text);utterance.lang='ja-JP';utterance.rate=1.07;utterance.volume=.75;utterance.onend=()=>{if(current?.id===event.id)current.until=performance.now()+400;};speechSynthesis.speak(utterance);}
+      if(r.url){clip=new Audio(r.url);clip.volume=.85;clip.onended=()=>{if(current?.id===event.id)current.until=performance.now()+500;};clip.onloadedmetadata=()=>{if(current?.id===event.id)current.until=performance.now()+clip.duration*1000+1000;};try{await clip.play();}catch{};}
+      else if('speechSynthesis' in window){const utterance=new SpeechSynthesisUtterance(t(event.text));utterance.lang=language==='en'?'en-US':'ja-JP';utterance.rate=1.07;utterance.volume=.75;utterance.onstart=()=>{if(current?.id===event.id)current.until=performance.now()+45000;};utterance.onend=utterance.onerror=()=>{if(current?.id===event.id)current.until=performance.now()+400;};speechSynthesis.speak(utterance);}
     });
   }
   async function talk(id){
@@ -116,6 +139,12 @@ export function createMemoryView(hooks){
     activate(next,fresh){revision++;queue=[];quiet();city=next;enabled=!!next?.memoryGame?.active;root.hidden=!enabled;document.body.classList.toggle('memory-playing',enabled);seen=fresh?0:next?.memoryGame?.serial||0;selected='light';lastSignature='';speech.clear();picked=null;editId=null;$('backdrop').hidden=true;$('drawer').hidden=true;if(enabled)this.update(next);},
     stop(){revision++;queue=[];quiet();cancelDrag();enabled=false;root.hidden=true;$('backdrop').hidden=true;$('drawer').hidden=true;},setMuted(value){muted=value;if(value)quiet();},
     update(next){city=next;if(!enabled||!next?.memoryGame)return;const m=next.memoryGame;for(const event of m.events.filter(e=>e.id>seen)){if(event.kind==='discovery'){queue=queue.filter(e=>e.kind!=='discovery');if(current?.kind==='discovery')quiet();}queue.push(event);requestVoice(event);}seen=m.serial;const sig=m.revision+':'+m.stage+':'+m.serial;if(lastSignature!==sig){lastSignature=sig;render();}},
-    frame(now,visible){if(!enabled)return;$('goal').hidden=!visible;$('open').hidden=!visible;$('pocket').hidden=!visible;if(!visible){if(current){queue.unshift(current);quiet();}return;}if(current&&now>=current.until)quiet();if(!current&&queue.length)speak(queue.shift());if(!pending&&!current&&!queue.length)talkPartner=null;},
+    frame(now,visible){
+      if(!enabled)return;$('goal').hidden=!visible;$('open').hidden=!visible;$('pocket').hidden=!visible;
+      $('orient').hidden=!visible||guide?.part!==1;
+      $('wayfinder').hidden=!visible||!guide?.target||!!current||pending;
+      if(visible&&guide?.target){const target=guide.target.resident?city.positions?.[guide.target.id]||guide.target:guide.target;const d=guideDirection(hooks.position(),hooks.heading?.()||0,target);$('wayfinder').querySelector('span').style.transform='rotate('+d.angle+'rad)';text($('wayfinder').querySelector('strong'),t(guide.target.label));text($('wayfinder').querySelector('small'),Math.round(d.distance)+' m');}
+      if(!visible){if(current){queue.unshift(current);quiet();}return;}if(current&&now>=current.until)quiet();if(!current&&queue.length)speak(queue.shift());if(!pending&&!current&&!queue.length)talkPartner=null;
+    },
   };
 }

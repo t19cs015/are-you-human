@@ -42,8 +42,9 @@ export async function memoryGameSpeech(s,id,fetcher=fetch){
   const event=s.world.city.memoryGame.events.find(e=>e.id===id);
   if(!event)throw new Error('INVALID_ACTION');
   if(!memoryClips){try{memoryClips=JSON.parse(await readFile(new URL('../assets/memory/voices.json',import.meta.url),'utf8'));}catch{memoryClips={};}}
-  const spoken=s.language==='en'?translateText(event.text,'en'):event.text,hash=createHash('sha256').update(event.by+'\n'+event.text).digest('hex'),clip=memoryClips[hash];
-  if(s.language!=='en'&&clip&&/^[a-z0-9_]+\.mp3$/.test(clip))return {mode:'generated',url:'/assets/memory/'+clip};
+  const spoken=s.language==='en'?translateText(event.text,'en'):event.text,hash=createHash('sha256').update(event.by+'\n'+spoken).digest('hex');
+  const clip=memoryClips[(s.language==='en'?'en':'ja')+':'+hash]||(s.language!=='en'?memoryClips[hash]:null);
+  if(clip&&/^[a-z0-9_]+\.mp3$/.test(clip))return {mode:'generated',url:'/assets/memory/'+clip};
   return cachedSpeech(s,event.by,spoken,fetcher);
 }
 export async function episodeSpeech(s,id,fetcher=fetch){
