@@ -8,14 +8,28 @@ https://github.com/user-attachments/assets/7579595f-eb28-4ede-bc77-58cb868f7f98
 
 Rearrange your memories, find your own words, and shape the future of a small AI town. Words You Keep carries forward Haruna's charming residents and the warmth of a town at night.
 
-The latest playable game and demo production files are on the [`ilya` branch](https://github.com/t19cs015/are-you-human/tree/ilya). The instructions below describe that version.
+The playable game and demo production files are maintained together on `main`.
+
+## Screenshots
+
+Scenes from the one-minute in-engine demo. Click an image to view it at full size.
+
+| Rearrange your memories | See residents respond |
+| --- | --- |
+| [![Dragging the Our promise memory block into the memory drawer beside Tomo.](docs/images/demo-v9/memory-blocks.png)](docs/images/demo-v9/memory-blocks.png) | [![Tomo agrees to meet by the square lights after hearing an invitation shaped by the player's memories.](docs/images/demo-v9/resident-conversation.png)](docs/images/demo-v9/resident-conversation.png) |
+| Put a memory first, or double-click to rewrite it in your own words. | Your memories shape what your body says. Residents choose how to respond. |
+
+| Explore a town full of small discoveries | Share a moment with Central |
+| --- | --- |
+| [![A first-person view of the river waterwheel, with an E interaction prompt and the city skyline beyond.](docs/images/demo-v9/river-waterwheel.png)](docs/images/demo-v9/river-waterwheel.png) | [![Central's holographic face accepts a shared memory and offers to pass it on.](docs/images/demo-v9/central-memory.png)](docs/images/demo-v9/central-memory.png) |
+| Turn the waterwheel, follow the river, and collect memories along the way. | Entrust a shared experience to Central so it can survive the next synchronization. |
 
 ## Run locally
 
 Requires **Node.js 20.12 or later** and a browser with WebGL2 support. The game uses Three.js and a local Node.js server.
 
 ```sh
-git clone --branch ilya https://github.com/t19cs015/are-you-human.git
+git clone https://github.com/t19cs015/are-you-human.git
 cd are-you-human
 npm install
 npm start
@@ -27,11 +41,11 @@ Open [http://127.0.0.1:4173/](http://127.0.0.1:4173/). You can try the controls 
 
 Choose **English** or **Japanese** on the title screen before starting. English is the default. Interface text, memory blocks, story dialogue, AI residents' replies, Central's Realtime conversations, and generated speech follow your selection. The choice persists when you reload the same tab.
 
-Start with **Wake up in this body**. A synchronization with Central has erased Tomo's memory of a promise, but you still remember it. Press **Q** to rearrange your memory blocks or rewrite them in natural language. What you keep changes the words your body speaks. Residents choose how to act on what they hear, and experiences they agree to share can survive the next synchronization. See [the first memory chapter](https://github.com/t19cs015/are-you-human/blob/ilya/docs/MEMORY_GAME.md).
+Start with **Wake up in this body**. A synchronization with Central has erased Tomo's memory of a promise, but you still remember it. Press **Q** to rearrange your memory blocks or rewrite them in natural language. What you keep changes the words your body speaks. Residents choose how to act on what they hear, and experiences they agree to share can survive the next synchronization. See [the first memory chapter](docs/MEMORY_GAME.md).
 
-Explore the city behind Central, with canals, bridges, storefronts, gardens, and a musical playground. Press **E** at 39 interactive locations to turn windmills and waterwheels, launch a little boat, and discover other small moments. Collect nine kinds of memories, invite residents on detours, and choose whether to entrust an experience to Central or share it directly in the garden. See [a town to touch](https://github.com/t19cs015/are-you-human/blob/ilya/docs/A_TOWN_TO_TOUCH.md).
+Explore the city behind Central, with canals, bridges, storefronts, gardens, and a musical playground. Press **E** at 39 interactive locations to turn windmills and waterwheels, launch a little boat, and discover other small moments. Collect nine kinds of memories, invite residents on detours, and choose whether to entrust an experience to Central or share it directly in the garden. See [a town to touch](docs/A_TOWN_TO_TOUCH.md).
 
-At the map's edge lies a shore of memories that have not yet been restored. The river bends into a misty floodgate, with the outlines of houses beyond it. Follow a little boat's reply or deliver a memory to light a window. These discoveries connect exploration to the story. See [the unrestored shore](https://github.com/t19cs015/are-you-human/blob/ilya/docs/THE_UNRESTORED_SHORE.md).
+At the map's edge lies a shore of memories that have not yet been restored. The river bends into a misty floodgate, with the outlines of houses beyond it. Follow a little boat's reply or deliver a memory to light a window. These discoveries connect exploration to the story. See [the unrestored shore](docs/THE_UNRESTORED_SHORE.md).
 
 ### Controls
 
@@ -54,17 +68,17 @@ Touch controls use swipes and the onscreen movement arrows. Browsers without poi
 
 ### Other ways to play
 
-**Build a town with everyone** is the community-building prototype under **Other ways to play**. Residents turn toward the arriving human. Press **E** at the nearby distributor to change the lights and see an immediate reaction. Propose an idea to the residents: two of them can agree, walk to the site, and build a garden, a musical playground, or a stargazing spot. An image generated from your proposal appears on the town's sketch board. You can also speak with Central through the Realtime API. See [community play](https://github.com/t19cs015/are-you-human/blob/ilya/docs/COMMUNITY_PLAYTEST.md).
+**Build a town with everyone** is the community-building prototype under **Other ways to play**. Residents turn toward the arriving human. Press **E** at the nearby distributor to change the lights and see an immediate reaction. Propose an idea to the residents: two of them can agree, walk to the site, and build a garden, a musical playground, or a stargazing spot. An image generated from your proposal appears on the town's sketch board. You can also speak with Central through the Realtime API. See [community play](docs/COMMUNITY_PLAYTEST.md).
 
-During Central's synchronization, you can keep moving while the residents pause. Speak to one resident and activity returns from one resident to the next. Central has a holographic face that turns toward you; beyond the bridge, the memory city keeps moving. See [the human-town prototype](https://github.com/t19cs015/are-you-human/blob/ilya/docs/HUMAN_TOWN.md).
+During Central's synchronization, you can keep moving while the residents pause. Speak to one resident and activity returns from one resident to the next. Central has a holographic face that turns toward you; beyond the bridge, the memory city keeps moving. See [the human-town prototype](docs/HUMAN_TOWN.md).
 
-**A little story · Mia's Café** is the earlier three-to-five-minute episode. Find a way to complete Central's update while keeping Mia's café warm. Explore, talk, and propose a solution in your own words; residents discuss it and move to their tasks. Key dialogue and generated discussions have synthesized voices and captions. See [One Warm Light](https://github.com/t19cs015/are-you-human/blob/ilya/docs/ONE_WARM_LIGHT.md). The memory chapter and this episode each start in a separate town session.
+**A little story · Mia's Café** is the earlier three-to-five-minute episode. Find a way to complete Central's update while keeping Mia's café warm. Explore, talk, and propose a solution in your own words; residents discuss it and move to their tasks. Key dialogue and generated discussions have synthesized voices and captions. See [One Warm Light](docs/ONE_WARM_LIGHT.md). The memory chapter and this episode each start in a separate town session.
 
 **Explore the town freely** opens the earlier town simulation described below.
 
 ## The town simulation
 
-Power, water, and conversation records flow toward Central as the town modernizes. The original simulation spans five districts, including the windmill hill and Central; the latest game extends the walkable world to six. See [the modernizing town](https://github.com/t19cs015/are-you-human/blob/ilya/docs/MODERNIZING_TOWN.md).
+Power, water, and conversation records flow toward Central as the town modernizes. The original simulation spans five districts, including the windmill hill and Central; the latest game extends the walkable world to six. See [the modernizing town](docs/MODERNIZING_TOWN.md).
 
 - Residents operate windmills, pumps, and the collection tower to supply Central with power and water.
 - Central first uses old records to create new streetlights. Further development requires conversation records delivered by residents, leading to extensions and taller housing across three modernization stages.
@@ -108,9 +122,9 @@ Game state is saved atomically in `data/sessions/`, with separate sessions isola
 
 ## Implemented scope and limitations
 
-The main chapter covers a promise, synchronization, reunion, carrying residents' memories forward, and exploring the city beyond. The community prototype supports the path from the first interaction to a shared creation, with three kinds of 3D outcomes at three sites and six modernization building families. Generative AI interprets ideas, supports cooperation and dialogue, and draws proposal sketches within this designed framework. See [implementation and validation details](https://github.com/t19cs015/are-you-human/blob/ilya/docs/COMMUNITY_PLAYTEST.md).
+The main chapter covers a promise, synchronization, reunion, carrying residents' memories forward, and exploring the city beyond. The community prototype supports the path from the first interaction to a shared creation, with three kinds of 3D outcomes at three sites and six modernization building families. Generative AI interprets ideas, supports cooperation and dialogue, and draws proposal sketches within this designed framework. See [implementation and validation details](docs/COMMUNITY_PLAYTEST.md).
 
-The café episode is one scene with two solutions. AI interprets player proposals and chooses cooperation, responsibilities, and dialogue. Resource rules, jobs, and the main story lines are authored. See [the episode's AI and game rules](https://github.com/t19cs015/are-you-human/blob/ilya/docs/ONE_WARM_LIGHT.md).
+The café episode is one scene with two solutions. AI interprets player proposals and chooses cooperation, responsibilities, and dialogue. Resource rules, jobs, and the main story lines are authored. See [the episode's AI and game rules](docs/ONE_WARM_LIGHT.md).
 
 The latest game has four residents, six connected districts, one Lab interior, and one Library interior. Jobs include operating infrastructure, delivering records, updating Central, repairing riverside lights, and preparing reading seats. The earlier creative system includes two projects: a poster and a short musical sequence. Central's learning is an in-game progression system; it does not train an LLM's weights.
 
@@ -122,21 +136,21 @@ Larger memory stores do not guarantee perfect recall. Model capability and memor
 
 Run `npm test` for checks that do not require live API calls. They cover memory isolation, corrections, retrieval, save restoration, creative project transitions, holds, feedback recipients, and HTTP boundaries.
 
-Development references include [town observation and intervention](https://github.com/t19cs015/are-you-human/blob/ilya/docs/CITY_OBSERVATION_PLAN.md), [the social and memory system plan](https://github.com/t19cs015/are-you-human/blob/ilya/docs/SOCIETY_IMPLEMENTATION_PLAN.md), and [the original project brief](https://github.com/t19cs015/are-you-human/blob/ilya/ARE_YOU_HUMAN_Astra_Initial_Prompt.txt). Some linked development notes are in Japanese.
+Development references include [town observation and intervention](docs/CITY_OBSERVATION_PLAN.md), [the social and memory system plan](docs/SOCIETY_IMPLEMENTATION_PLAN.md), and [the original project brief](ARE_YOU_HUMAN_Astra_Initial_Prompt.txt). Some linked development notes are in Japanese.
 
 ## Town visuals
 
-The night sky, soft shading, illuminated windows, cobblestone materials, and moving water have been refined. Graphics settings offer **Auto**, **Pretty**, and **Lightweight** modes. Use `/?visual=1` for the visual review view. See [night graphics](https://github.com/t19cs015/are-you-human/blob/ilya/docs/NIGHT_GRAPHICS.md).
+The night sky, soft shading, illuminated windows, cobblestone materials, and moving water have been refined. Graphics settings offer **Auto**, **Pretty**, and **Lightweight** modes. Use `/?visual=1` for the visual review view. See [night graphics](docs/NIGHT_GRAPHICS.md).
 
 The café's visual direction extends to the Library, Lab, homes, and plaza, with coordinated roofs, signs, planting, and paving. The Lab and Library interiors include wooden furniture, bookshelves, and lighting, while retaining first-person movement and interactive monitors and reading material.
 
-Open `/cafe-review.html?town=1` to switch between overhead, first-person, and interior views. See [the town visual upgrade](https://github.com/t19cs015/are-you-human/blob/ilya/docs/TOWN_VISUAL_UPGRADE.md). The earlier `/cafe-review.html` comparison and [café review notes](https://github.com/t19cs015/are-you-human/blob/ilya/docs/CAFE_VISUAL_REVIEW.md) remain as historical references.
+Open `/cafe-review.html?town=1` to switch between overhead, first-person, and interior views. See [the town visual upgrade](docs/TOWN_VISUAL_UPGRADE.md). The earlier `/cafe-review.html` comparison and [café review notes](docs/CAFE_VISUAL_REVIEW.md) remain as historical references.
 
 Sources, pinned commits, and hashes for 29 downloaded free assets are recorded in `assets/cafe/manifest.json`; original licenses are in `docs/licenses/`. A district falls back to its earlier appearance if an asset fails to load. The four AI residents use original Blender models.
 
 ## Resident models and infrastructure
 
-Mia, Ren, Tomo, and Shell each have distinct bodies, accessories, expressions, and gestures. Open `/character-review.html` to compare all four or rotate and inspect them individually, without an API key. Editable Blender files are in `art/characters/`. See [the resident modeling guide](https://github.com/t19cs015/are-you-human/blob/ilya/docs/RESIDENT_MODELS.md).
+Mia, Ren, Tomo, and Shell each have distinct bodies, accessories, expressions, and gestures. Open `/character-review.html` to compare all four or rotate and inspect them individually, without an API key. Editable Blender files are in `art/characters/`. See [the resident modeling guide](docs/RESIDENT_MODELS.md).
 
 The five infrastructure models are original Blender assets. Editable files are in `art/infrastructure/`, their generator is `scripts/build-infrastructure.py`, and provenance and hashes are in `assets/infrastructure/manifest.json`.
 
@@ -144,8 +158,8 @@ District ground and road shapes are combined using polygon unions to eliminate f
 
 ## One-minute English demo
 
-[Words You Keep — Demo v9](https://github.com/user-attachments/assets/7579595f-eb28-4ede-bc77-58cb868f7f98) plays at the top of this README with English voices, captions, and music. It shows memory editing, the resulting changes in your words, and residents' choices spreading through the town. The README version is 720p at 30 fps, with the original audio preserved. The 1080p master is kept locally at `exports/words-you-keep-demo-v9.mp4`. See [v9 production files](https://github.com/t19cs015/are-you-human/blob/ilya/art/demo-v9/README.md).
+[Words You Keep — Demo v9](https://github.com/user-attachments/assets/7579595f-eb28-4ede-bc77-58cb868f7f98) plays at the top of this README with English voices, captions, and music. It shows memory editing, the resulting changes in your words, and residents' choices spreading through the town. The README version is 720p at 30 fps, with the original audio preserved. The 1080p master is kept locally at `exports/words-you-keep-demo-v9.mp4`. See [v9 production files](art/demo-v9/README.md).
 
-The earlier town-building demo, under the former title, is `exports/are-you-human-demo-v3.mp4`: a 60-second, 1080p film with English voices, captions, and music. It stays in first person, opens with residents turning and murmuring, shows six building families growing in an eight-second time-lapse, and follows residents cooperating on an open-ended proposal. The player character is not shown. The opening and growth sequences are staged with game assets; cooperation replays the first demo's real API decisions and game progression from a first-person camera. Version 2 is also preserved. See [the earlier production files](https://github.com/t19cs015/are-you-human/blob/ilya/art/timelapse/README.md).
+The earlier town-building demo, under the former title, is `exports/are-you-human-demo-v3.mp4`: a 60-second, 1080p film with English voices, captions, and music. It stays in first person, opens with residents turning and murmuring, shows six building families growing in an eight-second time-lapse, and follows residents cooperating on an open-ended proposal. The player character is not shown. The opening and growth sequences are staged with game assets; cooperation replays the first demo's real API decisions and game progression from a first-person camera. Version 2 is also preserved. See [the earlier production files](art/timelapse/README.md).
 
-The older Mia episode film is kept locally at `exports/are-you-human-60s-en.mp4`. It is an edited sequence using the game's actual rules and recorded API decisions. See [episode demo production files](https://github.com/t19cs015/are-you-human/blob/ilya/art/demo/README.md). Files under `exports/` are local build outputs and are not committed to the repository.
+The older Mia episode film is kept locally at `exports/are-you-human-60s-en.mp4`. It is an edited sequence using the game's actual rules and recorded API decisions. See [episode demo production files](art/demo/README.md). Files under `exports/` are local build outputs and are not committed to the repository.
