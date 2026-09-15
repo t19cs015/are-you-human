@@ -108,6 +108,8 @@ Power, water, and conversation records flow toward Central as the town modernize
 
 ## Deploy on Vercel
 
+[Play AI TOWN](https://ai-town-ashen.vercel.app) — no API key entry required.
+
 The hosted game uses the team’s OpenAI key on the server, so players can start without entering a key. The public build excludes secrets and server files. Upstash Redis preserves each player’s town and enforces shared usage limits across function instances. Follow the [Vercel deployment guide](docs/VERCEL_DEPLOYMENT.md) for the project settings and server environment variables.
 
 ## AI connection and API keys

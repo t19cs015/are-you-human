@@ -2,6 +2,8 @@
 
 Players use the team's OpenAI connection automatically. The regular API key stays in the Node.js function; it is never sent to the browser, included in game saves, or copied into the public build.
 
+Production: [ai-town-ashen.vercel.app](https://ai-town-ashen.vercel.app). The current project was deployed with the Vercel CLI. Automatic deployments from GitHub require a GitHub Login Connection on the Vercel account; until that is connected, publish updates with `vercel deploy --prod --scope aming4mit-5956`.
+
 ## Project settings
 
 Import this repository into Vercel. `vercel.json` selects the **Other** framework preset, runs `npm run build`, serves `dist`, and routes `/api/*` to a Node.js function. The function runs in Tokyo (`hnd1`). Enable Fluid compute and use Node.js 22 or later.

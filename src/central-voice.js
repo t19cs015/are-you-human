@@ -1,3 +1,5 @@
+import {language} from './language.js';
+
 export function createCentralVoice({api,position,changed,onVoice}){
   const $=id=>document.getElementById(id),output=$('central-audio'),lines=new Map();
   let current=null,available=false,configured=false,pendingText=false,closing=Promise.resolve();
@@ -46,7 +48,7 @@ export function createCentralVoice({api,position,changed,onVoice}){
     if(current!==c)return;
     if(event.type==='session.created'){
       c.ready=true;clearTimeout(c.timeout);controls();listening(c);onVoice(true);
-      send(c,{type:'conversation.item.create',item:{type:'message',role:'user',content:[{type:'input_text',text:'中央のそばへ来ました。短く挨拶して。'}]}});
+      send(c,{type:'conversation.item.create',item:{type:'message',role:'user',content:[{type:'input_text',text:language==='en'?'I have just arrived beside Central. Please greet me briefly in English.':'中央のそばへ来ました。短く挨拶して。'}]}});
       send(c,{type:'response.create'});
     }
     if(event.type==='input_audio_buffer.speech_started'){

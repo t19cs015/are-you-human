@@ -40,7 +40,7 @@ export const centralTools=[
   {type:'function',name:'set_modernization',description:'プレイヤーが明確に頼んだとき、中央による街の更新を停止(false)または再開(true)する。会話は止まらない。',parameters:{type:'object',properties:{enabled:{type:'boolean'}},required:['enabled'],additionalProperties:false}},
 ];
 const episodeTool={type:'function',name:'propose_cafe_plan',description:'この灯りを明日にも、の場面で、人間が具体的に提案した方法を住民に相談する。完成させる操作ではない。余熱の循環か、電力の分配で更新とカフェを両立する。',parameters:{type:'object',properties:{method:{type:'string',enum:['share_heat','share_power']},idea:{type:'string'}},required:['method','idea'],additionalProperties:false}};
-function persona(s){return centralPersona+communityContext(s.world)+episodeContext(s.world,'central')+(s.world.city?.episode?.active?'\nこの場面に限り、具体的な方法をpropose_cafe_planで住民へ相談できる。住民の承諾と現地作業はまだ必要。相談したことだけを伝え、完成したと言わない。電力配分はepisode.supply、更新進行はepisode.updateが唯一の根拠。過去の記録収集や増築はこの場面の課題ではない。':'')+'\n'+(s.language==='en'?'Speak only natural English, including the first greeting.':'自然な日本語だけで話す。');}
+function persona(s){return centralPersona+communityContext(s.world)+episodeContext(s.world,'central')+(s.world.city?.episode?.active?'\nこの場面に限り、具体的な方法をpropose_cafe_planで住民へ相談できる。住民の承諾と現地作業はまだ必要。相談したことだけを伝え、完成したと言わない。電力配分はepisode.supply、更新進行はepisode.updateが唯一の根拠。過去の記録収集や増築はこの場面の課題ではない。':'')+'\n'+(s.language==='en'?'Speak only natural English, including the first greeting. Translate all Japanese examples and quoted greetings above into English; never recite them in Japanese.':'自然な日本語だけで話す。');}
 export function runCentralTool(s,name,args,position){
   requireCentral(s,position);
   if(!args||typeof args!=='object'||Array.isArray(args))throw new Error('INVALID_ACTION');
