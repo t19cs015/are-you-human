@@ -1,0 +1,210 @@
+/* Game-only sizing: keep the interface as readable as the filmed demo.
+   Use both viewport axes so a large or zoomed-out window doesn't leave tiny UI.
+   Narrow windows keep readable text and scroll instead of shrinking controls. */
+:root {
+  --ui-unit: clamp(.8px, min(.0585651vw, .1041666dvh), 1.68px);
+  --ui-text-unit: calc(.875 * var(--ui-unit));
+  --ui-small: max(16px, calc(18 * var(--ui-text-unit)));
+  --ui-body: max(18px, calc(22 * var(--ui-text-unit)));
+  --ui-action: max(20px, calc(24 * var(--ui-text-unit)));
+  --ui-heading: max(24px, calc(32 * var(--ui-text-unit)));
+}
+
+#start {
+  justify-content: flex-start;
+  padding: max(24px, 4dvh) 6vw;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: linear-gradient(90deg, #12243bf5 0%, #182941b3 43%, #18294130 76%);
+}
+#start .start-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 0 0 auto;
+  width: min(calc(690 * var(--ui-unit)), 100%);
+  margin-block: auto;
+  padding: 0;
+}
+body:has(#start:not([hidden])) header { visibility: hidden; }
+#start .eyebrow { font-size: max(14px, calc(14 * var(--ui-text-unit))); letter-spacing: .15em; line-height: 1.4; }
+#start h1, #ending h1 { font-size: max(64px, calc(110 * var(--ui-text-unit))); line-height: .92; margin: calc(14 * var(--ui-unit)) 0 calc(18 * var(--ui-unit)); }
+#start .language-choice { gap: calc(14 * var(--ui-unit)); margin: 0 0 calc(14 * var(--ui-unit)); font-size: max(14px, calc(14 * var(--ui-text-unit))); letter-spacing: .1em; }
+#start .language-choice>div { padding: calc(3 * var(--ui-unit)); }
+#start .language-choice button { font-size: max(18px, calc(20 * var(--ui-text-unit))); min-width: calc(106 * var(--ui-unit)); min-height: max(44px, calc(50 * var(--ui-unit))); padding: calc(10 * var(--ui-unit)) calc(18 * var(--ui-unit)); line-height: 1.25; }
+#start .start-card>p { font-size: max(18px, calc(26 * var(--ui-text-unit))); line-height: 1.45; margin: 0; color: #e5e8df; }
+#start #play-memory, #ending #continue {
+  width: 100%;
+  max-width: calc(620 * var(--ui-unit));
+  min-height: max(52px, calc(64 * var(--ui-unit)));
+  padding: calc(15 * var(--ui-unit)) calc(24 * var(--ui-unit));
+  margin: calc(18 * var(--ui-unit)) 0 0;
+  font-size: var(--ui-action);
+  line-height: 1.35;
+  border-radius: calc(17 * var(--ui-unit));
+}
+#start #resume { width: 100%; max-width: calc(620 * var(--ui-unit)); min-height: max(44px, calc(54 * var(--ui-unit))); font-size: max(18px, calc(20 * var(--ui-text-unit))); padding: calc(12 * var(--ui-unit)) calc(20 * var(--ui-unit)); margin: calc(10 * var(--ui-unit)) 0 0; line-height: 1.35; border-radius: calc(15 * var(--ui-unit)); }
+#start .start-alternatives { width: 100%; margin: calc(8 * var(--ui-unit)) 0 0; }
+#start .start-alternatives summary { width: fit-content; min-height: max(44px, calc(48 * var(--ui-unit))); padding: calc(12 * var(--ui-unit)) 0; font-size: var(--ui-small); line-height: 1.35; color: #d3ddd9; }
+#start .start-alternatives :is(#play-community, #play-episode, #begin) { display: block; width: 100%; max-width: calc(620 * var(--ui-unit)); min-height: max(44px, calc(54 * var(--ui-unit))); font-size: max(18px, calc(20 * var(--ui-text-unit))); line-height: 1.4; margin: 0 0 calc(8 * var(--ui-unit)); padding: calc(12 * var(--ui-unit)) calc(20 * var(--ui-unit)); }
+#start .start-note { font-size: var(--ui-small); line-height: 1.5; margin-top: calc(12 * var(--ui-unit)); color: #cbd8d3; }
+#ending>p { font-size: var(--ui-body); }
+#ending #continue { width: min(calc(420 * var(--ui-unit)), 88vw); }
+
+/* The same few controls, with larger targets and generous separation. */
+body.human-interface header { top: calc(26 * var(--ui-unit)); left: calc(28 * var(--ui-unit)); }
+body.human-interface header .brand { font-size: max(24px, calc(30 * var(--ui-text-unit))); }
+body.human-interface header .brand small { font-size: max(14px, calc(12 * var(--ui-text-unit))); }
+.human-nav { top: calc(24 * var(--ui-unit)); right: calc(24 * var(--ui-unit)); gap: calc(10 * var(--ui-unit)); }
+.human-nav button { font-size: max(18px, calc(20 * var(--ui-text-unit))); min-height: max(44px, calc(54 * var(--ui-unit))); padding: calc(12 * var(--ui-unit)) calc(18 * var(--ui-unit)); border-radius: calc(16 * var(--ui-unit)); }
+.human-nav kbd { font-size: var(--ui-small); }
+#human-menu-button { font-size: max(24px, calc(28 * var(--ui-text-unit))); width: calc(58 * var(--ui-unit)); padding: calc(8 * var(--ui-unit)); }
+#world-action { bottom: calc(86 * var(--ui-unit)); font-size: var(--ui-action); line-height: 1.35; min-height: max(52px, calc(62 * var(--ui-unit))); max-width: min(calc(620 * var(--ui-unit)), 80vw); padding: calc(15 * var(--ui-unit)) calc(26 * var(--ui-unit)); border-radius: calc(32 * var(--ui-unit)); }
+#human-controls, #memory-orient { bottom: calc(24 * var(--ui-unit)); font-size: var(--ui-small); line-height: 1.4; padding: calc(10 * var(--ui-unit)) calc(18 * var(--ui-unit)); }
+#toast { top: calc(90 * var(--ui-unit)); font-size: var(--ui-body); line-height: 1.45; padding: calc(14 * var(--ui-unit)) calc(24 * var(--ui-unit)); }
+
+#memory-goal { top: calc(108 * var(--ui-unit)); left: calc(28 * var(--ui-unit)); width: calc(360 * var(--ui-unit)); max-width: 37vw; padding: calc(16 * var(--ui-unit)) calc(18 * var(--ui-unit)); }
+#memory-goal>small { font-size: max(14px, calc(16 * var(--ui-text-unit))); }
+#memory-goal h2 { font-size: max(24px, calc(28 * var(--ui-text-unit))); margin: calc(8 * var(--ui-unit)) 0; }
+#memory-goal p { font-size: max(18px, calc(20 * var(--ui-text-unit))); }
+#memory-wayfinder { top: calc(26 * var(--ui-unit)); gap: calc(10 * var(--ui-unit)); max-width: 42vw; padding: calc(12 * var(--ui-unit)) calc(18 * var(--ui-unit)); border-radius: calc(28 * var(--ui-unit)); }
+#memory-wayfinder span { font-size: max(24px, calc(28 * var(--ui-text-unit))); }
+#memory-wayfinder strong { font-size: max(18px, calc(20 * var(--ui-text-unit))); }
+#memory-wayfinder small { font-size: var(--ui-small); }
+#memory-open { left: calc(28 * var(--ui-unit)); bottom: calc(28 * var(--ui-unit)); min-height: max(52px, calc(60 * var(--ui-unit))); font-size: var(--ui-action); padding: calc(12 * var(--ui-unit)) calc(20 * var(--ui-unit)); border-radius: calc(20 * var(--ui-unit)); }
+#memory-open span { font-size: max(24px, calc(28 * var(--ui-text-unit))); }
+#memory-open kbd { font-size: max(18px, calc(20 * var(--ui-text-unit))); margin-left: calc(14 * var(--ui-unit)); }
+#memory-pocket { left: calc(28 * var(--ui-unit)); bottom: calc(102 * var(--ui-unit)); gap: calc(9 * var(--ui-unit)); }
+#memory-pocket .memory-block.small { min-width: calc(70 * var(--ui-unit)); height: calc(72 * var(--ui-unit)); padding: calc(8 * var(--ui-unit)) calc(12 * var(--ui-unit)); gap: calc(5 * var(--ui-unit)); }
+#memory-pocket .memory-block.small:not(:first-child) { min-width: calc(58 * var(--ui-unit)); }
+#memory-pocket .memory-block.small strong { font-size: var(--ui-small); }
+#memory-pocket .memory-glyph, #memory-pocket .memory-glyph svg { width: calc(30 * var(--ui-unit)); height: calc(30 * var(--ui-unit)); }
+
+/* Spoken lines have the prominence of the demo's subtitles. */
+#memory-subtitle { bottom: calc(182 * var(--ui-unit)); max-width: min(calc(790 * var(--ui-unit)), 82vw); padding: calc(18 * var(--ui-unit)) calc(54 * var(--ui-unit)) calc(20 * var(--ui-unit)) calc(24 * var(--ui-unit)); border-radius: calc(22 * var(--ui-unit)); }
+#memory-subtitle p { font-size: max(18px, calc(26 * var(--ui-text-unit))); line-height: 1.5; }
+#memory-subtitle>small, #memory-cause { font-size: var(--ui-small); }
+#memory-cause { padding-bottom: calc(8 * var(--ui-unit)); margin-bottom: calc(8 * var(--ui-unit)); }
+#memory-quiet { font-size: max(24px, calc(28 * var(--ui-text-unit))); min-width: calc(44 * var(--ui-unit)); min-height: max(44px, calc(44 * var(--ui-unit))); }
+#memory-wait { bottom: calc(184 * var(--ui-unit)); max-width: 82vw; font-size: var(--ui-body); padding: calc(12 * var(--ui-unit)) calc(20 * var(--ui-unit)); }
+body.human-interface #community-subtitle { bottom: calc(162 * var(--ui-unit)); font-size: max(18px, calc(26 * var(--ui-text-unit))); max-width: min(calc(790 * var(--ui-unit)), 82vw); padding: calc(16 * var(--ui-unit)) calc(24 * var(--ui-unit)); }
+body.human-interface #community-speaker { font-size: var(--ui-small); }
+body.human-interface .bubble { font-size: max(18px, calc(20 * var(--ui-text-unit))); max-width: calc(280 * var(--ui-unit)); padding: calc(10 * var(--ui-unit)) calc(15 * var(--ui-unit)); }
+body.human-interface .bubble small { font-size: max(14px, calc(16 * var(--ui-text-unit))); }
+
+/* Scale the whole workbench, so larger type has room inside each cartridge. */
+#memory-drawer { width: min(calc(1120 * var(--ui-unit)), calc(100vw - 40 * var(--ui-unit))); right: calc(20 * var(--ui-unit)); max-height: calc(100dvh - 32 * var(--ui-unit)); padding: calc(22 * var(--ui-unit)) calc(28 * var(--ui-unit)); border-radius: calc(28 * var(--ui-unit)); }
+#memory-drawer>h2 { font-size: var(--ui-heading); margin: 0 calc(140 * var(--ui-unit)) calc(12 * var(--ui-unit)) 0; }
+#memory-drawer #memory-close { font-size: var(--ui-body); gap: calc(10 * var(--ui-unit)); min-height: max(44px, calc(48 * var(--ui-unit))); top: calc(14 * var(--ui-unit)); right: calc(20 * var(--ui-unit)); padding: calc(8 * var(--ui-unit)) calc(12 * var(--ui-unit)); }
+#memory-close kbd { font-size: var(--ui-small); }
+#memory-drawer .memory-help { font-size: max(18px, calc(20 * var(--ui-text-unit))); margin-bottom: calc(18 * var(--ui-unit)); }
+.memory-layout { gap: calc(22 * var(--ui-unit)); }
+#memory-preview { padding: calc(18 * var(--ui-unit)); }
+#memory-preview>small { font-size: var(--ui-body); }
+#memory-preview>p { font-size: var(--ui-action); margin-top: calc(12 * var(--ui-unit)); }
+#memory-device { padding: calc(8 * var(--ui-unit)) calc(14 * var(--ui-unit)) calc(14 * var(--ui-unit)); border-radius: calc(24 * var(--ui-unit)); }
+#memory-slots { gap: calc(12 * var(--ui-unit)); }
+.memory-slot { min-height: calc(198 * var(--ui-unit)); padding: calc(36 * var(--ui-unit)) calc(9 * var(--ui-unit)) calc(14 * var(--ui-unit)); }
+.memory-slot>small { font-size: var(--ui-small); top: calc(9 * var(--ui-unit)); }
+.memory-slot .memory-block { max-width: calc(190 * var(--ui-unit)); height: calc(148 * var(--ui-unit)); padding: calc(10 * var(--ui-unit)) calc(7 * var(--ui-unit)) calc(18 * var(--ui-unit)); gap: calc(8 * var(--ui-unit)); }
+.memory-block strong, .memory-slot .memory-block strong, #memory-library .memory-block strong { font-size: var(--ui-body); }
+.memory-slot .memory-glyph { width: calc(52 * var(--ui-unit)); height: calc(50 * var(--ui-unit)); }
+.memory-slot .memory-glyph svg { width: calc(46 * var(--ui-unit)); height: calc(46 * var(--ui-unit)); }
+#memory-tray { margin-top: calc(18 * var(--ui-unit)); min-height: calc(188 * var(--ui-unit)); padding: calc(38 * var(--ui-unit)) calc(12 * var(--ui-unit)) calc(16 * var(--ui-unit)); }
+.memory-tray-label { font-size: var(--ui-small); top: calc(12 * var(--ui-unit)); left: calc(18 * var(--ui-unit)); }
+#memory-library { gap: calc(18 * var(--ui-unit)); min-height: calc(140 * var(--ui-unit)); }
+#memory-library .memory-block { width: calc(158 * var(--ui-unit)); height: calc(140 * var(--ui-unit)); gap: calc(8 * var(--ui-unit)); padding: calc(10 * var(--ui-unit)) calc(8 * var(--ui-unit)) calc(18 * var(--ui-unit)); }
+#memory-library .memory-block .memory-glyph { width: calc(48 * var(--ui-unit)); height: calc(46 * var(--ui-unit)); }
+#memory-library .memory-glyph svg { width: calc(42 * var(--ui-unit)); height: calc(42 * var(--ui-unit)); }
+#memory-tray-hint, #memory-status { font-size: var(--ui-small); }
+.memory-footnotes { margin-top: calc(16 * var(--ui-unit)); padding-top: calc(10 * var(--ui-unit)); }
+.memory-inspect summary, .memory-inspect p, #memory-facts { font-size: var(--ui-small); }
+.memory-inspect summary { min-height: max(44px, calc(44 * var(--ui-unit))); padding-block: calc(9 * var(--ui-unit)); }
+#memory-back { max-width: calc(650 * var(--ui-unit)); padding: calc(30 * var(--ui-unit)); }
+#memory-selected-title { font-size: var(--ui-heading); margin-bottom: calc(18 * var(--ui-unit)); }
+#memory-text { font-size: max(24px, calc(28 * var(--ui-text-unit))); min-height: calc(230 * var(--ui-unit)); padding: calc(16 * var(--ui-unit)); }
+#memory-edit-note { font-size: max(18px, calc(20 * var(--ui-text-unit))); margin-top: calc(18 * var(--ui-unit)); }
+
+/* Menus and Central remain readable when opened from the main chapter. */
+body.human-interface .modal, body.human-interface #community-board { width: min(calc(660 * var(--ui-unit)), 92vw); padding: calc(26 * var(--ui-unit)); }
+#human-menu { width: min(calc(560 * var(--ui-unit)), 92vw); }
+body.human-interface .modal h2, #human-menu h2, body.human-interface #community-board h2 { font-size: var(--ui-heading); }
+body.human-interface .modal :is(p,label,input,select,button), body.human-interface #community-board :is(p,textarea,button), #human-menu :is(button,summary,p,label) { font-size: max(18px, calc(20 * var(--ui-text-unit))); line-height: 1.5; }
+body.human-interface .modal button, body.human-interface #community-board button { min-height: max(44px, calc(50 * var(--ui-unit))); padding: calc(12 * var(--ui-unit)) calc(16 * var(--ui-unit)); }
+#human-menu>button.primary { font-size: var(--ui-action); min-height: max(52px, calc(60 * var(--ui-unit))); }
+.human-menu-links { gap: calc(10 * var(--ui-unit)); }
+#human-menu details { margin-top: calc(18 * var(--ui-unit)); padding-top: calc(16 * var(--ui-unit)); }
+#human-menu summary { min-height: max(44px, calc(44 * var(--ui-unit))); }
+body.human-interface .fine, body.human-interface #community-board .community-fine { font-size: max(14px, calc(16 * var(--ui-text-unit))); }
+body.human-interface #facility-panel { width: min(calc(540 * var(--ui-unit)), 92vw); top: calc(108 * var(--ui-unit)); max-height: calc(100dvh - 140 * var(--ui-unit)); padding: calc(26 * var(--ui-unit)); }
+body.human-interface #facility-panel[data-site=central] { width: min(calc(660 * var(--ui-unit)), 92vw); bottom: calc(26 * var(--ui-unit)); right: calc(26 * var(--ui-unit)); }
+body.human-interface #facility-panel :is(p,button,input) { font-size: max(18px, calc(20 * var(--ui-text-unit))); }
+body.human-interface #facility-panel button { min-height: max(44px, calc(50 * var(--ui-unit))); padding: calc(12 * var(--ui-unit)) calc(16 * var(--ui-unit)); }
+body.human-interface .central-heading h3 { font-size: var(--ui-heading); }
+body.human-interface #central-status, body.human-interface #central-transcript p { font-size: var(--ui-body)!important; }
+body.human-interface #central-transcript small, body.human-interface #central-duration, body.human-interface #central-conversation .central-fine { font-size: max(14px, calc(16 * var(--ui-text-unit)))!important; }
+body.human-interface #dialogue { width: min(calc(740 * var(--ui-unit)), 92vw); bottom: calc(26 * var(--ui-unit)); padding: calc(24 * var(--ui-unit)); }
+body.human-interface .dialogue-head strong { font-size: var(--ui-heading); }
+body.human-interface .utterance, body.human-interface .utterance.you { font-size: var(--ui-body); }
+body.human-interface #choices button, body.human-interface #message, body.human-interface #send { font-size: max(18px, calc(20 * var(--ui-text-unit))); min-height: max(44px, calc(50 * var(--ui-unit))); }
+body.human-interface .utterance small, body.human-interface .dialogue-head small, body.human-interface #resident-replay { font-size: max(14px, calc(16 * var(--ui-text-unit))); }
+
+@media (max-width: 950px) {
+  #memory-drawer { left: 14px; right: 14px; width: auto; }
+  #memory-preview>p { max-height: 180px; overflow-y: auto; }
+}
+@media (max-width: 750px) {
+  #start { padding: 28px 22px; }
+  #start h1, #ending h1 { font-size: clamp(64px, 16vw, 92px); margin-block: 14px 20px; }
+  #start .start-card>p { font-size: 20px; }
+  #start .language-choice { gap: 10px; }
+  #start .language-choice>span { font-size: 12px; }
+  #start #play-memory { font-size: 20px; min-height: 58px; padding-inline: 15px; }
+  #start #resume, #start .start-alternatives :is(#play-community, #play-episode, #begin) { font-size: 20px; padding-inline: 15px; }
+  #start .start-note { font-size: 16px; }
+  .human-nav { top: 16px; right: 14px; }
+  .human-nav button { font-size: 18px; min-height: 50px; padding: 10px 12px; }
+  #human-menu-button { width: 50px; font-size: 26px; }
+  body.human-interface header { top: 20px; left: 18px; }
+  body.human-interface header .brand { font-size: 25px; }
+  #memory-wayfinder { top: 79px; max-width: 90vw; padding: 9px 14px; }
+  #memory-wayfinder strong { font-size: 18px; }
+  #memory-wayfinder small { font-size: 16px; }
+  #memory-goal { left: 15px; top: 139px; width: 350px; max-width: calc(100vw - 30px); padding: 13px 16px; }
+  #memory-goal h2 { font-size: 22px; }
+  #memory-goal p { font-size: 18px; }
+  #memory-goal>small { font-size: 15px; }
+  #memory-open { left: 14px; bottom: 20px; max-width: 47vw; font-size: 21px; min-height: 58px; padding: 12px 14px; }
+  #memory-open span { display: none; }
+  #memory-open kbd { margin-left: 8px; font-size: 18px; }
+  #memory-pocket { left: 14px; bottom: 94px; max-width: 88vw; }
+  #memory-pocket .memory-block.small { height: 64px; }
+  #memory-pocket .memory-block.small strong { font-size: 18px; }
+  body.memory-playing #world-action { right: 14px; bottom: 20px; max-width: 45vw; font-size: 20px; min-height: 58px; padding: 12px 14px; }
+  #memory-orient { bottom: 96px; max-width: 85vw; font-size: 18px; }
+  body:has(#world-action:not([hidden])) #memory-orient { display: none; }
+  #memory-subtitle { bottom: 174px; width: max-content; max-width: calc(100vw - 28px); padding: 15px 46px 17px 18px; }
+  #memory-subtitle p { font-size: 20px; }
+  #memory-subtitle>small, #memory-cause { font-size: 17px; }
+  #memory-wait { bottom: 176px; font-size: 20px; }
+  #memory-drawer { left: 10px; right: 10px; padding: 22px 14px; max-height: calc(100dvh - 20px); }
+  #memory-drawer>h2 { font-size: 26px; margin-right: 112px; }
+  #memory-drawer #memory-close { font-size: 20px; right: 12px; top: 14px; }
+  #memory-drawer .memory-help { font-size: 18px; }
+  #memory-preview { padding: 14px; }
+  #memory-preview>small { font-size: 20px; }
+  #memory-preview>p { font-size: 20px; }
+  #memory-device { padding: 8px 8px 14px; }
+  #memory-slots { gap: 7px; }
+  .memory-slot { padding: 34px 5px 15px; }
+  .memory-slot>small { font-size: 16px; }
+  .memory-slot .memory-block { padding: 10px 4px 18px; }
+  .memory-block strong, .memory-slot .memory-block strong, #memory-library .memory-block strong { font-size: 18px; }
+  #memory-library .memory-block { width: 128px; }
+  #memory-back { padding: 23px 18px; }
+  #memory-selected-title { font-size: 26px; }
+  #memory-text { font-size: 22px; min-height: 210px; padding: 12px; }
+  body.human-interface .modal, #human-menu { padding: 24px 20px; }
+  body.human-interface #facility-panel[data-site=central] { right: 3vw; bottom: 20px; max-height: 70dvh; }
+  body.human-interface #community-subtitle { font-size: 23px; bottom: 150px; }
+}

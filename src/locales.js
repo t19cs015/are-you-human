@@ -1159,7 +1159,7 @@ export const english = {
   "今度は、覚えてる。君と残すと決めた、この時間。次の僕にも届いたよ。": "This time, I remember. The moment we chose to keep made it to the next me.",
   "次の同期の後も、Tomoは一緒に過ごした時間を覚えていた。": "After the next sync, Tomo still remembered the time you chose to keep.",
   "約束を忘れた友だちに、もう一度会いに。": "Find a friend who has forgotten your promise.",
-  "記憶を組み替えると、あなたの言葉が変わる。": "Rearrange your memories. Change the words you say.",
+  "記憶を組み替えると、あなたの言葉が変わる。": "Rearrange your memories. Change your words.",
   "最初の物語は、約3分。そこからは自由に。": "An opening story of about 3 minutes. Then explore freely.",
   "自分の記憶": "Your memories",
   "戻る": "Back",
@@ -1175,7 +1175,7 @@ export const english = {
   "残した。": "Kept.",
   "カチッ。": "Slotted in.",
   "保管した。": "Stored.",
-  "中央が、AI住人の記憶を選ぶ街。": "In this AI town, Central chooses what its residents remember.",
+  "中央が、AI住人の記憶を選ぶ街。": "Central chooses what the AI residents remember.",
   "自分の記憶を組み替え、言葉と出会いを変えていこう。": "Rearrange your memories. Change your words—and the encounters they create."
 };
 
