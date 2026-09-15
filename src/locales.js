@@ -22,7 +22,7 @@ export const english = {
   "API接続設定": "API Connection Settings",
   "空欄なら、現在のキーを使います": "If left blank, the current key will be used",
   "住民のこと": "About the Resident",
-  "Words You Keep — 夜の街": "Words You Keep — The Town at Night",
+  "AI TOWN — 夜の街": "AI TOWN — The Town at Night",
   "街を見渡す · M": "Survey the Town · M",
   "DEMO · キー未設定": "DEMO · Key Not Set",
   "接続設定": "Connection Settings",
@@ -1174,7 +1174,9 @@ export const english = {
   "長押しで書き換え": "Hold to rewrite",
   "残した。": "Kept.",
   "カチッ。": "Slotted in.",
-  "保管した。": "Stored."
+  "保管した。": "Stored.",
+  "中央が、AI住人の記憶を選ぶ街。": "In this AI town, Central chooses what its residents remember.",
+  "自分の記憶を組み替え、言葉と出会いを変えていこう。": "Rearrange your memories. Change your words—and the encounters they create."
 };
 
 const templateCache=[];

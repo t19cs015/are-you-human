@@ -1,4 +1,4 @@
-# Words You Keep — Hackathon Submission
+# AI TOWN — Hackathon Submission
 
 [One-minute English demo · v9](https://github.com/user-attachments/assets/7579595f-eb28-4ede-bc77-58cb868f7f98) · [Code repository](https://github.com/t19cs015/are-you-human) · [Setup and screenshots](../README.md)
 
@@ -6,17 +6,19 @@ Copy the answer beneath each numbered heading into the corresponding form field.
 
 ## 1. Project description
 
-Words You Keep turns memory into something you can pick up, rearrange, and speak through. It is a first-person game for people who enjoy cozy exploration, expressive characters, and discovering how a world responds to their experiments.
+AI TOWN is a first-person game about joining a miniature society of AI residents. It is for players who enjoy expressive characters, cozy exploration, and discovering how their experiments change an encounter.
 
-You wake inside a small robot body in a town managed by Central. Its residents receive their active memories through synchronization. Your own memories are yours to arrange: drag cartridges into three slots, change their order, or rewrite them in ordinary language. Those memories shape what your body says. Each resident then decides how to respond and where to go.
+Central keeps the town running by selecting the active memories its residents receive at each synchronization. Work continues, but a personal promise can disappear from someone's current context.
 
-The opening gives this system an immediate purpose: Tomo has forgotten a promise you still remember. Make a new invitation, spend time together, and help a shared experience survive the next synchronization.
+You inhabit a similar robot body, with one crucial freedom: you choose your own memories. Drag cartridges into three slots, rearrange their priorities, or rewrite them in ordinary language. OpenAI turns those memories into your character's words. Each resident independently decides how to respond and where to go.
 
-Beyond the square are windmills, waterwheels, musical objects, lantern boats, and houses waiting in the mist. Small discoveries become memories you can carry into the next conversation. Expressive robots and a warm miniature town give a quietly unsettling question a playful form: which experiences deserve a place in tomorrow?
+The opening makes the stakes personal: Tomo forgets your promise. Invite him again, spend time together, and try carrying that shared experience into the next synchronization.
+
+Beyond this first encounter, explore windmills, waterways, musical objects, and a city with houses waiting in the mist. Discoveries become memories for new conversations. Under the town's warm appearance is a playable question: who decides what tomorrow remembers?
 
 ## 2. Meaningful use of OpenAI tools — 30%
 
-OpenAI models drive the connection between memory, speech, and action. The Responses API, configured with gpt-5.6-luna, first turns selected, ordered memories into the player's utterance. A separate call gives the resident that utterance and its own current context to choose a reply and action. Unspoken player memories stay outside the resident's input; structured outputs and server validation connect decisions to real movement and sharing.
+OpenAI models make AI TOWN's memory system playable. The Responses API, configured with gpt-5.6-luna, first turns selected, ordered memories into the player's utterance. A separate call gives the resident that utterance and its own current context to choose a reply and action. Unspoken player memories stay outside the resident's input; structured outputs and server validation connect decisions to real movement and sharing.
 
 Text-to-speech with gpt-4o-mini-tts makes the effect audible: change a memory, then hear the words it produces. Central's holographic presence uses gpt-realtime-mini over WebRTC, with tools to inspect the town and pause or resume modernization. In the community-building mode, gpt-image-2.5-flare turns an agreed public proposal into a sketch displayed in the town while residents build with authored 3D components.
 
@@ -24,7 +26,7 @@ We used Codex with gpt-6-astra to develop interactively: discuss an idea, turn i
 
 ## 3. Originality — 25%
 
-The central interaction is editing the context from which your character speaks. A promise, a passing impression, or a sentence you invent becomes a physical cartridge. Moving it to the first slot changes its influence on your next encounter.
+AI TOWN makes AI context a physical game mechanic. A promise, a passing impression, or a sentence you invent becomes a cartridge inside your robot body. Moving it to the first slot changes its influence on your next encounter.
 
 This creates a different kind of dialogue puzzle: form a hypothesis about your memories, hear the resulting invitation, and discover what another character chooses. Rewriting your recollection changes your perspective; the actual event record remains intact. Residents encounter your words through their own limited memories, and can accept an invitation, listen, return to work, or choose a detour.
 
@@ -34,9 +36,9 @@ The concept emerged through playable conversations with Codex, moving from obser
 
 ## 4. Playability / Utility — 25%
 
-The current build has a playable opening chapter with a clear emotional goal: reconnect with a friend who has forgotten your promise, then carry a shared experience forward. Players can start exploring immediately and return to memory experiments at their own pace.
+The opening is designed for a short first visit: reconnect with a friend who has forgotten your promise, then help a shared experience survive an update. A three-part guide shows one next action, with a direction marker and highlighted memory blocks. Players can also explore freely.
 
-Mouse look, walking, jogging, and a short dash support first-person exploration. E handles nearby interactions; Q opens the memory drawer. Cartridges support dragging, swapping, and natural-language editing, with click and keyboard alternatives. Once memories are equipped, talking does not require typing a new sentence every time.
+Mouse look, walking, jogging, and a short dash support exploration. E handles nearby interactions; Q opens the memory drawer. Large text, short instructions, and tactile cartridges support dragging, swapping, and natural-language editing, with click and keyboard alternatives. Once memories are equipped, talking does not require typing a new sentence every time.
 
 Four residents inhabit six connected districts with 39 interaction points and nine collectible memory types. Turn a waterwheel, launch a lantern boat, play a musical object, or invite someone to join a detour. Sound, movement, dialogue, and changing lights make consequences visible.
 
@@ -81,6 +83,7 @@ These references document the scope of the claims above. Verification date: Sept
 
 ### Production and scope notes
 
+- The linked GitHub recording retains the previous title card. The retitled **AI TOWN** master is ready locally at `exports/ai-town-demo-v9.mp4`, with the same 60-second sequence and original audio.
 - The team identifies the Codex development model as **gpt-6-astra**. This is the team's development-session attribution: source files and Git commits document the work, but do not independently record which model performed each historical action. The runtime dialogue model is separately configured as **gpt-5.6-luna**.
 - The Codex workflow covered the demo's complete production pipeline using the listed tools, models, and incorporated assets. We developed the concept through successive playable prototypes and refined the film through visual and audio review. Custom modeling scripts and imported CC0 assets are documented separately in the repository.
 - The v9 video is an edited in-engine demonstration. Its preparation accepts a recorded live invitation that leads to the filmed meeting; it does not establish that every prompt produces that outcome. The opening, camera cuts, skyline timing, and some dialogue are authored. Realtime microphone conversation and runtime image generation are implemented elsewhere in the game and are not demonstrated in this take.

@@ -1,8 +1,9 @@
 import {execFileSync,spawnSync} from 'node:child_process';
-import {readFile,writeFile,mkdir} from 'node:fs/promises';
+import {writeFile,mkdir} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
+import {retitleV9} from './retitle-demo-v9.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url)),dir=root+'data/film-v9/',out=root+'exports/';await mkdir(out,{recursive:true});
-const file=out+'words-you-keep-demo-v9.mp4';
+const file=out+'ai-town-demo-v9.mp4';
 const measure=spawnSync('ffmpeg',['-hide_banner','-i',dir+'master.wav','-af','loudnorm=I=-16:TP=-1.0:LRA=16:print_format=json','-f','null','-'],{encoding:'utf8'});
 if(measure.status!==0)throw new Error('Loudness analysis failed');
 const loudness=JSON.parse(measure.stderr.match(/\{[^{}]+\}/s)[0]);
@@ -10,12 +11,6 @@ const norm=`loudnorm=I=-16:TP=-1.0:LRA=16:measured_I=${loudness.input_i}:measure
 const normalized=spawnSync('ffmpeg',['-y','-hide_banner','-i',dir+'master.wav','-af',norm,'-ar','48000','-ac','2',dir+'master-normalized.wav'],{encoding:'utf8'});
 if(normalized.status!==0)throw new Error('Loudness normalization failed');
 await writeFile(dir+'loudness.json',JSON.stringify({analysis:loudness,master:JSON.parse(normalized.stderr.match(/\{[^{}]+\}/s)[0])},null,2));
-execFileSync('ffmpeg',['-y','-v','error','-i',dir+'picture.mp4','-i',dir+'master-normalized.wav','-map','0:v:0','-map','1:a:0','-c:v','copy','-c:a','aac','-b:a','256k','-ar','48000','-t','60','-movflags','+faststart','-metadata','title=Words You Keep — Demo v9','-metadata','comment=First-person in-engine demo. Actual memory drawer interactions and live OpenAI memory-to-speech decisions replayed through game rules. Navigation and time condensed. English AI-generated voices; original music.',file]);
-const p=JSON.parse(execFileSync('ffprobe',['-v','error','-show_format','-show_streams','-of','json',file],{encoding:'utf8'})),v=p.streams.find(s=>s.codec_type==='video'),a=p.streams.find(s=>s.codec_type==='audio');
-if(Math.abs(Number(p.format.duration)-60)>.04||v.width!==1920||v.height!==1080||v.nb_frames!=='1800'||a.channels!==2)throw new Error('V9 format validation failed');
-execFileSync('ffmpeg',['-v','error','-i',file,'-f','null','-'],{stdio:'pipe'});
-await writeFile(dir+'specs.json',JSON.stringify({duration:Number(p.format.duration),width:v.width,height:v.height,frames:Number(v.nb_frames),fps:v.avg_frame_rate,videoCodec:v.codec_name,audioCodec:a.codec_name,channels:a.channels,bytes:Number(p.format.size),fullDecodePassed:true},null,2));
-const manifest=JSON.parse(await readFile(dir+'audio-manifest.json','utf8')),stamp=t=>new Date(t*1000).toISOString().slice(11,23).replace('.',',');
-await writeFile(out+'words-you-keep-demo-v9.srt',manifest.clips.filter(c=>!c.crowd).map((c,i)=>`${i+1}\n${stamp(c.start)} --> ${stamp(Math.min(c.end,c.start+(c.renderedDuration??c.duration/c.tempo)))}\n${c.text}\n`).join('\n'));
-await writeFile(out+'demo-v9-narration.md','# Words You Keep — Demo v9\n\n60 seconds · English · first person\n\n'+manifest.clips.map(c=>`**${c.start.toFixed(2)}–${c.end.toFixed(2)}s · ${c.who}${c.crowd?' · overlapping crowd':''}**\n\n${c.text}`).join('\n\n')+'\n');
+execFileSync('ffmpeg',['-y','-v','error','-i',dir+'picture.mp4','-i',dir+'master-normalized.wav','-map','0:v:0','-map','1:a:0','-c:v','copy','-c:a','aac','-b:a','256k','-ar','48000','-t','60','-movflags','+faststart',dir+'before-title.mp4']);
+await retitleV9(dir+'before-title.mp4',file);
 console.log('Verified: 60 seconds · 1920×1080 · 30 fps · H.264 + stereo AAC · full decode passed.');console.log(file);

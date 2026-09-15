@@ -133,8 +133,8 @@ function overlay(t){
   if(c&&t<56.2){const who=c.who==='NARRATOR'?'':c.who;ctx.font='38px Arial';const wide=Math.min(1540,ctx.measureText(c.text).width+100),two=ctx.measureText(c.text).width>1460;panel((W-wide)/2,two?925:952,wide,two?127:82,'#112b38e8',18);if(who)text(who,W/2,(two?925:952)-16,19,gold,'Arial','center');wrap(c.text,W/2,two?970:1003,1460,38,47);}
   if(t>=56){
     const a=smooth((t-56)/.65);ctx.fillStyle=`rgba(18,39,47,${a*.97})`;ctx.fillRect(0,0,W,H);ctx.save();ctx.globalAlpha=a;
-    text('WORDS',960,430,100,ink,'Georgia','center');text('YOU KEEP',960,557,122,gold,'Georgia','center');
-    text('A little town. The memories you make.',960,662,30,mint,'Arial','center');
+    text('AI',960,430,100,ink,'Georgia','center');text('TOWN',960,557,122,gold,'Georgia','center');
+    text('A living AI town. Memories you can rewrite.',960,662,30,mint,'Arial','center');
     text('Created by Haruna & Ilya',960,816,21,ink,'Arial','center');
     text('OpenAI-powered voices & resident decisions',960,852,20,mint,'Arial','center');
     text('In-engine demo · recorded AI decisions · AI-generated voices',960,1029,17,'#a4bdb9','Arial','center');ctx.restore();

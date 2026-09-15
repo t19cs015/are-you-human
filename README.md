@@ -1,12 +1,16 @@
-# Words You Keep
+# AI TOWN
 
 https://github.com/user-attachments/assets/7579595f-eb28-4ede-bc77-58cb868f7f98
 
 **Demo v9 · 60 seconds · English voices & captions**
 
-[GIF preview (no audio)](docs/media/words-you-keep-demo-v9.gif)
+**A living AI town. Memories you can rewrite.**
 
-Rearrange your memories, find your own words, and shape the future of a small AI town. Words You Keep carries forward Haruna's charming residents and the warmth of a town at night.
+In **AI TOWN**, Central keeps a miniature town running by choosing the memories its AI residents receive at each synchronization. The lights return, work continues—and a friend may forget a promise you made moments ago.
+
+You inhabit a similar robot body, but choose your own memories. Drag memory blocks into place or rewrite them in ordinary language, then hear them become your character's words. Each resident decides how to respond: join you, share an experience, or return to work. Explore windmills, waterways, and the city beyond Central, and help the moments you make together survive the next update. A warm, playful town hides an unsettling question: who decides what tomorrow remembers?
+
+[GIF preview (no audio)](docs/media/ai-town-demo-v9.gif)
 
 The playable game and demo production files are maintained together on `main`.
 
@@ -162,7 +166,7 @@ District ground and road shapes are combined using polygon unions to eliminate f
 
 ## One-minute English demo
 
-[Words You Keep — Demo v9](https://github.com/user-attachments/assets/7579595f-eb28-4ede-bc77-58cb868f7f98) plays at the top of this README with English voices, captions, and music. It shows memory editing, the resulting changes in your words, and residents' choices spreading through the town. The README version is 720p at 30 fps, with the original audio preserved. The 1080p master is kept locally at `exports/words-you-keep-demo-v9.mp4`. See [v9 production files](art/demo-v9/README.md).
+[Demo v9](https://github.com/user-attachments/assets/7579595f-eb28-4ede-bc77-58cb868f7f98) plays at the top of this README with English voices, captions, and music. It shows memory editing, the resulting changes in your words, and residents' choices spreading through the town. The embedded 720p recording retains the previous title card. The retitled **AI TOWN** 1080p master is kept locally at `exports/ai-town-demo-v9.mp4`, with its original audio preserved. See [v9 production files](art/demo-v9/README.md).
 
 The earlier town-building demo, under the former title, is `exports/are-you-human-demo-v3.mp4`: a 60-second, 1080p film with English voices, captions, and music. It stays in first person, opens with residents turning and murmuring, shows six building families growing in an eight-second time-lapse, and follows residents cooperating on an open-ended proposal. The player character is not shown. The opening and growth sequences are staged with game assets; cooperation replays the first demo's real API decisions and game progression from a first-person camera. Version 2 is also preserved. See [the earlier production files](art/timelapse/README.md).
 

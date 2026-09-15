@@ -288,7 +288,7 @@ $('journal-button').onclick=async()=>{
  for(const event of [...(state.changes||[])].reverse().slice(0,12)){
   const row=document.createElement('p');row.textContent=`#${event.step} ${getNPC(event.observer)?.name} → ${event.target==='player'?'あなた':getNPC(event.target)?.name}：${event.reason}`;$('journal-content').append(row);
  }
- const save=document.createElement('button');save.textContent='観察記録を保存';save.onclick=()=>{const blob=new Blob([JSON.stringify({version:state.version,agents:state.agents,changes:state.changes,events:state.events},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='words-you-keep-observation.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};$('journal-content').append(save);
+ const save=document.createElement('button');save.textContent='観察記録を保存';save.onclick=()=>{const blob=new Blob([JSON.stringify({version:state.version,agents:state.agents,changes:state.changes,events:state.events},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='ai-town-observation.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};$('journal-content').append(save);
 
  if(version==='4.2'&&mode==='play'){const b=document.createElement('button');b.textContent='街の更新イベントを試す';b.onclick=()=>{setModal('journal',false);systemUpdate();};$('journal-content').append(b);}
  }catch(e){$('journal-content').textContent=apiError(e);}

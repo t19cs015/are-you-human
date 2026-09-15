@@ -121,4 +121,4 @@ export function createServer({fetcher=fetch,apiKey=defaults.key,model=defaults.m
  server.on('close',()=>{for(const s of sessions.values())endCentralVoice(s,null,fetcher).catch(()=>{});});
  return server;
 }
-if(process.argv[1]===fileURLToPath(import.meta.url))createServer({saveDirectory:root+'data/sessions'}).listen(Number(process.env.PORT)||4173,'127.0.0.1',()=>console.log('WORDS YOU KEEP → http://127.0.0.1:'+(process.env.PORT||4173)));
+if(process.argv[1]===fileURLToPath(import.meta.url))createServer({saveDirectory:root+'data/sessions'}).listen(Number(process.env.PORT)||4173,'127.0.0.1',()=>console.log('AI TOWN → http://127.0.0.1:'+(process.env.PORT||4173)));

@@ -7,7 +7,7 @@ import {join} from 'node:path';
 import {once} from 'node:events';
 import {fileURLToPath} from 'node:url';
 const build=fileURLToPath(new URL('../data/film-v9/',import.meta.url));await mkdir(build,{recursive:true});
-const riverOnly=process.argv.includes('--river'),preview=process.argv.includes('--preview')||riverOnly,profile=await mkdtemp(join(tmpdir(),'wyk-v9-chrome-'));
+const riverOnly=process.argv.includes('--river'),preview=process.argv.includes('--preview')||riverOnly,profile=await mkdtemp(join(tmpdir(),'ai-town-v9-chrome-'));
 const chrome=spawn('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',['--headless=new','--no-first-run','--no-default-browser-check','--disable-background-timer-throttling','--disable-renderer-backgrounding','--disable-backgrounding-occluded-windows','--hide-scrollbars','--remote-debugging-port=9236','--window-size=1920,1080','--force-device-scale-factor=1','--user-data-dir='+profile,'about:blank'],{stdio:'ignore'});
 let socket,encoder,seq=0,waiting=new Map(),errors=[],audit=[],completed=false;
 const pause=ms=>new Promise(r=>setTimeout(r,ms));

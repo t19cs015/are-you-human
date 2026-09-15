@@ -1,4 +1,4 @@
-# Words You Keep — v9
+# AI TOWN — v9
 
 Standalone English MP4, 60 seconds, 1920 × 1080, 30 fps. The camera stays at the visitor's eye height throughout. The visitor is never identified as human. The final question addresses the viewer.
 
@@ -6,7 +6,9 @@ The film opens with Haruna's residents noticing a newcomer. Quick interactions t
 
 ## v9 title
 
-The game is now **Words You Keep**. The closing card, production-page title, script heading, MP4 metadata, and output filenames use this name. The two-line closing card reads “WORDS / YOU KEEP” in the existing cream and warm-gold palette. All sixteen spoken performances and their timing are carried forward from v8; none speaks the former title.
+The game is now **AI TOWN**. The closing card, production-page title, script heading, MP4 metadata, and output filenames use this name. The two-line closing card reads “AI / TOWN” in the existing cream and warm-gold palette, followed by “A living AI town. Memories you can rewrite.” All sixteen spoken performances and their timing are carried forward from v8; none speaks a project title.
+
+This title edition retains the recorded v9 sequence, fading the final town shot to the closing-card background at 55.7–56 seconds. `scripts/retitle-demo-v9.mjs` brings in the new title at 56 seconds. The original stereo AAC packets are copied and verified by hash; voices are not regenerated. The retitle step also runs during normal final assembly, so an earlier cached picture cannot accidentally export an old closing title.
 
 The completed v8 MP4 is preserved at `exports/are-you-human-demo-v8.mp4`.
 
@@ -28,13 +30,13 @@ These motion, waterline, skyline, and boundary-light improvements are shared wit
 
 ## Output
 
-- `exports/words-you-keep-demo-v9.mp4`
-- `exports/words-you-keep-demo-v9-readme.mp4` — a 720p preview below GitHub’s 10 MB attachment limit, with the original audio.
-- `exports/words-you-keep-demo-v9.srt`
+- `exports/ai-town-demo-v9.mp4`
+- `exports/ai-town-demo-v9-readme.mp4` — a 720p preview below GitHub’s 10 MB attachment limit, with the original audio.
+- `exports/ai-town-demo-v9.srt`
 - `exports/demo-v9-narration.md`
-- [`docs/media/words-you-keep-demo-v9.gif`](../../docs/media/words-you-keep-demo-v9.gif) — the full 60-second film as a silent, looping README preview.
+- [`docs/media/ai-town-demo-v9.gif`](../../docs/media/ai-town-demo-v9.gif) — the full 60-second film as a silent, looping README preview.
 
-The studio HTML is a local production tool. The repository README embeds the voiced MP4 preview directly below the title and links to the silent GIF. The original 1080p MP4 is preserved locally.
+The studio HTML is a local production tool. The repository README embeds the earlier voiced MP4 attachment directly below the title and links to the retitled silent GIF. Both the retitled 1080p MP4 and the 720p upload copy are ready locally; the existing GitHub video attachment retains the previous title card.
 
 ## Reproduce
 
@@ -54,6 +56,14 @@ node scripts/verify-demo-v9.mjs
 ```
 
 Requires the installed Google Chrome, FFmpeg, Python with NumPy, Three.js dependencies, and the existing server OpenAI configuration. The renderer starts its own disposable headless Chrome profile on port 9236; the production server uses port 4180. It never controls the user's open browser or reads the user's game save. Build products and voice caches live in ignored `data/film-v9/`; exports are also ignored.
+
+To create the current title edition from an already completed v9 master, without regenerating the recorded sequence or speech:
+
+```sh
+node scripts/retitle-demo-v9.mjs /path/to/previous-demo.mp4
+```
+
+The existing `data/film-v9/audio-manifest.json` supplies the matching subtitles and narration text. The title audit and export specifications are saved alongside the production files.
 
 ## What was recorded, and what was staged
 

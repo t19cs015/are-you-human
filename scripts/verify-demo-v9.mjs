@@ -8,7 +8,7 @@ const replay=JSON.parse(await readFile(dir+'replay.json','utf8'));
 if(replay.decision.mode!=='live'||replay.decision.action!=='meet'||!replay.states.restored.memoryGame.exploration.borderShared)throw new Error('The recorded game outcome is incomplete');
 const expected=manifest.clips.filter(c=>c.start>=6.5).map(c=>c.text).join(' ');
 if(/[\u3040-\u30ff\u3400-\u9fff]/.test(expected))throw new Error('Non-English dialogue in the mix');
-let source=dir+'master.wav';try{await access(root+'exports/words-you-keep-demo-v9.mp4');source=root+'exports/words-you-keep-demo-v9.mp4';}catch{}
+let source=dir+'master.wav';try{await access(root+'exports/ai-town-demo-v9.mp4');source=root+'exports/ai-town-demo-v9.mp4';}catch{}
 execFileSync('ffmpeg',['-y','-v','error','-ss','6.5','-i',source,'-t','53.5','-ac','1',dir+'verification.wav']);
 const form=new FormData();form.set('model','gpt-4o-mini-transcribe');form.set('language','en');form.set('file',new File([await readFile(dir+'verification.wav')],'demo-v9.wav',{type:'audio/wav'}));
 const r=await fetch('https://api.openai.com/v1/audio/transcriptions',{method:'POST',headers:{Authorization:'Bearer '+defaults.key},body:form,signal:AbortSignal.timeout(60000)});
