@@ -134,6 +134,8 @@ Larger memory stores do not guarantee perfect recall. Model capability and memor
 
 ## Verification and design notes
 
+The [hackathon submission](docs/HACKATHON_SUBMISSION.md) includes six English form responses, each under 200 words, with implementation references and asset credits.
+
 Run `npm test` for checks that do not require live API calls. They cover memory isolation, corrections, retrieval, save restoration, creative project transitions, holds, feedback recipients, and HTTP boundaries.
 
 Development references include [town observation and intervention](docs/CITY_OBSERVATION_PLAN.md), [the social and memory system plan](docs/SOCIETY_IMPLEMENTATION_PLAN.md), and [the original project brief](ARE_YOU_HUMAN_Astra_Initial_Prompt.txt). Some linked development notes are in Japanese.
