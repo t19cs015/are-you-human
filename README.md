@@ -1,8 +1,10 @@
 # Words You Keep
 
-![Words You Keep demo v9: meet the residents, rearrange memory blocks, and watch your words change the town.](docs/media/words-you-keep-demo-v9.gif)
+https://github.com/user-attachments/assets/7579595f-eb28-4ede-bc77-58cb868f7f98
 
-**Demo v9 · 60-second GIF · English captions**
+**Demo v9 · 60 seconds · English voices & captions**
+
+[GIF preview (no audio)](docs/media/words-you-keep-demo-v9.gif)
 
 記憶を組み替え、自分の言葉で住民と関わり、街の未来を変えていく。陽菜（Haruna）が用意した住民モデルと、暖かい夜の街の雰囲気を引き継いでいます。
 
@@ -110,7 +112,7 @@ Mia・Ren・Tomo・Shellを、それぞれ異なる外装・アクセサリー�
 
 ## 英語の1分デモ動画
 
-最新版は冒頭の [Words You Keep — Demo v9（GIF）](docs/media/words-you-keep-demo-v9.gif)。60秒の全編を字幕付き・音声なしでループ再生します。記憶を組み替え、自分の言葉が変わり、住民の選択が街へ広がる体験を収録しています。英語音声・字幕・音楽付きの1080p MP4はローカルの `exports/words-you-keep-demo-v9.mp4` に保存しています。[v9の制作ファイル](art/demo-v9/README.md)。
+最新版は [Words You Keep — Demo v9](https://github.com/user-attachments/assets/7579595f-eb28-4ede-bc77-58cb868f7f98)。英語音声・字幕・音楽付きの60秒デモを、冒頭で再生できます。README用は720p・30fps、音声は元のMP4と同一です。記憶を組み替え、自分の言葉が変わり、住民の選択が街へ広がる体験を収録しています。1080pの元動画はローカルの `exports/words-you-keep-demo-v9.mp4` に保存しています。[v9の制作ファイル](art/demo-v9/README.md)。
 
 旧タイトルの街づくりデモは `exports/are-you-human-demo-v3.mp4`。英語音声・字幕・音楽付き、60秒・1080p。全編を人間の目線に統一し、住民が振り返って声を重ねる冒頭、6系統の建物が増える8秒のタイムラプス、自由な提案から住民が協力して行動する場面を収録。主人公のモデルは表示しません。冒頭と街の成長はゲーム内アセットを使った演出、協力場面はver1の実API判断とゲーム進行の記録を一人称で再描画したものです。制作手順と台本は [動画の制作ファイル](art/timelapse/README.md)。ver2のMP4も残しています。
 

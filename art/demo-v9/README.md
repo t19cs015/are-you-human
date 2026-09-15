@@ -29,11 +29,12 @@ These motion, waterline, skyline, and boundary-light improvements are shared wit
 ## Output
 
 - `exports/words-you-keep-demo-v9.mp4`
+- `exports/words-you-keep-demo-v9-readme.mp4` — a 720p preview below GitHub’s 10 MB attachment limit, with the original audio.
 - `exports/words-you-keep-demo-v9.srt`
 - `exports/demo-v9-narration.md`
 - [`docs/media/words-you-keep-demo-v9.gif`](../../docs/media/words-you-keep-demo-v9.gif) — the full 60-second film as a silent, looping README preview.
 
-The studio HTML is a local production tool. The repository README displays the GIF preview directly below the title; the original MP4 retains its English voices and score.
+The studio HTML is a local production tool. The repository README embeds the voiced MP4 preview directly below the title and links to the silent GIF. The original 1080p MP4 is preserved locally.
 
 ## Reproduce
 
