@@ -1,10 +1,14 @@
-# Are You Human? — 夜の街
+# Words You Keep
+
+![Words You Keep demo v9: meet the residents, rearrange memory blocks, and watch your words change the town.](docs/media/words-you-keep-demo-v9.gif)
+
+**Demo v9 · 60-second GIF · English captions**
+
+記憶を組み替え、自分の言葉で住民と関わり、街の未来を変えていく。陽菜（Haruna）が用意した住民モデルと、暖かい夜の街の雰囲気を引き継いでいます。
+
+デモに対応する最新のゲームと制作ファイルは [`ilya` ブランチ](https://github.com/t19cs015/are-you-human/tree/ilya) にあります。
 
 Three.js と Node.js（20.12以降）のローカルプロトタイプ。`npm install`、`npm start` で http://127.0.0.1:4173/ を開く。
-
-![Are You Human?のタイトル画面。夜の街を俯瞰し、「ここは、AIたちの街。そして、あなただけが人間。」と表示される](docs/images/title-screen.png)
-
-原型のタイトル画面。陽菜が用意した住民モデルと、暖かい夜の街の雰囲気を引き継いでいます。
 
 ## 遊び方
 
