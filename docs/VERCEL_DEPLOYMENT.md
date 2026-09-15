@@ -42,18 +42,22 @@ Local `npm start` continues to use `data/sessions/` and needs no Redis connectio
 
 Hosted players cannot change API keys or models, restore a different connection, or reset the usage allowance through the settings endpoint. Graphics and mouse settings remain available. Cross-site API calls are rejected, request bodies are size-limited, and provider errors do not reveal credentials or raw response bodies.
 
-These daily request limits apply to all players together in each environment:
+These daily request limits apply to all players together in each environment. Production overrides give judges and repeat playtests more room for image generation and voice connections:
 
-| Variable | Default |
-| --- | ---: |
-| `AI_TOWN_DAILY_TEXT_LIMIT` | 1,000 Responses requests |
-| `AI_TOWN_DAILY_SPEECH_LIMIT` | 500 speech generations |
-| `AI_TOWN_DAILY_IMAGE_LIMIT` | 12 image generations |
-| `AI_TOWN_DAILY_VOICE_LIMIT` | 30 Realtime calls |
+| Variable | Default | Current production |
+| --- | ---: | ---: |
+| `AI_TOWN_DAILY_TEXT_LIMIT` | 1,000 Responses requests | 1,000 |
+| `AI_TOWN_DAILY_SPEECH_LIMIT` | 500 speech generations | 500 |
+| `AI_TOWN_DAILY_IMAGE_LIMIT` | 12 image generations | 50 |
+| `AI_TOWN_DAILY_VOICE_LIMIT` | 30 Realtime calls | 100 |
 
-Set a limit to `0` to disable that live feature. The limits count attempts, including failed provider requests. Existing per-session limits also apply; starting a new night does not reset them. New sessions are limited to 20 per IP per hour and 100 total per hour. These are request limits, not a dollar spending cap. An API key that stays private can still incur usage through a public game URL, so share the playtest URL with the intended participants and adjust these limits as needed.
+The daily allowance resets at 00:00 UTC (09:00 Japan time). Set a limit to `0` to disable that live feature. The limits count attempts, including failed provider requests. Redeploy after changing a production override.
 
-Realtime audio connects directly between the browser and OpenAI over WebRTC. Vercel exchanges SDP on the server without returning a project key or an ephemeral API token. Hosted calls last up to **four minutes**; a bounded `waitUntil` cleanup hangs up the call within the function's five-minute execution limit. Local calls retain their five-minute limit. The browser also closes its microphone and call when the panel closes or the tab is hidden.
+Each saved session also permits 120 text-generation requests, usually enough for 60 memory-based exchanges, and 40 new speech generations (32 in the café episode). Prerecorded and cached audio does not consume a new speech generation. Starting a new night does not reset the text or speech allowance. Each community run permits up to three generated images. Reaching the text limit uses fallback dialogue; it does not end the game.
+
+New sessions are limited to 20 per IP per hour and 100 total per hour. These are request limits, not a dollar spending cap. An API key that stays private can still incur usage through a public game URL, so share the playtest URL with the intended participants and adjust these limits as needed.
+
+Realtime audio connects directly between the browser and OpenAI over WebRTC. Vercel exchanges SDP on the server without returning a project key or an ephemeral API token. Hosted calls last up to **four minutes**; a bounded `waitUntil` cleanup hangs up the call within the function's five-minute execution limit. Players can reconnect afterward; the game itself has no playtime limit. Local calls retain their five-minute limit. The browser also closes its microphone and call when the panel closes or the tab is hidden.
 
 For previews, add credentials only if live AI testing is needed. Keep Vercel's preview deployment protection enabled. A preview without the database connection cannot start a session.
 
