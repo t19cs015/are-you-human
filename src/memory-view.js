@@ -5,17 +5,41 @@ import {language,t} from './language.js';
 
 export function createMemoryView(hooks){
   const root=document.createElement('div');root.id='memory-play';root.hidden=true;
-  root.innerHTML=`<aside id="memory-goal"><small>THE ONE WHO REMEMBERS</small><h2></h2><p></p></aside><button id="memory-open"><span aria-hidden="true">▧</span> 記憶 <kbd>Q</kbd></button><div id="memory-pocket" aria-label="身体に入っている記憶"></div><div id="memory-subtitle" hidden aria-live="polite"><small></small><p></p><button id="memory-quiet" aria-label="この声を止める">×</button></div><p id="memory-wait" role="status" hidden></p><section id="memory-drawer" role="dialog" aria-modal="true" aria-labelledby="memory-title" hidden><button id="memory-close" class="close" aria-label="記憶を閉じて街へ戻る">×</button><small class="memory-eyebrow">YOUR BODY. YOUR MEMORIES.</small><h2 id="memory-title">いま、大切にするもの。</h2><p class="memory-help" id="memory-gesture-hint">つまんで、はめる。ダブルクリック・長押しで、言葉を書く。</p><div id="memory-device"><div class="memory-device-edge" aria-hidden="true"><i></i><span>●</span><i></i></div><div id="memory-slots" aria-label="身体の記憶スロット"></div><div class="memory-device-caption"><span>左ほど、声に強く残る。</span><span aria-hidden="true">● ───── ● ───── ●</span></div></div><div id="memory-tray" role="button" tabindex="0" aria-label="記憶の保管場所。選んだブロックを身体から外す"><small class="memory-tray-label">持っている思い出</small><div id="memory-library"></div><span id="memory-tray-hint">ここへ戻すと、保管できる。</span></div><p id="memory-status" role="status"></p><div class="memory-footnotes"><details class="memory-inspect"><summary>あなたが見たこと</summary><ol id="memory-facts"></ol></details></div><div id="memory-backdrop" hidden><section id="memory-back"><small class="memory-eyebrow">この記憶の、裏側。</small><label for="memory-text" id="memory-selected-title"></label><small id="memory-origin"></small><textarea id="memory-text" maxlength="240" rows="5" spellcheck="false" placeholder="例：誰かと星に変な名前をつけて、笑っていた。もう一度、そんな時間を過ごしたい。" aria-describedby="memory-edit-note"></textarea><p id="memory-edit-note">書き終えたら Enter。外側を触れても、そのまま残ります。</p><small class="memory-back-fine">起きた出来事は残る。変わるのは、身体がどう覚えるか。</small></section></div></section>`;
+  root.innerHTML=`<aside id="memory-goal"><small></small><h2></h2><p></p></aside>
+    <button id="memory-open"><span aria-hidden="true">▧</span> 記憶 <kbd>Q</kbd></button>
+    <div id="memory-pocket" aria-label="身体に入っている記憶"></div>
+    <div id="memory-subtitle" hidden aria-live="polite"><small></small><p></p><button id="memory-quiet" aria-label="この声を止める">×</button></div>
+    <p id="memory-wait" role="status" hidden></p>
+    <section id="memory-drawer" role="dialog" aria-modal="true" aria-labelledby="memory-title" hidden>
+      <button id="memory-close" class="close" aria-label="記憶を閉じて街へ戻る"><span>戻る</span><kbd>Q</kbd></button>
+      <h2 id="memory-title">自分の記憶</h2>
+      <p class="memory-help" id="memory-gesture-hint"></p>
+      <div class="memory-layout"><div id="memory-preview"><small></small><p></p></div><div class="memory-workbench">
+      <div id="memory-device"><div class="memory-device-edge" aria-hidden="true"><i></i><span>●</span><i></i></div><div id="memory-slots" aria-label="身体の記憶スロット"></div></div>
+      <div id="memory-tray" role="button" tabindex="0" aria-label="記憶の保管場所。選んだブロックを身体から外す"><small class="memory-tray-label">持っている思い出</small><div id="memory-library"></div><span id="memory-tray-hint">ここへ戻すと、保管できる。</span></div>
+      </div></div>
+      <p id="memory-status" role="status" hidden></p>
+      <div class="memory-footnotes"><details class="memory-inspect"><summary>記憶のしくみ</summary>
+        <p class="memory-device-caption"><span>左ほど、声に強く残る。</span></p>
+        <p>起きた出来事は残る。変わるのは、身体がどう覚えるか。</p>
+        <p>あなたが見たこと</p><ol id="memory-facts"></ol>
+      </details></div>
+      <div id="memory-backdrop" hidden><section id="memory-back">
+        <small class="memory-eyebrow" hidden>この記憶の、裏側。</small><label for="memory-text" id="memory-selected-title"></label><small id="memory-origin" hidden></small>
+        <textarea id="memory-text" maxlength="240" rows="5" spellcheck="false" placeholder="どんな思い出を、残したい？" aria-describedby="memory-edit-note"></textarea>
+        <p id="memory-edit-note">Enterで残す</p>
+      </section></div>
+    </section>`;
   document.body.append(root);const $=id=>root.querySelector('#memory-'+id);
   root.insertAdjacentHTML('beforeend','<div id="memory-wayfinder" hidden><span aria-hidden="true">↑</span><strong></strong><small></small></div><p id="memory-orient" hidden>WASDで歩く · 画面をクリックしてマウスで見回す</p>');
-  const preview=document.createElement('div');preview.id='memory-preview';preview.innerHTML='<small></small><p></p>';$('device').before(preview);
+  const preview=$('preview');
   const cause=document.createElement('div');cause.id='memory-cause';$('subtitle').prepend(cause);
   $('open').setAttribute('aria-controls','memory-drawer');
   let city=null,enabled=false,seen=0,selected='light',pending=false,editPending=false,revision=0,queue=[],current=null,clip=null,muted=false,voiceStamp=0,talkPartner=null,used=[],lastSignature='',picked=null,drag=null,ignoreClickUntil=0,editId=null;
   let guide=null,editInitial='';
   const speech=new Map();
   function text(el,value){if(el.textContent!==value)el.textContent=value;}
-  function status(text){$('status').textContent=text;}
+  function status(text){$('status').textContent=text;$('status').hidden=!text;}
   async function close(){if($('drawer').hidden)return;if(!await fold())return;cancelDrag();picked=null;$('drawer').hidden=true;status('');hooks.focus();}
   function open(id){if(!enabled)return;hooks.prepare();selected=typeof id==='string'?id:guide?.block||city.memoryGame.equipped[0]||selected;$('drawer').hidden=false;status('');render();$('close').focus();hooks.chime('open');}
   function toggle(){if($('drawer').hidden)open();else close();}
@@ -29,7 +53,7 @@ export function createMemoryView(hooks){
     if($('backdrop').hidden)return true;if(editPending)return false;
     const text=$('text').value.trim(),b=city.memoryGame.blocks.find(b=>b.id===editId);
     if(!text&&b?.text){$('text').setCustomValidity('記憶の言葉を、ひとつ残しておこう。');$('text').reportValidity();return false;}
-    if(b&&editInitial!==text&&!await edit({action:'rewrite',id:editId,text},'あなたの言葉で、覚え直した。')){$('text').setCustomValidity($('status').textContent);$('text').reportValidity();return false;}
+    if(b&&editInitial!==text&&!await edit({action:'rewrite',id:editId,text},'残した。')){$('text').setCustomValidity($('status').textContent);$('text').reportValidity();return false;}
     $('backdrop').hidden=true;editId=null;render();return true;
   }
   async function edit(data,success){
@@ -43,11 +67,11 @@ export function createMemoryView(hooks){
     const m=city.memoryGame,next=[...m.equipped],old=next.indexOf(id);if(old===slot){picked=null;highlight();return;}
     if(old>=0){const swap=next[slot];next[slot]=id;if(swap)next[old]=swap;else next.splice(old,1);}else next[slot]=id;
     picked=null;selected=id;
-    if(await edit({action:'equip',equipped:next.filter(Boolean)},'カチッ。次の言葉は、この記憶から。')){
+    if(await edit({action:'equip',equipped:next.filter(Boolean)},'カチッ。')){
       const b=$('slots').querySelector('[data-id="'+id+'"]');if(!matchMedia('(prefers-reduced-motion: reduce)').matches)b?.animate([{transform:'translateY(-9px) scale(1.04)'},{transform:'translateY(3px) scale(.98)'},{transform:'translateY(0) scale(1)'}],{duration:260,easing:'ease-out'});
     }
   }
-  function store(id){picked=null;return edit({action:'equip',equipped:city.memoryGame.equipped.filter(i=>i!==id)},'この思い出は、ここに置いておこう。');}
+  function store(id){picked=null;return edit({action:'equip',equipped:city.memoryGame.equipped.filter(i=>i!==id)},'保管した。');}
   $('tray').onclick=e=>{if(picked&&!e.target.closest('.memory-block'))store(picked);};
   $('tray').onkeydown=e=>{if(e.target===$('tray')&&['Enter',' '].includes(e.key)&&picked){e.preventDefault();store(picked);}};
   function showPreview(){
@@ -95,12 +119,13 @@ export function createMemoryView(hooks){
     text($('goal').querySelector('small'),guide.part<4?t('小さな約束')+' · '+guide.part+' / 3':t('あなたが残した、ひとつの記憶'));
     text($('goal').querySelector('h2'),t(guide.title));text($('goal').querySelector('p'),t(guide.detail));
     $('goal').dataset.complete=String(guide.part===4);$('open').classList.toggle('suggested',guide.gesture==='equip');
-    text($('gesture-hint'),t(guide.gesture==='equip'?'光っている記憶を、一番左へ。':guide.part<4?'準備できたら Q で戻り、Tomoに E。ダブルクリックで文章も変えられる。':'つまんで、はめる。ダブルクリック・長押しで、言葉を書く。'));
+    const arrange=guide.gesture==='equip'?'光る記憶を一番左へ':guide.id==='invite'||guide.id==='ask-keep'?'Qで街へ戻る':'ドラッグで並べ替え';
+    text($('gesture-hint'),t(arrange)+' · '+t(matchMedia('(pointer: coarse)').matches?'長押しで書き換え':'ダブルクリックで書き換え'));
     if(drag)return;
     $('pocket').replaceChildren();for(const block of selectedMemories(m)){const b=chip(block,true);b.onclick=()=>open(block.id);b.setAttribute('aria-label',block.title+'の記憶を開く');$('pocket').append(b);}
     $('slots').replaceChildren();
     for(let i=0;i<3;i++){
-      const slot=document.createElement('div');slot.className='memory-slot';slot.dataset.memorySlot=i;slot.tabIndex=0;slot.setAttribute('role','button');slot.setAttribute('aria-label',i===0?'いちばん大切な場所に記憶を置く':(i+1)+'番目の場所に記憶を置く');const hint=document.createElement('small');hint.textContent=i===0?'01 · 声の中心':'0'+(i+1);slot.append(hint);
+      const slot=document.createElement('div');slot.className='memory-slot';slot.dataset.memorySlot=i;slot.tabIndex=0;slot.setAttribute('role','button');slot.setAttribute('aria-label',i===0?'いちばん大切な場所に記憶を置く':(i+1)+'番目の場所に記憶を置く');const hint=document.createElement('small');hint.textContent=i===0?'声の中心':'0'+(i+1);slot.append(hint);
       const socket=document.createElement('div');socket.className='memory-socket';socket.setAttribute('aria-hidden','true');socket.innerHTML='<i></i><i></i><i></i>';slot.append(socket);
       const block=m.blocks.find(b=>b.id===m.equipped[i]);if(block){const b=chip(block);wireBlock(b,block);slot.append(b);}
       slot.onclick=e=>{if(picked&&!e.target.closest('.memory-block'))equip(picked,i);};slot.onkeydown=e=>{if(e.target===slot&&['Enter',' '].includes(e.key)&&picked){e.preventDefault();equip(picked,i);}};$('slots').append(slot);

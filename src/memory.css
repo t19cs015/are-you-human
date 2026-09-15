@@ -54,3 +54,78 @@ body:has(#memory-drawer:not([hidden])) .human-nav{visibility:hidden}
   #memory-preview{padding:10px 12px;margin-bottom:12px}#memory-preview>p{font-size:15px;max-height:88px}#memory-preview>small{font-size:12px}
   #memory-drawer .memory-help{font-size:15px}#memory-cause{font-size:12px}#memory-pocket .memory-block.small strong{font-size:12px}
 }
+
+/* Read the selected memory; keep the blocks and the next gesture in view. */
+#memory-drawer{width:min(1040px,calc(100vw - 48px));max-height:calc(100dvh - 40px);padding:28px 30px}
+#memory-drawer>h2{font-size:32px;line-height:1.25;letter-spacing:0;margin:0 120px 12px 0}
+#memory-drawer #memory-close{display:flex;align-items:center;gap:12px;top:23px;right:24px;padding:8px 12px;font-size:19px;color:#eee3ce}
+#memory-close kbd{font:inherit;font-size:17px;color:#c7d4ca;border:1px solid #baccc460;border-radius:6px;padding:2px 6px}
+#memory-drawer .memory-help{font-size:20px;line-height:1.45;margin:0 0 22px;color:#e5ddca}
+.memory-layout{display:grid;grid-template-columns:minmax(220px,1fr) minmax(0,2fr);gap:24px;align-items:start}
+.memory-workbench{min-width:0}
+#memory-preview{padding:18px;margin:0;border-radius:0 16px 16px 0}
+#memory-preview>small{display:block;font-size:20px;line-height:1.35;font-weight:600}
+#memory-preview>p{font-size:22px;line-height:1.5;margin:12px 0 0;max-height:none;overflow:visible}
+#memory-device{padding:8px 14px 16px}
+#memory-slots{gap:12px}
+.memory-slot{min-height:218px;padding:37px 9px 18px}
+.memory-slot>small{font-size:18px;letter-spacing:0;top:9px}
+.memory-slot .memory-block{max-width:178px;height:158px;gap:9px;padding:10px 7px 18px}
+.memory-block strong,.memory-slot .memory-block strong,#memory-library .memory-block strong{font-size:20px;line-height:1.25;letter-spacing:0;overflow-wrap:anywhere}
+.memory-slot .memory-glyph{width:58px;height:56px}.memory-slot .memory-glyph svg{width:51px;height:51px}
+#memory-tray{margin-top:20px;min-height:192px;padding:40px 12px 18px}
+.memory-tray-label{font-size:17px;letter-spacing:0;top:12px;color:#d0dacf}
+#memory-library{gap:18px;min-height:148px}
+#memory-library .memory-block{width:152px;height:148px;gap:8px;padding:10px 8px 18px}
+#memory-library .memory-block .memory-glyph{width:50px;height:48px}#memory-library .memory-glyph svg{width:44px;height:44px}
+#memory-tray-hint{font-size:18px;color:#b9cfc5}
+#memory-status{font-size:18px;min-height:0;line-height:1.4;margin:15px 0 0}
+.memory-footnotes{margin-top:20px;padding-top:12px}
+.memory-inspect summary{font-size:18px;line-height:1.4;color:#c1d0c7}
+.memory-inspect p,#memory-facts{font-size:18px;line-height:1.6;color:#d6dfd0}
+.memory-inspect .memory-device-caption{display:block;padding:0}
+#memory-back{max-width:620px;padding:32px}
+#memory-selected-title{font-size:30px;line-height:1.35;margin:0 0 20px;color:#29474c}
+#memory-text{font-size:24px;line-height:1.55;min-height:230px;padding:17px}
+#memory-edit-note{font-size:19px;margin:18px 0 0;color:#3e6163}
+#memory-drawer:has(#memory-backdrop:not([hidden]))>:not(#memory-backdrop){visibility:hidden}
+#memory-open{font-size:20px}#memory-open kbd{font-size:18px}
+#memory-pocket .memory-block.small strong{font-size:17px}
+#memory-pocket .memory-block.small:not(:first-child){min-width:54px}
+#memory-pocket .memory-block.small:not(:first-child) strong{display:none}
+#memory-goal>small{font-size:14px}#memory-goal h2{font-size:28px}#memory-goal p{font-size:19px}
+#memory-wayfinder strong{font-size:18px}#memory-wayfinder small{font-size:16px}
+#memory-subtitle>small,#memory-cause{font-size:17px}#memory-subtitle p{font-size:23px}
+
+@media(min-width:951px) and (max-height:820px){
+  #memory-drawer{padding:22px 26px}
+  #memory-drawer>h2{font-size:30px;margin-bottom:10px}#memory-drawer .memory-help{margin-bottom:16px;font-size:19px}
+  .memory-layout{gap:20px}.memory-slot{min-height:184px;padding:32px 8px 14px}
+  .memory-slot .memory-block{height:138px;gap:7px;padding:9px 6px 15px}
+  .memory-slot .memory-glyph{width:48px;height:44px}.memory-slot .memory-glyph svg{width:42px;height:42px}
+  #memory-tray{margin-top:17px;min-height:176px;padding-top:35px;padding-bottom:14px}
+  #memory-library{min-height:135px}#memory-library .memory-block{height:135px}
+  .memory-footnotes{margin-top:16px;padding-top:10px}
+}
+@media(max-width:950px){
+  #memory-drawer{width:min(790px,calc(100vw - 32px));right:16px;padding:25px}
+  .memory-layout{grid-template-columns:1fr;gap:20px}
+  #memory-preview{padding:13px 16px}#memory-preview>p{margin-top:7px;max-height:165px;overflow-y:auto}
+  #memory-tray{margin-top:20px}
+}
+@media(max-width:750px){
+  #memory-drawer{left:10px;right:10px;width:auto;padding:22px 14px;max-height:calc(100dvh - 20px)}
+  #memory-drawer>h2{font-size:28px;margin-right:105px}#memory-drawer #memory-close{top:15px;right:12px;font-size:18px;gap:8px}
+  #memory-drawer .memory-help{font-size:18px;margin-bottom:16px}
+  .memory-layout{gap:16px}#memory-preview>small{font-size:18px}#memory-preview>p{font-size:20px;max-height:150px}
+  #memory-device{padding:7px 8px 13px}#memory-slots{gap:7px}
+  .memory-slot{min-height:190px;padding:34px 5px 15px}.memory-slot>small{font-size:16px}
+  .memory-slot .memory-block{height:142px;gap:8px;padding:9px 4px 16px}
+  .memory-block strong,.memory-slot .memory-block strong,#memory-library .memory-block strong{font-size:18px}
+  #memory-tray{padding:39px 9px 17px}#memory-library{gap:16px}#memory-library .memory-block{width:124px;height:142px}
+  #memory-backdrop{padding:12px}#memory-back{padding:23px 18px}#memory-selected-title{font-size:26px}
+  #memory-text{font-size:22px;padding:12px;min-height:210px}#memory-edit-note{font-size:18px}
+  #memory-open{font-size:19px}#memory-pocket .memory-block.small strong{font-size:16px}
+  #memory-goal>small{font-size:13px}#memory-goal h2{font-size:24px}#memory-goal p{font-size:18px}
+  #memory-subtitle p{font-size:20px}
+}

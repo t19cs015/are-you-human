@@ -1160,7 +1160,21 @@ export const english = {
   "次の同期の後も、Tomoは一緒に過ごした時間を覚えていた。": "After the next sync, Tomo still remembered the time you chose to keep.",
   "約束を忘れた友だちに、もう一度会いに。": "Find a friend who has forgotten your promise.",
   "記憶を組み替えると、あなたの言葉が変わる。": "Rearrange your memories. Change the words you say.",
-  "最初の物語は、約3分。そこからは自由に。": "An opening story of about 3 minutes. Then explore freely."
+  "最初の物語は、約3分。そこからは自由に。": "An opening story of about 3 minutes. Then explore freely.",
+  "自分の記憶": "Your memories",
+  "戻る": "Back",
+  "声の中心": "Your voice",
+  "記憶のしくみ": "About memories",
+  "どんな思い出を、残したい？": "What would you like to remember?",
+  "Enterで残す": "Enter to keep",
+  "光る記憶を一番左へ": "Drag the glowing memory left",
+  "Qで街へ戻る": "Q to return to town",
+  "ドラッグで並べ替え": "Drag to rearrange",
+  "ダブルクリックで書き換え": "Double-click to rewrite",
+  "長押しで書き換え": "Hold to rewrite",
+  "残した。": "Kept.",
+  "カチッ。": "Slotted in.",
+  "保管した。": "Stored."
 };
 
 const templateCache=[];
