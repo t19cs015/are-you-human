@@ -25,7 +25,7 @@ export function createCentralVoice({api,position,changed,onVoice}){
     clearTimeout(c.timeout);clearTimeout(c.expiry);clearTimeout(c.disconnected);c.controller.abort();
     c.stream?.getTracks().forEach(t=>t.stop());c.channel?.close();c.peer?.close();output.pause();output.srcObject=null;
     $('central-play').hidden=true;$('central-duration').textContent='';onVoice(false);status(message);controls();
-    closing=closing.catch(()=>{}).then(()=>api('central/stop',{connection:c.connection})).catch(()=>{});
+    closing=closing.catch(()=>{}).then(()=>api('central/stop',{connection:c.connection},{keepalive:true,timeout:10000})).catch(()=>{});
     return closing;
   }
   async function toolsDone(c,response){
@@ -97,8 +97,9 @@ export function createCentralVoice({api,position,changed,onVoice}){
       if(current!==c)return;c.connection=result.connection;
       await peer.setRemoteDescription({type:'answer',sdp:result.sdp});
       if(current!==c)return;
-      c.expiry=setTimeout(()=>{if(current===c)stop('5分たったので会話を終えました。また話しかけられます。');},Math.max(0,result.expiresAt-Date.now()));
-      $('central-duration').textContent=(microphone?'マイク ON':'マイク OFF')+' · 5分で自動終了';
+      const hostedDuration=result.durationMs===240000;
+      c.expiry=setTimeout(()=>{if(current===c)stop(hostedDuration?'4分たったので会話を終えました。また話しかけられます。':'5分たったので会話を終えました。また話しかけられます。');},Math.max(0,result.expiresAt-Date.now()));
+      $('central-duration').textContent=(microphone?'マイク ON':'マイク OFF')+(hostedDuration?' · 4分で自動終了':' · 5分で自動終了');
     }catch(error){if(current===c)stop(explain(error));}
   }
   $('central-start').onclick=()=>start(true);$('central-listen').onclick=()=>start(false);$('central-stop').onclick=()=>stop();

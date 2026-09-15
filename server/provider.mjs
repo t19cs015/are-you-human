@@ -19,6 +19,6 @@ export function createGenerator(config,fetcher=fetch,language='ja'){
    if(options.schema){const parsed=JSON.parse(text);return {data:parsed,text:parsed.text,mode:'live'};}
    if(structured){const parsed=JSON.parse(text);if(typeof parsed.text!=='string'||!parsed.text.trim()||!parsed.assessment)throw new Error('INVALID_DECISION');return {text:parsed.text.slice(0,600),assessment:parsed.assessment,aboutHuman:parsed.aboutHuman,mode:'live'};}
    return {text:text.slice(0,600),mode:'live'};
-  }catch(e){config.retryAfter=Date.now()+30000;return {text:fallback(),mode:'demo',warning:e.message==='HTTP_401'?'キーを確認してください・デモ会話':e.message==='HTTP_429'?'API利用上限・デモ会話':'API接続に失敗・デモ会話'};}
+  }catch(e){config.retryAfter=Date.now()+30000;return {text:fallback(),mode:'demo',warning:e.message==='HTTP_401'?'キーを確認してください・デモ会話':['HTTP_429','API_LIMIT'].includes(e.message)?'API利用上限・デモ会話':'API接続に失敗・デモ会話'};}
  };
 }

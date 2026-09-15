@@ -1,0 +1,13 @@
+.git
+.env
+.env.*
+.vercel
+server/local-config.mjs
+data
+exports
+art
+docs
+tests
+dist
+*.log
+.DS_Store

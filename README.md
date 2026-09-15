@@ -32,7 +32,7 @@ Scenes from the one-minute in-engine demo. Click an image to view it at full siz
 
 ## Run locally
 
-Requires **Node.js 20.12 or later** and a browser with WebGL2 support. The game uses Three.js and a local Node.js server.
+Requires **Node.js 22** and a browser with WebGL2 support. The game uses Three.js and a local Node.js server.
 
 ```sh
 git clone https://github.com/t19cs015/are-you-human.git
@@ -106,6 +106,10 @@ Power, water, and conversation records flow toward Central as the town modernize
 - **About the Resident** shows individual relationships, reasons, and memory counts. Search or page through memories and optionally trigger **SYSTEM UPDATE** from this panel.
 - Continue an existing save with **Continue from a saved town**. Starting a new free town or choosing **Start from the Beginning** resets that town. Retrying an episode creates a separate session, and **Return to Previous Town** takes you back to the earlier free town.
 
+## Deploy on Vercel
+
+The hosted game uses the team’s OpenAI key on the server, so players can start without entering a key. The public build excludes secrets and server files. Upstash Redis preserves each player’s town and enforces shared usage limits across function instances. Follow the [Vercel deployment guide](docs/VERCEL_DEPLOYMENT.md) for the project settings and server environment variables.
+
 ## AI connection and API keys
 
 The configured default for resident dialogue is `gpt-5.6-luna`, with reasoning set to `none` to prioritize response speed. Central uses `gpt-realtime-mini` for live voice conversations, resident speech uses `gpt-4o-mini-tts`, and incoming voice captions use `gpt-4o-mini-transcribe`. See [model documentation](https://developers.openai.com/api/docs/models/gpt-5.6-luna) and [OpenAI pricing](https://developers.openai.com/api/docs/pricing).
@@ -116,7 +120,7 @@ A key entered through the interface stays in server memory for that tab. Changin
 
 Free conversation, greetings, resident-to-resident dialogue, town action selection, and creative decisions make API requests, with a limit of 120 requests per connection configuration. A failed request, a waiting period, or an exhausted limit produces a labeled demo response. Project proposals use structured output and server validation before changing the world. The game does not generate and execute arbitrary HTML or code.
 
-Central's voice connection uses the [unified WebRTC interface](https://developers.openai.com/api/docs/guides/voice-webrtc?api=realtime#connecting-using-the-unified-interface). The server exchanges SDP without exposing the regular API key to the browser. Each tab supports one call of up to five minutes. Voice usage is billed separately from the text request allowance. Ending the call, closing the facility, hiding the tab, or reloading closes the microphone and connection; the server also ends expired calls. If microphone permission is unavailable, use text chat or **Listen to voice · No mic**.
+Central's voice connection uses the [unified WebRTC interface](https://developers.openai.com/api/docs/guides/voice-webrtc?api=realtime#connecting-using-the-unified-interface). The server exchanges SDP without exposing the regular API key to the browser. Each tab supports one call of up to five minutes locally, or four minutes on Vercel. Voice usage is billed separately from the text request allowance. Ending the call, closing the facility, hiding the tab, or reloading closes the microphone and connection; the server also ends expired calls. If microphone permission is unavailable, use text chat or **Listen to voice · No mic**.
 
 Central receives the current resources, facilities, residents' jobs, and delivered records. Residents' secrets and undelivered conversation text are excluded. The server validates the player's distance, the allowed action type, and session ownership before applying a facility action from Central. Call history stays in memory during the call or tab session; voice recordings and Central conversations are not added to game saves or the town's learning records.
 

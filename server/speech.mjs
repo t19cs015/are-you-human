@@ -26,12 +26,17 @@ export async function residentSpeech(s,id,fetcher=fetch){
   if(!last)return {mode:'unavailable'};
   return cachedSpeech(s,id,s.language==='en'?translateText(last.content,'en'):last.content,fetcher);
 }
-async function cachedSpeech(s,by,text,fetcher){
+async function cachedSpeech(s,by,text,fetcher,limit=40){
   if(!s.config.key||typeof text!=='string')return {mode:'unavailable'};
   s.speech??={cache:new Map(),calls:0};const hash=createHash('sha256').update(by+'\n'+text).digest('hex');
+  if(s.media){const saved=await s.media.get('speech:'+hash);if(saved)return JSON.parse(saved);}
   if(!s.speech.cache.has(hash)){
-    if(s.speech.calls>=40)return {mode:'unavailable'};s.speech.calls++;
-    s.speech.cache.set(hash,generateSpeech(s.config.key,by,text.slice(0,800),fetcher).then(bytes=>({url:'data:audio/mpeg;base64,'+bytes.toString('base64'),mode:'generated'})).catch(()=>({mode:'unavailable'})));
+    if(s.speech.calls>=limit)return {mode:'unavailable'};s.speech.calls++;
+    s.speech.cache.set(hash,generateSpeech(s.config.key,by,text.slice(0,800),fetcher).then(async bytes=>{
+      const result={url:'data:audio/mpeg;base64,'+bytes.toString('base64'),mode:'generated'};
+      if(s.media)await s.media.put('speech:'+hash,JSON.stringify(result));
+      return result;
+    }).catch(()=>({mode:'unavailable'})));
     if(s.speech.cache.size>32)s.speech.cache.delete(s.speech.cache.keys().next().value);
   }
   return s.speech.cache.get(hash);
@@ -54,14 +59,5 @@ export async function episodeSpeech(s,id,fetcher=fetch){
   if(s.language!=='en'&&event.clip&&Object.hasOwn(episodeLines,event.clip)&&event.text===episodeLines[event.clip].text){
     try{await access(new URL('../assets/episode/'+event.clip+'.mp3',import.meta.url));return {url:'/assets/episode/'+event.clip+'.mp3',mode:'generated'};}catch{}
   }
-  if(!s.config.key)return {mode:'unavailable'};
-  s.speech??={cache:new Map(),calls:0};
-  const hash=createHash('sha256').update(event.by+'\n'+event.text).digest('hex');
-  if(!s.speech.cache.has(hash)){
-    if(s.speech.calls>=32)return {mode:'unavailable'};s.speech.calls++;
-    const spoken=s.language==='en'?translateText(event.text,'en'):event.text;
-    const request=generateSpeech(s.config.key,event.by,spoken,fetcher).then(bytes=>({url:'data:audio/mpeg;base64,'+bytes.toString('base64'),mode:'generated'})).catch(()=>({mode:'unavailable'}));
-    s.speech.cache.set(hash,request);if(s.speech.cache.size>24)s.speech.cache.delete(s.speech.cache.keys().next().value);
-  }
-  return s.speech.cache.get(hash);
+  return cachedSpeech(s,event.by,s.language==='en'?translateText(event.text,'en'):event.text,fetcher,32);
 }

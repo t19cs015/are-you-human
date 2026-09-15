@@ -1,10 +1,10 @@
 import {loadEnvFile} from 'node:process';
 
 // Node reads .env without replacing values explicitly set by the shell.
-try{loadEnvFile(new URL('../.env',import.meta.url));}catch(error){
+try{if(process.env.VERCEL!=='1')loadEnvFile(new URL('../.env',import.meta.url));}catch(error){
   if(error.code!=='ENOENT')throw new Error('ENV_CONFIG_INVALID');
 }
-const {default:legacyKey}=await import('./local-config.mjs').catch(error=>{
+const {default:legacyKey}=process.env.VERCEL==='1'?{default:''}:await import('./local-config.mjs').catch(error=>{
   if(error.code==='ERR_MODULE_NOT_FOUND')return {default:''};
   throw new Error('LOCAL_CONFIG_INVALID');
 });

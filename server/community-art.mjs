@@ -20,7 +20,9 @@ export async function generateCommunityArt(s,revision,fetcher=fetch,dir=director
       if(typeof base64!=='string'||base64.length>14000000)throw new Error('IMAGE_UNAVAILABLE');
       const bytes=Buffer.from(base64,'base64');if(bytes.length<100||bytes[0]!==255||bytes[1]!==216)throw new Error('IMAGE_UNAVAILABLE');
       if(s.world!==world||s.world.city.community!==c)throw new Error('STALE');
-      const id=randomUUID();await mkdir(dir,{recursive:true});await writeFile(new URL(id+'.jpg',dir),bytes,{mode:0o600});
+      const id=randomUUID();
+      if(s.media)await s.media.put('art:'+id,bytes.toString('base64'));
+      else{await mkdir(dir,{recursive:true});await writeFile(new URL(id+'.jpg',dir),bytes,{mode:0o600});}
       const art={status:'ready',revision,id,title:p.title,model:s.config.imageModel};if(c.project===p)c.art=art;
       const finished=c.completed.find(place=>place.revision===revision);if(finished)finished.artId=id;
       p.artId=id;emitCommunity(s.world,p.lead,'みんなの案、こんな絵になったよ。スケッチに飾っておくね。',{kind:'art',site:p.site});
@@ -36,5 +38,9 @@ export async function generateCommunityArt(s,revision,fetcher=fetch,dir=director
 export async function readCommunityArt(s,id,dir=directory){
   const c=requireCommunity(s.world);
   if(typeof id!=='string'||!/^[a-f0-9-]{36}$/.test(id)||!(c.art?.id===id||c.completed.some(p=>p.artId===id)))throw new Error('INVALID_ACTION');
-  try{return {url:'data:image/jpeg;base64,'+(await readFile(new URL(id+'.jpg',dir))).toString('base64')};}catch{throw new Error('ART_UNAVAILABLE');}
+  try{
+    const base64=s.media?await s.media.get('art:'+id):(await readFile(new URL(id+'.jpg',dir))).toString('base64');
+    if(!base64)throw new Error('ART_UNAVAILABLE');
+    return {url:'data:image/jpeg;base64,'+base64};
+  }catch{throw new Error('ART_UNAVAILABLE');}
 }

@@ -57,7 +57,9 @@ export async function openCentralVoice(s,data,fetcher=fetch){
   if(!s.config.key)throw new Error('KEY_REQUIRED');
   if(typeof data.sdp!=='string'||data.sdp.length>60000||!data.sdp.startsWith('v=0\r\n')||!data.sdp.includes('m=audio')||!data.sdp.includes('m=application'))throw new Error('INVALID_SDP');
   if(s.realtime)throw new Error('REALTIME_BUSY');
-  const lease={connection:randomUUID(),key:s.config.key,controller:new AbortController(),results:new Map(),expiresAt:Date.now()+voiceDuration};
+  // Leave time to hang up within Vercel Hobby's five-minute function limit.
+  const durationMs=s.hosted?4*60*1000:voiceDuration;
+  const lease={connection:randomUUID(),key:s.config.key,controller:new AbortController(),results:new Map(),expiresAt:Date.now()+durationMs};
   s.realtime=lease;
   const fd=new FormData();fd.set('sdp',data.sdp);fd.set('session',JSON.stringify({type:'realtime',model:s.config.realtimeModel,
     instructions:persona(s)+'\n接続時の街の事実: '+JSON.stringify(centralSnapshot(s.world)),
@@ -71,8 +73,12 @@ export async function openCentralVoice(s,data,fetcher=fetch){
     const sdp=await r.text();
     if(s.realtime!==lease){await hangup(lease,fetcher);throw new Error('REALTIME_CLOSED');}
     if(!lease.callId||!sdp.startsWith('v=0'))throw new Error('REALTIME_UNAVAILABLE');
-    lease.timer=setTimeout(()=>{endCentralVoice(s,lease.connection,fetcher).catch(()=>{});},voiceDuration);lease.timer.unref();
-    return {sdp,connection:lease.connection,model:s.config.realtimeModel,expiresAt:lease.expiresAt};
+    const finished=new Promise(resolve=>{lease.finish=resolve;});
+    lease.timer=setTimeout(()=>{endCentralVoice(s,lease.connection,fetcher).catch(()=>{}).finally(lease.finish);},Math.max(0,lease.expiresAt-Date.now()));lease.timer.unref();
+    // Keep only this bounded cleanup alive after the SDP response. No websocket
+    // server or permanent process is required: audio goes directly over WebRTC.
+    if(s.background)s.background(finished);
+    return {sdp,connection:lease.connection,model:s.config.realtimeModel,expiresAt:lease.expiresAt,durationMs};
   }catch(error){if(s.realtime===lease)s.realtime=null;await hangup(lease,fetcher);throw error;}
 }
 async function hangup(lease,fetcher){
@@ -81,7 +87,7 @@ async function hangup(lease,fetcher){
 }
 export async function endCentralVoice(s,connection,fetcher=fetch){
   const lease=s.realtime;if(!lease||connection&&lease.connection!==connection)return {ok:true};
-  s.realtime=null;clearTimeout(lease.timer);lease.controller.abort();await hangup(lease,fetcher);return {ok:true};
+  s.realtime=null;clearTimeout(lease.timer);lease.controller.abort();await hangup(lease,fetcher);lease.finish?.();return {ok:true};
 }
 export function voiceTool(s,data){
   const lease=s.realtime;

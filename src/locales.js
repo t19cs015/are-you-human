@@ -1,5 +1,10 @@
 // Generated bilingual copy: Japanese source text remains the canonical authored version.
 export const english = {
+  "文字だけでも話せます。声はAIが生成します。音声会話には時間制限があり、閉じるとマイクもオフになります。": "You can also talk by text. Voices are AI-generated. Voice calls have a time limit; closing this panel turns off your microphone.",
+  "この街のAIは接続済みです。そのまま遊べます。": "The town’s AI is ready. You can just play.",
+  "今はデモ会話で遊べます。": "You can play with scripted dialogue for now.",
+  "4分たったので会話を終えました。また話しかけられます。": "The four-minute conversation has ended. You can talk again.",
+  " · 4分で自動終了": " · Ends automatically after 4 minutes",
   "一人称で歩くAIの街": "An AI town to explore in first person",
   "移動コントロール": "Movement Controls",
   "前へ歩く": "Walk Forward",

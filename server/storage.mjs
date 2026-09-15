@@ -1,7 +1,14 @@
 import {mkdir,readFile,writeFile,rename} from 'node:fs/promises';
 import {join} from 'node:path';
 import {createSociety} from './society.mjs';
-const valid=id=>typeof id==='string'&&/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(id);
+export const validSessionId=id=>typeof id==='string'&&/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(id);
+const valid=validSessionId;
+export function restoreWorld(state){
+ if(!state?.agents)throw new Error('SAVE_READ_FAILED');
+ const world=createSociety();Object.assign(world,state,{busy:new Set()});
+ for(const id of Object.keys(createSociety().agents))if(!world.agents[id])throw new Error('SAVE_READ_FAILED');
+ return world;
+}
 export function createStorage(directory){
  const queues=new Map();
  return {
@@ -9,9 +16,7 @@ export function createStorage(directory){
    if(!valid(id))return null;
    let data;try{data=JSON.parse(await readFile(join(directory,id+'.json'),'utf8'));}catch(e){if(e.code==='ENOENT')return null;throw new Error('SAVE_READ_FAILED');}
    if(data.schema!==1||!data.world?.agents)throw new Error('SAVE_READ_FAILED');
-   const world=createSociety();Object.assign(world,data.world,{busy:new Set()});
-   for(const id of Object.keys(createSociety().agents))if(!world.agents[id])throw new Error('SAVE_READ_FAILED');
-   return world;
+   return restoreWorld(data.world);
   },
   save(id,world){
    if(!valid(id))return Promise.reject(new Error('SAVE_WRITE_FAILED'));
